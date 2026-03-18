@@ -57,24 +57,16 @@ export function MainMenu() {
       }}
     >
       <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <div
+        <img
+          src="/Logo_Gold.png"
+          alt="HERO – Tales of the Tomes"
           style={{
-            width: 64,
-            height: 64,
-            backgroundColor: "#222",
-            borderRadius: 12,
-            margin: "0 auto 16px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 32,
-            color: "#e0a050",
-            fontWeight: "bold",
-            border: "2px solid #444",
+            width: 360,
+            maxWidth: "90%",
+            height: "auto",
+            marginBottom: 12,
           }}
-        >
-          H
-        </div>
+        />
         <h1 style={{ margin: 0, fontSize: 24, color: "#eee" }}>
           Health Tracker
         </h1>

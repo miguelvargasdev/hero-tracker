@@ -95,16 +95,14 @@ export function HeroSelectModal({
 								position: "relative",
 							}}
 						>
-							<img
-								src={template.image}
-								alt={template.name}
+							<div
 								style={{
 									width: "100%",
 									height: "100%",
-									objectFit: "cover",
-									objectPosition: template.focus,
-									transform: "scale(4)",
-									display: "block",
+									backgroundImage: `url(${template.image})`,
+									backgroundSize: "400%",
+									backgroundPosition: template.selectFocus,
+									backgroundRepeat: "no-repeat",
 								}}
 							/>
 						</button>
