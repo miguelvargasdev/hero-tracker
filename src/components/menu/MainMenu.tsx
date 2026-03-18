@@ -58,7 +58,7 @@ export function MainMenu() {
     >
       <div style={{ textAlign: "center", marginBottom: 24 }}>
         <img
-          src="/Logo_Gold.png"
+          src={`${import.meta.env.BASE_URL}Logo_Gold.png`}
           alt="HERO – Tales of the Tomes"
           style={{
             width: 360,
