@@ -20,6 +20,13 @@ export function GameView() {
 
 	const isSolo = gameMode === "solo";
 
+	// Crown button sits at the gap between row 1 and row 2
+	const getMenuTopPercent = () => {
+		const count = heroes.length;
+		if (count === 5) return "33.3%"; // 3 rows → 1/3
+		return "50%"; // 2 rows → 1/2
+	};
+
 	return (
 		<div
 			style={{
@@ -106,29 +113,37 @@ export function GameView() {
 				</div>
 			)}
 
-			{/* Menu button */}
+			{/* Center menu button (crown icon) */}
 			<button
 				onClick={() => setMenuOpen(true)}
 				style={{
 					position: "absolute",
-					top: 8,
-					right: 8,
+					...(isSolo
+						? { top: 8, right: 8 }
+						: { top: getMenuTopPercent(), left: "50%", transform: "translate(-50%, -50%)" }),
 					zIndex: 5,
-					width: 36,
-					height: 36,
-					backgroundColor: "rgba(0, 0, 0, 0.5)",
-					color: "#aaa",
+					width: 40,
+					height: 40,
+					backgroundColor: "rgba(0, 0, 0, 0.8)",
 					border: "none",
-					borderRadius: 8,
+					borderRadius: "50%",
 					cursor: "pointer",
-					fontSize: 18,
+					padding: 0,
 					display: "flex",
 					alignItems: "center",
 					justifyContent: "center",
 				}}
 				aria-label="Menu"
 			>
-				&#8942;
+				<img
+					src="/crown.png"
+					alt="Menu"
+					style={{
+						width: 26,
+						height: 26,
+						objectFit: "contain",
+					}}
+				/>
 			</button>
 
 			{/* Counter grid */}

@@ -4,6 +4,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vite.dev/config/
 export default defineConfig({
+	base: "/hero-tracker/",
 	plugins: [
 		react(),
 		VitePWA({
@@ -17,8 +18,8 @@ export default defineConfig({
 				theme_color: "#1a1a2e",
 				background_color: "#1a1a2e",
 				display: "standalone",
-				scope: "/",
-				start_url: "/",
+				scope: "/hero-tracker/",
+				start_url: "/hero-tracker/",
 				orientation: "portrait-primary",
 				icons: [
 					{

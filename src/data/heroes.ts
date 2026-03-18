@@ -18,7 +18,7 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		color: "#3b82f6",
 		image: "/heroes/arcanas.png",
 		focus: "50% 15%",
-		selectFocus: "50% 12%",
+		selectFocus: "50% 19%",
 	},
 	{
 		id: "darren",
@@ -27,7 +27,7 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		color: "#eab308",
 		image: "/heroes/darren.png",
 		focus: "50% 20%",
-		selectFocus: "50% 15%",
+		selectFocus: "50% 26%",
 	},
 	{
 		id: "heathanmoore",
@@ -36,7 +36,7 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		color: "#22c55e",
 		image: "/heroes/heathanmoore.png",
 		focus: "50% 25%",
-		selectFocus: "50% 18%",
+		selectFocus: "50% 20%",
 	},
 	{
 		id: "nascha",
@@ -45,7 +45,7 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		color: "#f97316",
 		image: "/heroes/nascha.png",
 		focus: "50% 20%",
-		selectFocus: "50% 15%",
+		selectFocus: "48% 11%",
 	},
 	{
 		id: "scathtassia",
@@ -54,7 +54,7 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		color: "#991b1b",
 		image: "/heroes/scathtassia.png",
 		focus: "50% 25%",
-		selectFocus: "50% 18%",
+		selectFocus: "50% 24%",
 	},
 	{
 		id: "briar",
@@ -63,7 +63,7 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		color: "#92400e",
 		image: "/heroes/briar.png",
 		focus: "50% 25%",
-		selectFocus: "50% 18%",
+		selectFocus: "48% 23%",
 	},
 	{
 		id: "gwendolyn",
@@ -72,7 +72,7 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		color: "#9333ea",
 		image: "/heroes/gwendolyn.png",
 		focus: "50% 20%",
-		selectFocus: "50% 15%",
+		selectFocus: "50% 20%",
 	},
 	{
 		id: "jugolach",
@@ -81,6 +81,6 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		color: "#ef4444",
 		image: "/heroes/jugolach.png",
 		focus: "50% 20%",
-		selectFocus: "50% 15%",
+		selectFocus: "50% 47%",
 	},
 ];

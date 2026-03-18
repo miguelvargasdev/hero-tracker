@@ -70,17 +70,15 @@ export function HealthCounter({
 		>
 			{/* Hero artwork background */}
 			{template && (
-				<img
-					src={template.image}
-					alt=""
+				<div
 					style={{
 						position: "absolute",
 						inset: 0,
-						width: "100%",
-						height: "100%",
-						objectFit: "cover",
-						objectPosition: template.focus,
-						transform: `scale(2)${rotation ? ` rotate(${rotation}deg)` : ""}`,
+						backgroundImage: `url(${template.image})`,
+						backgroundSize: "300%",
+						backgroundPosition: template.focus,
+						backgroundRepeat: "no-repeat",
+						transform: rotation ? `rotate(${rotation}deg)` : undefined,
 					}}
 				/>
 			)}
