@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Read(//c/Users/ignan/AppData/Local/pnpm/global//**)",
+      "Read(//c/Users/ignan/AppData/**)",
+      "Bash(cmd /c \"cd /d \"\"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\"\" && pnpm add zustand 2>&1\")",
+      "Bash(cmd /c \"cd /d \"\"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\"\" && pnpm add zustand && pnpm add -D vite-plugin-pwa && echo DONE\")",
+      "Bash(NODE=\"/c/Users/ignan/AppData/Local/Zed/node/node-v22.5.1-win-x64/node.exe\")",
+      "Bash(PNPM_CJS=\"/c/Users/ignan/AppData/Local/pnpm/.tools/pnpm/10.20.0/node_modules/pnpm/bin/pnpm.cjs\")",
+      "Bash(\"$NODE\" \"$PNPM_CJS\" add -D vite-plugin-pwa)",
+      "Bash(\"$NODE\" scripts/generate-icons.mjs)",
+      "Bash(PNPM=\"/c/Users/ignan/AppData/Local/pnpm/.tools/pnpm/10.20.0/node_modules/pnpm/bin/pnpm.cjs\")",
+      "Bash(\"$NODE\" \"$PNPM\" build)",
+      "Bash(\"$NODE\" node_modules/.bin/tsc -b)",
+      "Bash(\"$NODE\" node_modules/typescript/bin/tsc -b)",
+      "Bash(\"$NODE\" node_modules/vite/bin/vite.js build)",
+      "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Arcanas_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\arcanas.png\")",
+      "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Darren_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\darren.png\")",
+      "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Heathanmoore_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\heathanmoore.png\")",
+      "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Nascha_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\nascha.png\")",
+      "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Scathtasscia_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\scathtassia.png\")",
+      "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Briar_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\briar.png\")",
+      "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Gwendolyn_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\gwendolyn.png\")",
+      "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Jugolach_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\jugolach.png\")"
+    ]
+  }
+}
