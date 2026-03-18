@@ -3,8 +3,10 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vite.dev/config/
-export default defineConfig({
-	base: "/hero-tracker/",
+export default defineConfig(({ mode }) => {
+	const base = mode === "production" ? "/hero-tracker/" : "/";
+	return {
+	base,
 	plugins: [
 		react(),
 		VitePWA({
@@ -18,8 +20,8 @@ export default defineConfig({
 				theme_color: "#1a1a2e",
 				background_color: "#1a1a2e",
 				display: "standalone",
-				scope: "/hero-tracker/",
-				start_url: "/hero-tracker/",
+				scope: base,
+				start_url: base,
 				orientation: "portrait-primary",
 				icons: [
 					{
@@ -50,4 +52,5 @@ export default defineConfig({
 			},
 		}),
 	],
+};
 });
