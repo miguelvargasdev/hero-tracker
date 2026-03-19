@@ -85,12 +85,10 @@ export function HealthCounter({
 								}
 							: {
 									inset: 0,
-									transform: rotation
-										? `rotate(${rotation}deg)`
-										: undefined,
+									transform: rotation ? `rotate(${rotation}deg)` : undefined,
 								}),
 						backgroundImage: `url(${template.image})`,
-						backgroundSize: "300%",
+						backgroundSize: "150%",
 						backgroundPosition: template.focus,
 						backgroundRepeat: "no-repeat",
 					}}
@@ -113,6 +111,7 @@ export function HealthCounter({
 					style={{
 						position: "relative",
 						zIndex: 1,
+						fontFamily: "'Cinzel', serif",
 						fontSize: "clamp(48px, 15vw, 120px)",
 						fontWeight: 900,
 						color: "#fff",
