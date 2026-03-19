@@ -67,7 +67,7 @@ export function MainMenu() {
             marginBottom: 12,
           }}
         />
-        <h1 style={{ margin: 0, fontSize: 24, color: "#eee", fontFamily: "'Cinzel', serif", fontWeight: 700 }}>
+        <h1 style={{ margin: 0, fontSize: 24, color: "#eee", fontFamily: "'Cinzel', serif", fontWeight: 700, textTransform: "uppercase" }}>
           Health Tracker
         </h1>
       </div>
@@ -98,7 +98,7 @@ export function MainMenu() {
               opacity: item.action === "tyrant" ? 0.5 : 1,
             }}
           >
-            <div style={{ fontFamily: "'Cinzel', serif", fontWeight: 700 }}>{item.label}</div>
+            <div style={{ fontFamily: "'Cinzel', serif", fontWeight: 700, textTransform: "uppercase" }}>{item.label}</div>
             <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
               {item.action === "tyrant" ? "Coming soon" : item.description}
             </div>
