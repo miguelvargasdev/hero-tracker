@@ -24,7 +24,7 @@ function App() {
   return (
     <>
       {view}
-      <InstallPrompt />
+      {activeView === "main-menu" && <InstallPrompt />}
     </>
   );
 }

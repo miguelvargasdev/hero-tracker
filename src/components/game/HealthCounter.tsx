@@ -73,12 +73,24 @@ export function HealthCounter({
 				<div
 					style={{
 						position: "absolute",
-						inset: 0,
+						...(rotation === 90 || rotation === 270
+							? {
+									// When rotated sideways, enlarge the div so the
+									// image fully covers the card after rotation
+									top: "50%",
+									left: "50%",
+									width: "200%",
+									height: "200%",
+									transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+								}
+							: {
+									inset: 0,
+									transform: rotation ? `rotate(${rotation}deg)` : undefined,
+								}),
 						backgroundImage: `url(${template.image})`,
-						backgroundSize: "300%",
+						backgroundSize: "150%",
 						backgroundPosition: template.focus,
 						backgroundRepeat: "no-repeat",
-						transform: rotation ? `rotate(${rotation}deg)` : undefined,
 					}}
 				/>
 			)}
@@ -99,6 +111,7 @@ export function HealthCounter({
 					style={{
 						position: "relative",
 						zIndex: 1,
+						fontFamily: "'Cinzel', serif",
 						fontSize: "clamp(48px, 15vw, 120px)",
 						fontWeight: 900,
 						color: "#fff",

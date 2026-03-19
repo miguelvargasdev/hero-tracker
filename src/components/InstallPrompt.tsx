@@ -5,18 +5,29 @@ interface BeforeInstallPromptEvent extends Event {
 	userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+function isIOS(): boolean {
+	return (
+		/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+		(navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+	);
+}
+
+function isInStandaloneMode(): boolean {
+	return (
+		window.matchMedia("(display-mode: standalone)").matches ||
+		(navigator as unknown as { standalone?: boolean }).standalone === true
+	);
+}
+
 export function InstallPrompt() {
 	const [deferredPrompt, setDeferredPrompt] =
 		useState<BeforeInstallPromptEvent | null>(null);
 	const [dismissed, setDismissed] = useState(false);
 	const [isInstalled, setIsInstalled] = useState(false);
+	const [showIOSPrompt, setShowIOSPrompt] = useState(false);
 
 	useEffect(() => {
-		// Check if already installed (standalone mode)
-		if (
-			window.matchMedia("(display-mode: standalone)").matches ||
-			(navigator as unknown as { standalone?: boolean }).standalone
-		) {
+		if (isInStandaloneMode()) {
 			setIsInstalled(true);
 			return;
 		}
@@ -27,6 +38,12 @@ export function InstallPrompt() {
 			setDismissed(true);
 		}
 
+		// iOS Safari — no beforeinstallprompt, show manual instructions
+		if (isIOS()) {
+			setShowIOSPrompt(true);
+			return;
+		}
+
 		const handler = (e: Event) => {
 			e.preventDefault();
 			setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -34,7 +51,6 @@ export function InstallPrompt() {
 
 		window.addEventListener("beforeinstallprompt", handler);
 
-		// Listen for successful install
 		window.addEventListener("appinstalled", () => {
 			setIsInstalled(true);
 			setDeferredPrompt(null);
@@ -57,8 +73,11 @@ export function InstallPrompt() {
 		sessionStorage.setItem("pwa-install-dismissed", "true");
 	};
 
-	// Don't show if already installed, dismissed, or no prompt available
-	if (isInstalled || dismissed || !deferredPrompt) return null;
+	// Don't show if installed or dismissed
+	if (isInstalled || dismissed) return null;
+
+	// Don't show if neither iOS nor Chrome prompt available
+	if (!showIOSPrompt && !deferredPrompt) return null;
 
 	return (
 		<div
@@ -78,31 +97,63 @@ export function InstallPrompt() {
 				boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
 			}}
 		>
-			<div style={{ fontSize: 24 }}>📲</div>
+			<div style={{ fontSize: 24 }}>{showIOSPrompt ? "📱" : "📲"}</div>
 			<div style={{ flex: 1 }}>
 				<div style={{ color: "#eee", fontSize: 14, fontWeight: "bold" }}>
 					Install App
 				</div>
 				<div style={{ color: "#999", fontSize: 12, marginTop: 2 }}>
-					Add to your home screen for the best experience
+					{showIOSPrompt ? (
+						<>
+							Tap{" "}
+							<span
+								style={{
+									display: "inline-flex",
+									alignItems: "center",
+									verticalAlign: "middle",
+								}}
+							>
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="#4aa3ff"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									style={{ verticalAlign: "middle" }}
+								>
+									<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+									<polyline points="16 6 12 2 8 6" />
+									<line x1="12" y1="2" x2="12" y2="15" />
+								</svg>
+							</span>{" "}
+							then <strong style={{ color: "#ccc" }}>"Add to Home Screen"</strong>
+						</>
+					) : (
+						"Add to your home screen for the best experience"
+					)}
 				</div>
 			</div>
-			<button
-				onClick={handleInstall}
-				style={{
-					padding: "8px 14px",
-					fontSize: 13,
-					fontWeight: "bold",
-					backgroundColor: "#e0a050",
-					color: "#111",
-					border: "none",
-					borderRadius: 8,
-					cursor: "pointer",
-					whiteSpace: "nowrap",
-				}}
-			>
-				Install
-			</button>
+			{!showIOSPrompt && (
+				<button
+					onClick={handleInstall}
+					style={{
+						padding: "8px 14px",
+						fontSize: 13,
+						fontWeight: "bold",
+						backgroundColor: "#e0a050",
+						color: "#111",
+						border: "none",
+						borderRadius: 8,
+						cursor: "pointer",
+						whiteSpace: "nowrap",
+					}}
+				>
+					Install
+				</button>
+			)}
 			<button
 				onClick={handleDismiss}
 				style={{

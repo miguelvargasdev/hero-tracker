@@ -109,10 +109,11 @@ export function PlayerSelect() {
 			>
 				<h2
 					style={{
+						fontFamily: "'Cinzel', serif",
 						marginBottom: 32,
 						fontSize: 28,
 						color: "#eee",
-						fontWeight: 900,
+						fontWeight: 700,
 						textTransform: "uppercase",
 						letterSpacing: "0.04em",
 						textAlign: "center",
