@@ -196,7 +196,7 @@ function HealthIcon() {
 			style={{
 				width: "clamp(18px, 5vw, 36px)",
 				height: "clamp(18px, 5vw, 36px)",
-				filter: "brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,0.7))",
+				filter: "brightness(0) invert(1) drop-shadow(0 2px 12px rgba(0,0,0,0.8)) drop-shadow(0 0 4px rgba(0,0,0,0.6))",
 				opacity: 0.85,
 			}}
 		/>
