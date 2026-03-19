@@ -41,18 +41,12 @@ export function HealthCounter({
 		};
 	}, []);
 
-	const spawnFloater = (isIncrement: boolean, isPortrait: boolean) => {
+	const spawnFloater = (isIncrement: boolean) => {
 		const value = isIncrement ? 1 : -1;
 		const direction = isIncrement ? 1 : -1;
-		// Arc direction matches tap layout:
-		// portrait cards: arc up for +, down for -
-		// landscape cards: arc right for +, left for -
-		const arcX = isPortrait
-			? (Math.random() - 0.5) * 30
-			: direction * (40 + Math.random() * 30);
-		const arcY = isPortrait
-			? direction * -(50 + Math.random() * 40)
-			: -(50 + Math.random() * 40);
+		// Always arc up for +, down for -
+		const arcX = (Math.random() - 0.5) * 30;
+		const arcY = direction * -(50 + Math.random() * 40);
 		const id = nextId++;
 
 		const floater: FloatingNumber = { id, value, arcX, arcY };
@@ -77,32 +71,22 @@ export function HealthCounter({
 		const clickY = e.clientY - rect.top;
 
 		let isIncrement: boolean;
-		const norm = rotation % 360;
-		const isPortrait = rect.height > rect.width;
-		if (norm === 90 || norm === -270) {
+		const norm = ((rotation % 360) + 360) % 360;
+		if (norm === 90) {
+			isIncrement = clickX > rect.width / 2;
+		} else if (norm === 270) {
+			isIncrement = clickX < rect.width / 2;
+		} else if (norm === 180) {
 			isIncrement = clickY > rect.height / 2;
-		} else if (norm === 270 || norm === -90) {
-			isIncrement = clickY < rect.height / 2;
-		} else if (norm === 180 || norm === -180) {
-			isIncrement = isPortrait
-				? clickY > rect.height / 2
-				: clickX < rect.width / 2;
 		} else {
-			isIncrement = isPortrait
-				? clickY < rect.height / 2
-				: clickX > rect.width / 2;
+			isIncrement = clickY < rect.height / 2;
 		}
 
 		const change = isIncrement ? 1 : -1;
 
-		updateStat(
-			hero.id,
-			"hp",
-			"current",
-			hero.hp.current + change,
-		);
+		updateStat(hero.id, "hp", "current", hero.hp.current + change);
 
-		spawnFloater(isIncrement, isPortrait);
+		spawnFloater(isIncrement);
 	};
 
 	return (
@@ -141,7 +125,7 @@ export function HealthCounter({
 									transform: rotation ? `rotate(${rotation}deg)` : undefined,
 								}),
 						backgroundImage: `url(${template.image})`,
-						backgroundSize: "150%",
+						backgroundSize: "200%",
 						backgroundPosition: template.focus,
 						backgroundRepeat: "no-repeat",
 					}}
