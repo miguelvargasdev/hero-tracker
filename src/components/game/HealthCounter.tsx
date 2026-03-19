@@ -1,7 +1,17 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import { HERO_TEMPLATES } from "../../data/heroes";
 import type { Hero } from "../../types/hero";
+
+interface FloatingNumber {
+	id: number;
+	value: number; // +1 or -1
+	// Random arc parameters for variety
+	arcX: number; // horizontal drift (px)
+	arcY: number; // vertical rise (px)
+}
+
+let nextId = 0;
 
 interface HealthCounterProps {
 	hero: Hero;
@@ -21,37 +31,34 @@ export function HealthCounter({
 		? null
 		: HERO_TEMPLATES.find((t) => t.id === hero.templateId);
 
-	// Tap counter state
-	const [delta, setDelta] = useState(0);
-	const [showing, setShowing] = useState(false);
-	const [fading, setFading] = useState(false);
-	const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const fadeOutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-	const resetFadeTimer = useCallback(() => {
-		if (fadeTimer.current) clearTimeout(fadeTimer.current);
-		if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
-		setFading(false);
-		// Fade in on first appearance
-		requestAnimationFrame(() => setShowing(true));
-		fadeTimer.current = setTimeout(() => {
-			setFading(true);
-			// After fade-out animation completes, reset everything
-			fadeOutTimer.current = setTimeout(() => {
-				setDelta(0);
-				setShowing(false);
-				setFading(false);
-			}, 500);
-		}, 1200);
-	}, []);
+	const [floaters, setFloaters] = useState<FloatingNumber[]>([]);
+	const cleanupTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
 	// Clean up timers on unmount
 	useEffect(() => {
 		return () => {
-			if (fadeTimer.current) clearTimeout(fadeTimer.current);
-			if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
+			cleanupTimers.current.forEach((t) => clearTimeout(t));
 		};
 	}, []);
+
+	const spawnFloater = (isIncrement: boolean) => {
+		const value = isIncrement ? 1 : -1;
+		const direction = isIncrement ? 1 : -1;
+		// Randomize the arc slightly for each tap
+		const arcX = direction * (40 + Math.random() * 30);
+		const arcY = -(50 + Math.random() * 40);
+		const id = nextId++;
+
+		const floater: FloatingNumber = { id, value, arcX, arcY };
+		setFloaters((prev) => [...prev, floater]);
+
+		// Remove after animation completes
+		const timer = setTimeout(() => {
+			setFloaters((prev) => prev.filter((f) => f.id !== id));
+			cleanupTimers.current.delete(timer);
+		}, 800);
+		cleanupTimers.current.add(timer);
+	};
 
 	const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (isUnselected) {
@@ -84,8 +91,7 @@ export function HealthCounter({
 			hero.hp.current + change,
 		);
 
-		setDelta((prev) => prev + change);
-		resetFadeTimer();
+		spawnFloater(isIncrement);
 	};
 
 	return (
@@ -113,8 +119,6 @@ export function HealthCounter({
 						position: "absolute",
 						...(rotation === 90 || rotation === 270
 							? {
-									// When rotated sideways, enlarge the div so the
-									// image fully covers the card after rotation
 									top: "50%",
 									left: "50%",
 									width: "200%",
@@ -163,35 +167,66 @@ export function HealthCounter({
 						{hero.hp.current}
 					</span>
 
-					{/* Delta indicator */}
-					{delta !== 0 && (
-						<span
-							style={{
-								position: "absolute",
-								zIndex: 2,
-								top: "50%",
-								...(delta > 0 ? { right: "12%" } : { left: "12%" }),
-								fontFamily: "'Cinzel', serif",
-								fontSize: "clamp(18px, 5vw, 36px)",
-								fontWeight: 700,
-								color: delta > 0 ? "#4ade80" : "#f87171",
-								lineHeight: 1,
-								textShadow: "0 1px 8px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.7)",
-								pointerEvents: "none",
-								transition: "opacity 0.3s ease-in-out, transform 0.3s ease-in-out",
-								opacity: showing && !fading ? 1 : 0,
-								transform: (() => {
-									const rot = rotation ? `rotate(${rotation}deg) ` : "";
-									if (!showing || fading) return `${rot}translateY(-10px)`;
-									return rot ? `rotate(${rotation}deg)` : undefined;
-								})(),
-							}}
-						>
-							{delta > 0 ? `+${delta}` : delta}
-						</span>
-					)}
+					{/* Floating +1/-1 particles */}
+					{floaters.map((f) => (
+						<FloatingParticle
+							key={f.id}
+							value={f.value}
+							arcX={f.arcX}
+							arcY={f.arcY}
+							rotation={rotation}
+						/>
+					))}
 				</>
 			)}
 		</div>
+	);
+}
+
+function FloatingParticle({
+	value,
+	arcX,
+	arcY,
+	rotation,
+}: {
+	value: number;
+	arcX: number;
+	arcY: number;
+	rotation: number;
+}) {
+	const [started, setStarted] = useState(false);
+
+	useEffect(() => {
+		// Trigger animation on next frame so the transition kicks in
+		requestAnimationFrame(() => setStarted(true));
+	}, []);
+
+	const isPositive = value > 0;
+
+	return (
+		<span
+			style={{
+				position: "absolute",
+				zIndex: 3,
+				top: "50%",
+				left: "50%",
+				fontFamily: "'Cinzel', serif",
+				fontSize: "clamp(16px, 4vw, 28px)",
+				fontWeight: 700,
+				color: isPositive ? "#4ade80" : "#f87171",
+				lineHeight: 1,
+				textShadow: "0 1px 6px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.7)",
+				pointerEvents: "none",
+				transition: started
+					? "transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.75s ease-out"
+					: "none",
+				transform: started
+					? `translate(calc(-50% + ${arcX}px), calc(-50% + ${arcY}px)) rotate(${rotation}deg)`
+					: `translate(-50%, -50%) rotate(${rotation}deg)`,
+				opacity: started ? 0 : 1,
+			}}
+		>
+			{isPositive ? "+1" : "-1"}
+		</span>
 	);
 }
