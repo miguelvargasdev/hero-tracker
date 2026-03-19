@@ -78,7 +78,7 @@ export function MainMenu() {
           flexDirection: "column",
           gap: 12,
           width: "100%",
-          maxWidth: 280,
+          maxWidth: 400,
         }}
       >
         {MENU_ITEMS.map((item) => (
