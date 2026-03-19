@@ -23,26 +23,33 @@ export function HealthCounter({
 
 	// Tap counter state
 	const [delta, setDelta] = useState(0);
+	const [showing, setShowing] = useState(false);
 	const [fading, setFading] = useState(false);
 	const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const fadeOutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const resetFadeTimer = useCallback(() => {
 		if (fadeTimer.current) clearTimeout(fadeTimer.current);
+		if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
 		setFading(false);
+		// Fade in on first appearance
+		requestAnimationFrame(() => setShowing(true));
 		fadeTimer.current = setTimeout(() => {
 			setFading(true);
-			// After fade animation completes, reset delta
-			setTimeout(() => {
+			// After fade-out animation completes, reset everything
+			fadeOutTimer.current = setTimeout(() => {
 				setDelta(0);
+				setShowing(false);
 				setFading(false);
 			}, 500);
 		}, 1200);
 	}, []);
 
-	// Clean up timer on unmount
+	// Clean up timers on unmount
 	useEffect(() => {
 		return () => {
 			if (fadeTimer.current) clearTimeout(fadeTimer.current);
+			if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
 		};
 	}, []);
 
@@ -169,18 +176,15 @@ export function HealthCounter({
 								fontWeight: 700,
 								color: delta > 0 ? "#4ade80" : "#f87171",
 								lineHeight: 1,
-								transform: rotation ? `rotate(${rotation}deg)` : undefined,
 								textShadow: "0 1px 8px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.7)",
-								opacity: fading ? 0 : 1,
-								transition: fading
-									? "opacity 0.5s ease-out, transform 0.5s ease-out"
-									: "none",
-								...(fading && {
-									transform: rotation
-										? `rotate(${rotation}deg) translateY(-10px)`
-										: "translateY(-10px)",
-								}),
 								pointerEvents: "none",
+								transition: "opacity 0.3s ease-in-out, transform 0.3s ease-in-out",
+								opacity: showing && !fading ? 1 : 0,
+								transform: (() => {
+									const rot = rotation ? `rotate(${rotation}deg) ` : "";
+									if (!showing || fading) return `${rot}translateY(-10px)`;
+									return rot ? `rotate(${rotation}deg)` : undefined;
+								})(),
 							}}
 						>
 							{delta > 0 ? `+${delta}` : delta}
