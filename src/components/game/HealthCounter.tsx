@@ -170,7 +170,7 @@ export function HealthCounter({
 								position: "absolute",
 								zIndex: 2,
 								top: "12%",
-								right: "8%",
+								...(delta > 0 ? { right: "8%" } : { left: "8%" }),
 								fontFamily: "'Cinzel', serif",
 								fontSize: "clamp(18px, 5vw, 36px)",
 								fontWeight: 700,
