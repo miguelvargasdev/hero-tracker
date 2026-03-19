@@ -190,21 +190,16 @@ export function HealthCounter({
 
 function HealthIcon() {
 	return (
-		<svg
-			width="clamp(18px, 5vw, 36px)"
-			height="clamp(18px, 5vw, 36px)"
-			viewBox="0 0 100 100"
-			fill="white"
+		<img
+			src={`${import.meta.env.BASE_URL}hp-icon.png`}
+			alt="HP"
 			style={{
-				filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.7))",
+				width: "clamp(18px, 5vw, 36px)",
+				height: "clamp(18px, 5vw, 36px)",
+				filter: "brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,0.7))",
 				opacity: 0.85,
 			}}
-		>
-			{/* Medical cross with folded corner */}
-			<path d="M35 5 H65 V35 H95 V65 H65 V95 H35 V65 H5 V35 H35 Z" />
-			{/* Folded corner overlay (top-left inner) */}
-			<path d="M35 5 L35 35 L5 35 Z" fill="rgba(0,0,0,0.25)" />
-		</svg>
+		/>
 	);
 }
 
