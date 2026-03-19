@@ -35,6 +35,7 @@ export function GameView() {
 				display: "flex",
 				flexDirection: "column",
 				backgroundColor: "#000",
+				padding: 8,
 			}}
 		>
 			{/* Menu overlay */}
