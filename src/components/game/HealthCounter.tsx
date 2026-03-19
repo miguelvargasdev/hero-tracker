@@ -214,6 +214,13 @@ function FloatingParticle({
 
 	const isPositive = value > 0;
 
+	// Rotate the arc vector to match the card's rotation
+	const rad = (rotation * Math.PI) / 180;
+	const cos = Math.cos(rad);
+	const sin = Math.sin(rad);
+	const rotatedArcX = arcX * cos - arcY * sin;
+	const rotatedArcY = arcX * sin + arcY * cos;
+
 	return (
 		<span
 			style={{
@@ -232,7 +239,7 @@ function FloatingParticle({
 					? "transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.75s ease-out"
 					: "none",
 				transform: started
-					? `translate(calc(-50% + ${arcX}px), calc(-50% + ${arcY}px)) rotate(${rotation}deg)`
+					? `translate(calc(-50% + ${rotatedArcX}px), calc(-50% + ${rotatedArcY}px)) rotate(${rotation}deg)`
 					: `translate(-50%, -50%) rotate(${rotation}deg)`,
 				opacity: started ? 0 : 1,
 			}}
