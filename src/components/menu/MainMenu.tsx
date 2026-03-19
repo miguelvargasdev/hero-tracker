@@ -8,7 +8,7 @@ const MENU_ITEMS = [
   },
   {
     label: "Standard",
-    description: "2 to 6 players",
+    description: "2 to 5 players",
     action: "standard" as const,
   },
   {
