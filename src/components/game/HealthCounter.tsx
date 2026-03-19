@@ -145,22 +145,32 @@ export function HealthCounter({
 				</svg>
 			) : (
 				<>
-					<span
+					<div
 						style={{
 							position: "relative",
 							zIndex: 1,
-							fontFamily: "'Cinzel', serif",
-							fontSize: "clamp(48px, 15vw, 120px)",
-							fontWeight: 900,
-							color: "#fff",
-							lineHeight: 1,
+							display: "flex",
+							flexDirection: "column",
+							alignItems: "center",
+							gap: "clamp(2px, 0.5vw, 6px)",
 							transform: rotation ? `rotate(${rotation}deg)` : undefined,
-							textShadow: "0 2px 12px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.6)",
-							letterSpacing: "-0.02em",
 						}}
 					>
-						{hero.hp.current}
-					</span>
+						<span
+							style={{
+								fontFamily: "'Cinzel', serif",
+								fontSize: "clamp(48px, 15vw, 120px)",
+								fontWeight: 900,
+								color: "#fff",
+								lineHeight: 1,
+								textShadow: "0 2px 12px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.6)",
+								letterSpacing: "-0.02em",
+							}}
+						>
+							{hero.hp.current}
+						</span>
+						<HealthIcon />
+					</div>
 
 					{/* Floating +1/-1 particles */}
 					{floaters.map((f) => (
@@ -175,6 +185,26 @@ export function HealthCounter({
 				</>
 			)}
 		</div>
+	);
+}
+
+function HealthIcon() {
+	return (
+		<svg
+			width="clamp(18px, 5vw, 36px)"
+			height="clamp(18px, 5vw, 36px)"
+			viewBox="0 0 100 100"
+			fill="white"
+			style={{
+				filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.7))",
+				opacity: 0.85,
+			}}
+		>
+			{/* Medical cross with folded corner */}
+			<path d="M35 5 H65 V35 H95 V65 H65 V95 H35 V65 H5 V35 H35 Z" />
+			{/* Folded corner overlay (top-left inner) */}
+			<path d="M35 5 L35 35 L5 35 Z" fill="rgba(0,0,0,0.25)" />
+		</svg>
 	);
 }
 
