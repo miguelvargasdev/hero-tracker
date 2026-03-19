@@ -1,6 +1,6 @@
 import { useHeroStore } from "../../store/useHeroStore";
 
-const PLAYER_COUNTS = [2, 4, 5, 6];
+const PLAYER_COUNTS = [2, 3, 4, 5, 6];
 
 /** Renders a dice face SVG with the given number of pips */
 function DiceFace({ count }: { count: number }) {
