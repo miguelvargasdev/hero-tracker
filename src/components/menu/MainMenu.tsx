@@ -51,23 +51,23 @@ export function MainMenu() {
         alignItems: "center",
         justifyContent: "center",
         height: "100%",
-        padding: 32,
-        gap: 16,
+        padding: "clamp(16px, 3vh, 32px)",
+        gap: "clamp(8px, 1.5vh, 16px)",
         backgroundColor: "#111",
       }}
     >
-      <div style={{ textAlign: "center", marginBottom: 24 }}>
+      <div style={{ textAlign: "center", marginBottom: "clamp(8px, 2vh, 24px)" }}>
         <img
           src={`${import.meta.env.BASE_URL}Logo_Gold.png`}
           alt="HERO – Tales of the Tomes"
           style={{
-            width: 360,
+            width: "clamp(200px, 40vw, 360px)",
             maxWidth: "90%",
             height: "auto",
-            marginBottom: 12,
+            marginBottom: "clamp(4px, 1vh, 12px)",
           }}
         />
-        <h1 style={{ margin: 0, fontSize: 24, color: "#eee", fontFamily: "'Cinzel', serif", fontWeight: 700, textTransform: "uppercase" }}>
+        <h1 style={{ margin: 0, fontSize: "clamp(18px, 2.5vw, 24px)", color: "#eee", fontFamily: "'Cinzel', serif", fontWeight: 700, textTransform: "uppercase" }}>
           Health Tracker
         </h1>
       </div>
