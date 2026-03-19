@@ -41,12 +41,18 @@ export function HealthCounter({
 		};
 	}, []);
 
-	const spawnFloater = (isIncrement: boolean) => {
+	const spawnFloater = (isIncrement: boolean, isPortrait: boolean) => {
 		const value = isIncrement ? 1 : -1;
 		const direction = isIncrement ? 1 : -1;
-		// Randomize the arc slightly for each tap
-		const arcX = direction * (40 + Math.random() * 30);
-		const arcY = -(50 + Math.random() * 40);
+		// Arc direction matches tap layout:
+		// portrait cards: arc up for +, down for -
+		// landscape cards: arc right for +, left for -
+		const arcX = isPortrait
+			? (Math.random() - 0.5) * 30
+			: direction * (40 + Math.random() * 30);
+		const arcY = isPortrait
+			? direction * -(50 + Math.random() * 40)
+			: -(50 + Math.random() * 40);
 		const id = nextId++;
 
 		const floater: FloatingNumber = { id, value, arcX, arcY };
@@ -72,14 +78,19 @@ export function HealthCounter({
 
 		let isIncrement: boolean;
 		const norm = rotation % 360;
+		const isPortrait = rect.height > rect.width;
 		if (norm === 90 || norm === -270) {
 			isIncrement = clickY > rect.height / 2;
 		} else if (norm === 270 || norm === -90) {
 			isIncrement = clickY < rect.height / 2;
 		} else if (norm === 180 || norm === -180) {
-			isIncrement = clickX < rect.width / 2;
+			isIncrement = isPortrait
+				? clickY > rect.height / 2
+				: clickX < rect.width / 2;
 		} else {
-			isIncrement = clickX > rect.width / 2;
+			isIncrement = isPortrait
+				? clickY < rect.height / 2
+				: clickX > rect.width / 2;
 		}
 
 		const change = isIncrement ? 1 : -1;
@@ -91,7 +102,7 @@ export function HealthCounter({
 			hero.hp.current + change,
 		);
 
-		spawnFloater(isIncrement);
+		spawnFloater(isIncrement, isPortrait);
 	};
 
 	return (
