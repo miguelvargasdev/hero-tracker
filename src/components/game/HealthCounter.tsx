@@ -1,3 +1,4 @@
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import { HERO_TEMPLATES } from "../../data/heroes";
 import type { Hero } from "../../types/hero";
@@ -19,6 +20,31 @@ export function HealthCounter({
 	const template = isUnselected
 		? null
 		: HERO_TEMPLATES.find((t) => t.id === hero.templateId);
+
+	// Tap counter state
+	const [delta, setDelta] = useState(0);
+	const [fading, setFading] = useState(false);
+	const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const resetFadeTimer = useCallback(() => {
+		if (fadeTimer.current) clearTimeout(fadeTimer.current);
+		setFading(false);
+		fadeTimer.current = setTimeout(() => {
+			setFading(true);
+			// After fade animation completes, reset delta
+			setTimeout(() => {
+				setDelta(0);
+				setFading(false);
+			}, 500);
+		}, 1200);
+	}, []);
+
+	// Clean up timer on unmount
+	useEffect(() => {
+		return () => {
+			if (fadeTimer.current) clearTimeout(fadeTimer.current);
+		};
+	}, []);
 
 	const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (isUnselected) {
@@ -42,12 +68,17 @@ export function HealthCounter({
 			isIncrement = clickX > rect.width / 2;
 		}
 
+		const change = isIncrement ? 1 : -1;
+
 		updateStat(
 			hero.id,
 			"hp",
 			"current",
-			hero.hp.current + (isIncrement ? 1 : -1),
+			hero.hp.current + change,
 		);
+
+		setDelta((prev) => prev + change);
+		resetFadeTimer();
 	};
 
 	return (
@@ -107,22 +138,55 @@ export function HealthCounter({
 					<rect x="4" y="16" width="32" height="8" rx="2" fill="#888" />
 				</svg>
 			) : (
-				<span
-					style={{
-						position: "relative",
-						zIndex: 1,
-						fontFamily: "'Cinzel', serif",
-						fontSize: "clamp(48px, 15vw, 120px)",
-						fontWeight: 900,
-						color: "#fff",
-						lineHeight: 1,
-						transform: rotation ? `rotate(${rotation}deg)` : undefined,
-						textShadow: "0 2px 12px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.6)",
-						letterSpacing: "-0.02em",
-					}}
-				>
-					{hero.hp.current}
-				</span>
+				<>
+					<span
+						style={{
+							position: "relative",
+							zIndex: 1,
+							fontFamily: "'Cinzel', serif",
+							fontSize: "clamp(48px, 15vw, 120px)",
+							fontWeight: 900,
+							color: "#fff",
+							lineHeight: 1,
+							transform: rotation ? `rotate(${rotation}deg)` : undefined,
+							textShadow: "0 2px 12px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.6)",
+							letterSpacing: "-0.02em",
+						}}
+					>
+						{hero.hp.current}
+					</span>
+
+					{/* Delta indicator */}
+					{delta !== 0 && (
+						<span
+							style={{
+								position: "absolute",
+								zIndex: 2,
+								top: "12%",
+								right: "8%",
+								fontFamily: "'Cinzel', serif",
+								fontSize: "clamp(18px, 5vw, 36px)",
+								fontWeight: 700,
+								color: delta > 0 ? "#4ade80" : "#f87171",
+								lineHeight: 1,
+								transform: rotation ? `rotate(${rotation}deg)` : undefined,
+								textShadow: "0 1px 8px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.7)",
+								opacity: fading ? 0 : 1,
+								transition: fading
+									? "opacity 0.5s ease-out, transform 0.5s ease-out"
+									: "none",
+								...(fading && {
+									transform: rotation
+										? `rotate(${rotation}deg) translateY(-10px)`
+										: "translateY(-10px)",
+								}),
+								pointerEvents: "none",
+							}}
+						>
+							{delta > 0 ? `+${delta}` : delta}
+						</span>
+					)}
+				</>
 			)}
 		</div>
 	);
