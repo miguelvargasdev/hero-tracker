@@ -27,6 +27,7 @@ export function HeroDetail() {
     { label: "HP", key: "hp" as const },
     { label: "Mana", key: "mana" as const },
     { label: "Armor", key: "armor" as const },
+    { label: "Attack", key: "attack" as const },
   ];
 
   return (

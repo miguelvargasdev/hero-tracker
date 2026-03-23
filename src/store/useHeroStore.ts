@@ -15,6 +15,7 @@ function createEmptySlot(): Hero {
     hp: { current: 0, max: 0 },
     mana: { ...ZERO_STAT },
     armor: { ...ZERO_STAT },
+    attack: { ...ZERO_STAT },
     customStats: [],
     createdAt: Date.now(),
   };
@@ -60,6 +61,7 @@ export const useHeroStore = create<HeroStore>()(
               hp: { current: template.hp, max: template.hp },
               mana: { ...ZERO_STAT },
               armor: { ...ZERO_STAT },
+              attack: { ...ZERO_STAT },
               customStats: [],
             };
           }),

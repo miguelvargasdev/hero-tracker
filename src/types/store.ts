@@ -15,7 +15,7 @@ export interface HeroStore {
 
   updateStat: (
     heroId: string,
-    statKey: "hp" | "mana" | "armor",
+    statKey: "hp" | "mana" | "armor" | "attack",
     field: "current" | "max",
     value: number
   ) => void;
