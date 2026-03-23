@@ -33,7 +33,9 @@ export function HealthCounter({
 		: HERO_TEMPLATES.find((t) => t.id === hero.templateId);
 
 	const [floaters, setFloaters] = useState<FloatingNumber[]>([]);
-	const [showDrawer, setShowDrawer] = useState(false);
+	const [drawerState, setDrawerState] = useState<
+		"closed" | "opening" | "open" | "closing"
+	>("closed");
 	const [showSubtrackers, setShowSubtrackers] = useState(false);
 	const cleanupTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 	const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -69,7 +71,10 @@ export function HealthCounter({
 		if (longPressTimer.current) clearTimeout(longPressTimer.current);
 		longPressTimer.current = setTimeout(() => {
 			didLongPress.current = true;
-			setShowDrawer(true);
+			setDrawerState("opening");
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => setDrawerState("open"));
+			});
 			longPressTimer.current = null;
 		}, LONG_PRESS_MS);
 	}, [isUnselected]);
@@ -118,7 +123,7 @@ export function HealthCounter({
 			return;
 		}
 
-		if (showDrawer) return;
+		if (drawerState !== "closed") return;
 
 		if (isUnselected) {
 			onSelect();
@@ -146,14 +151,20 @@ export function HealthCounter({
 		spawnFloater(isIncrement);
 	};
 
+	const closeDrawer = useCallback((onDone?: () => void) => {
+		setDrawerState("closing");
+		setTimeout(() => {
+			setDrawerState("closed");
+			onDone?.();
+		}, 300);
+	}, []);
+
 	const handleChangeHero = () => {
-		setShowDrawer(false);
-		onSelect();
+		closeDrawer(() => onSelect());
 	};
 
 	const handleToggleSubtrackers = () => {
-		setShowDrawer(false);
-		setShowSubtrackers((prev) => !prev);
+		closeDrawer(() => setShowSubtrackers((prev) => !prev));
 	};
 
 	return (
@@ -270,14 +281,15 @@ export function HealthCounter({
 			)}
 
 			{/* Long-press drawer */}
-			{showDrawer && (
+			{drawerState !== "closed" && (
 				<DrawerOverlay
 					heroColor={template?.color ?? "#333"}
 					rotation={rotation}
 					onChangeHero={handleChangeHero}
 					onToggleSubtrackers={handleToggleSubtrackers}
 					showingSubtrackers={showSubtrackers}
-					onClose={() => setShowDrawer(false)}
+					onClose={() => closeDrawer()}
+					animState={drawerState}
 				/>
 			)}
 		</div>
@@ -293,6 +305,7 @@ function DrawerOverlay({
 	onToggleSubtrackers,
 	showingSubtrackers,
 	onClose,
+	animState,
 }: {
 	heroColor: string;
 	rotation: number;
@@ -300,48 +313,75 @@ function DrawerOverlay({
 	onToggleSubtrackers: () => void;
 	showingSubtrackers: boolean;
 	onClose: () => void;
+	animState: "opening" | "open" | "closing";
 }) {
-	// For 90/270 rotations, we need to expand the overlay like the artwork
 	const is90or270 = rotation === 90 || rotation === 270;
+	const isVisible = animState === "open";
+
+	// For 90/270: the card is tall & narrow. The visual "bottom" in rotated
+	// space maps to the right edge (90°) or left edge (270°) of the card.
+	// We lay out with flex-direction: row and place the drawer bar on the
+	// appropriate side — no 200% expansion needed.
+	const norm = ((rotation % 360) + 360) % 360;
+	let flexDir: "column" | "row" | "row-reverse" = "column";
+	let slideHidden = "translateY(100%)";
+	let slideVisible = "translateY(0)";
+
+	if (norm === 90) {
+		flexDir = "row-reverse";
+		slideHidden = "translateX(-100%)";
+		slideVisible = "translateX(0)";
+	} else if (norm === 270) {
+		flexDir = "row";
+		slideHidden = "translateX(100%)";
+		slideVisible = "translateX(0)";
+	}
 
 	return (
 		<div
 			style={{
 				position: "absolute",
-				...(is90or270
-					? {
-							top: "50%",
-							left: "50%",
-							width: "200%",
-							height: "200%",
-							transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
-						}
-					: {
-							inset: 0,
-							transform: rotation ? `rotate(${rotation}deg)` : undefined,
-						}),
+				inset: 0,
+				...(norm === 180 ? { transform: "rotate(180deg)" } : {}),
 				zIndex: 5,
 				display: "flex",
-				flexDirection: "column",
+				flexDirection: flexDir,
+				overflow: "hidden",
 			}}
 			onClick={(e) => {
 				e.stopPropagation();
 				onClose();
 			}}
 		>
-			{/* Dim top area */}
-			<div style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)" }} />
+			{/* Dim area */}
+			<div
+				style={{
+					flex: 1,
+					backgroundColor: isVisible ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0)",
+					transition: "background-color 0.3s ease",
+				}}
+			/>
 
 			{/* Drawer content */}
 			<div
 				onClick={(e) => e.stopPropagation()}
 				style={{
 					backgroundColor: heroColor,
-					padding: "clamp(12px, 3vw, 24px)",
+					padding: "clamp(8px, 2vw, 16px)",
 					display: "flex",
-					justifyContent: "space-evenly",
-					alignItems: "center",
-					gap: 16,
+					...(is90or270
+						? {
+								flexDirection: "column" as const,
+								justifyContent: "space-evenly",
+								alignItems: "center",
+							}
+						: {
+								justifyContent: "space-evenly",
+								alignItems: "center",
+							}),
+					gap: is90or270 ? 8 : 16,
+					transform: isVisible ? slideVisible : slideHidden,
+					transition: "transform 0.3s ease",
 				}}
 			>
 				<button
@@ -353,15 +393,18 @@ function DrawerOverlay({
 						display: "flex",
 						flexDirection: "column",
 						alignItems: "center",
-						gap: 8,
+						gap: 4,
 						color: "#fff",
-						padding: 8,
+						padding: is90or270 ? 4 : 8,
+						...(is90or270
+							? { transform: `rotate(${rotation}deg)` }
+							: {}),
 					}}
 				>
 					{/* Refresh/change icon */}
 					<svg
-						width="clamp(28px, 6vw, 44px)"
-						height="clamp(28px, 6vw, 44px)"
+						width={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
+						height={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="white"
@@ -374,19 +417,40 @@ function DrawerOverlay({
 						<path d="M3 22v-6h6" />
 						<path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
 					</svg>
-					<span
-						style={{
-							fontFamily: "'Cinzel', serif",
-							fontWeight: 700,
-							fontSize: "clamp(10px, 2.5vw, 14px)",
-							textTransform: "uppercase",
-							letterSpacing: "0.05em",
-							textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-						}}
-					>
-						Change Hero
-					</span>
+					{!is90or270 && (
+						<span
+							style={{
+								fontFamily: "'Cinzel', serif",
+								fontWeight: 700,
+								fontSize: "clamp(10px, 2.5vw, 14px)",
+								textTransform: "uppercase",
+								letterSpacing: "0.05em",
+								textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+							}}
+						>
+							Change Hero
+						</span>
+					)}
 				</button>
+
+				{/* Divider */}
+				<div
+					style={{
+						...(is90or270
+							? {
+									width: "60%",
+									height: 1,
+									alignSelf: "center",
+								}
+							: {
+									width: 1,
+									height: "60%",
+									alignSelf: "center",
+								}),
+						backgroundColor: "rgba(255,255,255,0.3)",
+						flexShrink: 0,
+					}}
+				/>
 
 				<button
 					onClick={onToggleSubtrackers}
@@ -397,15 +461,18 @@ function DrawerOverlay({
 						display: "flex",
 						flexDirection: "column",
 						alignItems: "center",
-						gap: 8,
+						gap: 4,
 						color: "#fff",
-						padding: 8,
+						padding: is90or270 ? 4 : 8,
+						...(is90or270
+							? { transform: `rotate(${rotation}deg)` }
+							: {}),
 					}}
 				>
 					{/* Stacked tokens/coins icon */}
 					<svg
-						width="clamp(28px, 6vw, 44px)"
-						height="clamp(28px, 6vw, 44px)"
+						width={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
+						height={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="white"
@@ -418,18 +485,20 @@ function DrawerOverlay({
 						<path d="M4 10v4c0 1.66 3.58 3 8 3s8-1.34 8-3v-4" />
 						<path d="M4 14v4c0 1.66 3.58 3 8 3s8-1.34 8-3v-4" />
 					</svg>
-					<span
-						style={{
-							fontFamily: "'Cinzel', serif",
-							fontWeight: 700,
-							fontSize: "clamp(10px, 2.5vw, 14px)",
-							textTransform: "uppercase",
-							letterSpacing: "0.05em",
-							textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-						}}
-					>
-						{showingSubtrackers ? "Main View" : "Subtrackers"}
-					</span>
+					{!is90or270 && (
+						<span
+							style={{
+								fontFamily: "'Cinzel', serif",
+								fontWeight: 700,
+								fontSize: "clamp(10px, 2.5vw, 14px)",
+								textTransform: "uppercase",
+								letterSpacing: "0.05em",
+								textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+							}}
+						>
+							{showingSubtrackers ? "Main View" : "Subtrackers"}
+						</span>
+					)}
 				</button>
 			</div>
 		</div>
@@ -439,7 +508,7 @@ function DrawerOverlay({
 /* ─── Subtracker View ─── */
 
 interface StatConfig {
-	key: "hp" | "mana" | "armor";
+	key: "hp" | "mana" | "armor" | "attack";
 	label: string;
 	icon: React.ReactNode;
 }
@@ -459,6 +528,15 @@ const STAT_CONFIGS: StatConfig[] = [
 						"brightness(0) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,0.8))",
 				}}
 			/>
+		),
+	},
+	{
+		key: "attack",
+		label: "Attack",
+		icon: (
+			<svg viewBox="0 0 24 24" fill="white" width="100%" height="100%">
+				<path d="M14.5 2.5L22 10l-2.5 2.5-3-1.5-3 3 1.5 3L12.5 19.5 10 17l-3 3-2.5-1L2 21.5 4.5 19l-1-2.5 3-3-3-3L2 12l2.5-2.5 3 1.5 3-3-1.5-3z" />
+			</svg>
 		),
 	},
 	{
@@ -492,7 +570,7 @@ function SubtrackerView({
 
 	const handleStatClick = (
 		e: React.MouseEvent,
-		statKey: "hp" | "mana" | "armor",
+		statKey: "hp" | "mana" | "armor" | "attack",
 		currentValue: number,
 	) => {
 		e.stopPropagation();

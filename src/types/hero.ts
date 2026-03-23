@@ -18,6 +18,7 @@ export interface Hero {
   hp: Stat;
   mana: Stat;
   armor: Stat;
+  attack: Stat;
   customStats: CustomStat[];
   createdAt: number;
 }
