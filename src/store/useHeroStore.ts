@@ -28,6 +28,7 @@ export const useHeroStore = create<HeroStore>()(
       activeHeroId: null,
       activeView: "main-menu",
       gameMode: null,
+      resetCounter: 0,
 
       navigateTo: (view, heroId) =>
         set({
@@ -51,6 +52,7 @@ export const useHeroStore = create<HeroStore>()(
 
       resetGame: () =>
         set((state) => ({
+          resetCounter: state.resetCounter + 1,
           heroes: state.heroes.map((h) => {
             const template = HERO_TEMPLATES.find(
               (t) => t.id === h.templateId
@@ -59,9 +61,9 @@ export const useHeroStore = create<HeroStore>()(
             return {
               ...h,
               hp: { current: template.hp, max: template.hp },
-              mana: { ...ZERO_STAT },
-              armor: { ...ZERO_STAT },
-              attack: { ...ZERO_STAT },
+              attack: { current: template.attack, max: template.attack },
+              mana: { current: template.mana, max: template.mana },
+              armor: { current: template.armor, max: template.armor },
               customStats: [],
             };
           }),
@@ -81,6 +83,9 @@ export const useHeroStore = create<HeroStore>()(
                     templateId: template.id,
                     color: template.color,
                     hp: { current: template.hp, max: template.hp },
+                    attack: { current: template.attack, max: template.attack },
+                    mana: { current: template.mana, max: template.mana },
+                    armor: { current: template.armor, max: template.armor },
                   }
             ),
           };
