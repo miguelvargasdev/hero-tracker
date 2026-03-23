@@ -1,73 +1,65 @@
-# React + TypeScript + Vite
+# HERO: Tales of the Tomes - Health Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Progressive Web App (PWA) for tracking health, attack, mana, and armor stats during games of **HERO: Tales of the Tomes**.
 
-Currently, two official plugins are available:
+## About
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This is a mobile-first health tracker designed to be placed flat on a table during board game sessions. Players sit around the phone/tablet and each player's tracker is rotated to face them. The app supports multiple game modes and player counts, with each hero having unique base stats pulled from the board game.
 
-## React Compiler
+### Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Multiple game modes** - Solo, Standard (2-5 players), Skirmish (2v2), and Tyrant (coming soon)
+- **8 playable heroes** - Each with unique HP, attack, mana, and armor values
+- **Tap to increment/decrement** - Tap the top half to increase, bottom half to decrease (rotation-aware)
+- **Subtrackers** - Long-press any tracker to open a drawer, then add attack, armor, or mana subtrackers one at a time
+- **Rotated layouts** - 90/270 degree trackers use a 2x2 quadrant grid with HP positioned at each player's top-left perspective
+- **Floating particles** - +1/-1 animations on every stat change
+- **Hero artwork backgrounds** - Each tracker displays the hero's artwork
+- **Responsive design** - Works across phones, tablets, and desktops
+- **Installable PWA** - Add to home screen for a native app experience
+- **Game reset** - Resets all stats to base values and clears subtrackers
 
-## Expanding the ESLint configuration
+### Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 19 + TypeScript
+- Vite 7 with PWA plugin
+- Zustand for state management
+- Vitest + Testing Library for tests
+- GitHub Pages for deployment
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Built with Claude
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+This project is my first attempt at using [Claude Code](https://claude.com/claude-code) as the primary driver for development. Nearly all of the code - from the initial scaffold to the complex rotation-aware subtracker layouts - was written by Claude through an iterative conversation. I described features, provided reference images, and gave feedback on the results while Claude handled the implementation, debugging, and Git workflow (branching, PRs, merging).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+It was an interesting experiment in AI-assisted development, where my role shifted from writing code to directing the architecture and providing design feedback.
+
+## Getting Started
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start dev server
+pnpm dev
+
+# Run tests
+pnpm test
+
+# Build for production
+pnpm build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Testing
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Run tests in watch mode
+pnpm test
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Run tests once
+pnpm test:run
 ```
+
+The test suite includes:
+- **Hero template validation** - Verifies all 8 heroes have correct base stats
+- **Store action tests** - Covers game lifecycle, hero selection, stat updates, and resets
+- **Integration tests** - Full game flow from start to reset
