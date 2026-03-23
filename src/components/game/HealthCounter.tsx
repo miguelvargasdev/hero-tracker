@@ -26,6 +26,7 @@ export function HealthCounter({
 	onSelect,
 }: HealthCounterProps) {
 	const updateStat = useHeroStore((s) => s.updateStat);
+	const resetCounter = useHeroStore((s) => s.resetCounter);
 
 	const isUnselected = hero.templateId === null;
 	const template = isUnselected
@@ -36,7 +37,21 @@ export function HealthCounter({
 	const [drawerState, setDrawerState] = useState<
 		"closed" | "opening" | "open" | "closing"
 	>("closed");
-	const [showSubtrackers, setShowSubtrackers] = useState(false);
+	const [activeSubtrackers, setActiveSubtrackers] = useState<
+		("hp" | "mana" | "armor" | "attack")[]
+	>([]);
+
+	// Clear subtrackers on game reset
+	const prevResetCounter = useRef(resetCounter);
+	useEffect(() => {
+		if (resetCounter !== prevResetCounter.current) {
+			prevResetCounter.current = resetCounter;
+			setActiveSubtrackers([]);
+			setShowSubtrackerModal(false);
+			setDrawerState("closed");
+		}
+	}, [resetCounter]);
+	const [showSubtrackerModal, setShowSubtrackerModal] = useState(false);
 	const cleanupTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 	const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const didLongPress = useRef(false);
@@ -164,8 +179,19 @@ export function HealthCounter({
 	};
 
 	const handleToggleSubtrackers = () => {
-		closeDrawer(() => setShowSubtrackers((prev) => !prev));
+		closeDrawer(() => setShowSubtrackerModal(true));
 	};
+
+	const handleAddSubtracker = (key: "hp" | "mana" | "armor" | "attack") => {
+		setActiveSubtrackers((prev) => [...prev, key]);
+		setShowSubtrackerModal(false);
+	};
+
+	const handleRemoveSubtracker = (key: "hp" | "mana" | "armor" | "attack") => {
+		setActiveSubtrackers((prev) => prev.filter((k) => k !== key));
+	};
+
+	const hasSubtrackers = activeSubtrackers.length > 0;
 
 	return (
 		<div
@@ -232,7 +258,7 @@ export function HealthCounter({
 			) : (
 				<>
 					{/* Main HP display (hidden when subtrackers are showing) */}
-					{!showSubtrackers && (
+					{!hasSubtrackers && (
 						<div
 							style={{
 								position: "relative",
@@ -263,8 +289,13 @@ export function HealthCounter({
 					)}
 
 					{/* Subtrackers overlay */}
-					{showSubtrackers && (
-						<SubtrackerView hero={hero} rotation={rotation} />
+					{hasSubtrackers && (
+						<SubtrackerView
+							hero={hero}
+							rotation={rotation}
+							activeKeys={activeSubtrackers}
+							onRemove={handleRemoveSubtracker}
+						/>
 					)}
 
 					{/* Floating +1/-1 particles */}
@@ -287,9 +318,20 @@ export function HealthCounter({
 					rotation={rotation}
 					onChangeHero={handleChangeHero}
 					onToggleSubtrackers={handleToggleSubtrackers}
-					showingSubtrackers={showSubtrackers}
 					onClose={() => closeDrawer()}
 					animState={drawerState}
+				/>
+			)}
+
+			{/* Subtracker selection modal */}
+			{showSubtrackerModal && (
+				<SubtrackerModal
+					rotation={rotation}
+					heroColor={template?.color ?? "#333"}
+					activeKeys={activeSubtrackers}
+					onAdd={handleAddSubtracker}
+					onRemove={handleRemoveSubtracker}
+					onClose={() => setShowSubtrackerModal(false)}
 				/>
 			)}
 		</div>
@@ -303,7 +345,6 @@ function DrawerOverlay({
 	rotation,
 	onChangeHero,
 	onToggleSubtrackers,
-	showingSubtrackers,
 	onClose,
 	animState,
 }: {
@@ -311,7 +352,6 @@ function DrawerOverlay({
 	rotation: number;
 	onChangeHero: () => void;
 	onToggleSubtrackers: () => void;
-	showingSubtrackers: boolean;
 	onClose: () => void;
 	animState: "opening" | "open" | "closing";
 }) {
@@ -384,122 +424,257 @@ function DrawerOverlay({
 					transition: "transform 0.3s ease",
 				}}
 			>
-				<button
-					onClick={onChangeHero}
-					style={{
-						background: "none",
-						border: "none",
-						cursor: "pointer",
-						display: "flex",
-						flexDirection: "column",
-						alignItems: "center",
-						gap: 4,
-						color: "#fff",
-						padding: is90or270 ? 4 : 8,
-						...(is90or270
-							? { transform: `rotate(${rotation}deg)` }
-							: {}),
-					}}
-				>
-					{/* Refresh/change icon */}
-					<svg
-						width={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
-						height={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="white"
-						strokeWidth="2.5"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-					>
-						<path d="M21 2v6h-6" />
-						<path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-						<path d="M3 22v-6h6" />
-						<path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-					</svg>
-					{!is90or270 && (
-						<span
+				{(() => {
+					const is270 = rotation === 270;
+					const changeHeroBtn = (
+						<button
+							key="change-hero"
+							onClick={onChangeHero}
 							style={{
-								fontFamily: "'Cinzel', serif",
-								fontWeight: 700,
-								fontSize: "clamp(10px, 2.5vw, 14px)",
-								textTransform: "uppercase",
-								letterSpacing: "0.05em",
-								textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+								background: "none",
+								border: "none",
+								cursor: "pointer",
+								display: "flex",
+								flexDirection: "column",
+								alignItems: "center",
+								gap: 4,
+								color: "#fff",
+								padding: is90or270 ? 4 : 8,
+								...(is90or270
+									? { transform: `rotate(${rotation}deg)` }
+									: {}),
 							}}
 						>
-							Change Hero
-						</span>
-					)}
-				</button>
-
-				{/* Divider */}
-				<div
-					style={{
-						...(is90or270
-							? {
-									width: "60%",
-									height: 1,
-									alignSelf: "center",
-								}
-							: {
-									width: 1,
-									height: "60%",
-									alignSelf: "center",
-								}),
-						backgroundColor: "rgba(255,255,255,0.3)",
-						flexShrink: 0,
-					}}
-				/>
-
-				<button
-					onClick={onToggleSubtrackers}
-					style={{
-						background: "none",
-						border: "none",
-						cursor: "pointer",
-						display: "flex",
-						flexDirection: "column",
-						alignItems: "center",
-						gap: 4,
-						color: "#fff",
-						padding: is90or270 ? 4 : 8,
-						...(is90or270
-							? { transform: `rotate(${rotation}deg)` }
-							: {}),
-					}}
-				>
-					{/* Stacked tokens/coins icon */}
-					<svg
-						width={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
-						height={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="white"
-						strokeWidth="2.5"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-					>
-						<ellipse cx="12" cy="6" rx="8" ry="3" />
-						<path d="M4 6v4c0 1.66 3.58 3 8 3s8-1.34 8-3V6" />
-						<path d="M4 10v4c0 1.66 3.58 3 8 3s8-1.34 8-3v-4" />
-						<path d="M4 14v4c0 1.66 3.58 3 8 3s8-1.34 8-3v-4" />
-					</svg>
-					{!is90or270 && (
-						<span
+							<svg
+								width={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
+								height={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="white"
+								strokeWidth="2.5"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<path d="M21 2v6h-6" />
+								<path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+								<path d="M3 22v-6h6" />
+								<path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+							</svg>
+							{!is90or270 && (
+								<span
+									style={{
+										fontFamily: "'Cinzel', serif",
+										fontWeight: 700,
+										fontSize: "clamp(10px, 2.5vw, 14px)",
+										textTransform: "uppercase",
+										letterSpacing: "0.05em",
+										textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+									}}
+								>
+									Change Hero
+								</span>
+							)}
+						</button>
+					);
+					const subtrackersBtn = (
+						<button
+							key="subtrackers"
+							onClick={onToggleSubtrackers}
 							style={{
-								fontFamily: "'Cinzel', serif",
-								fontWeight: 700,
-								fontSize: "clamp(10px, 2.5vw, 14px)",
-								textTransform: "uppercase",
-								letterSpacing: "0.05em",
-								textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+								background: "none",
+								border: "none",
+								cursor: "pointer",
+								display: "flex",
+								flexDirection: "column",
+								alignItems: "center",
+								gap: 4,
+								color: "#fff",
+								padding: is90or270 ? 4 : 8,
+								...(is90or270
+									? { transform: `rotate(${rotation}deg)` }
+									: {}),
 							}}
 						>
-							{showingSubtrackers ? "Main View" : "Subtrackers"}
-						</span>
-					)}
-				</button>
+							<svg
+								width={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
+								height={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="white"
+								strokeWidth="2.5"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<ellipse cx="12" cy="6" rx="8" ry="3" />
+								<path d="M4 6v4c0 1.66 3.58 3 8 3s8-1.34 8-3V6" />
+								<path d="M4 10v4c0 1.66 3.58 3 8 3s8-1.34 8-3v-4" />
+								<path d="M4 14v4c0 1.66 3.58 3 8 3s8-1.34 8-3v-4" />
+							</svg>
+							{!is90or270 && (
+								<span
+									style={{
+										fontFamily: "'Cinzel', serif",
+										fontWeight: 700,
+										fontSize: "clamp(10px, 2.5vw, 14px)",
+										textTransform: "uppercase",
+										letterSpacing: "0.05em",
+										textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+									}}
+								>
+									Subtrackers
+								</span>
+							)}
+						</button>
+					);
+					const divider = (
+						<div
+							key="divider"
+							style={{
+								...(is90or270
+									? {
+											width: "60%",
+											height: 1,
+											alignSelf: "center",
+										}
+									: {
+											width: 1,
+											height: "60%",
+											alignSelf: "center",
+										}),
+								backgroundColor: "rgba(255,255,255,0.3)",
+								flexShrink: 0,
+							}}
+						/>
+					);
+					return is270
+						? [subtrackersBtn, divider, changeHeroBtn]
+						: [changeHeroBtn, divider, subtrackersBtn];
+				})()}
+			</div>
+		</div>
+	);
+}
+
+/* ─── Subtracker Selection Modal ─── */
+
+type StatKey = "hp" | "mana" | "armor" | "attack";
+
+function SubtrackerModal({
+	rotation,
+	heroColor,
+	activeKeys,
+	onAdd,
+	onRemove,
+	onClose,
+}: {
+	rotation: number;
+	heroColor: string;
+	activeKeys: StatKey[];
+	onAdd: (key: StatKey) => void;
+	onRemove: (key: StatKey) => void;
+	onClose: () => void;
+}) {
+	const is90or270 = rotation === 90 || rotation === 270;
+	const norm = ((rotation % 360) + 360) % 360;
+
+	return (
+		<div
+			style={{
+				position: "absolute",
+				inset: 0,
+				zIndex: 10,
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				backgroundColor: "rgba(0,0,0,0.7)",
+				...(is90or270
+					? {}
+					: norm === 180
+						? { transform: "rotate(180deg)" }
+						: {}),
+			}}
+			onClick={(e) => {
+				e.stopPropagation();
+				onClose();
+			}}
+		>
+			<div
+				onClick={(e) => e.stopPropagation()}
+				style={{
+					backgroundColor: "#1a1a1e",
+					borderRadius: 12,
+					padding: "clamp(12px, 3vw, 20px)",
+					display: "flex",
+					flexDirection: "column",
+					gap: 8,
+					minWidth: is90or270 ? undefined : "70%",
+					maxWidth: is90or270 ? "80%" : "85%",
+					border: `1px solid ${heroColor}`,
+					...(is90or270
+						? { transform: `rotate(${rotation}deg)` }
+						: {}),
+				}}
+			>
+				<h3
+					style={{
+						margin: 0,
+						color: "#fff",
+						fontFamily: "'Cinzel', serif",
+						fontSize: "clamp(12px, 3vw, 16px)",
+						textAlign: "center",
+						textTransform: "uppercase",
+						letterSpacing: "0.05em",
+					}}
+				>
+					Add Subtracker
+				</h3>
+				{STAT_CONFIGS.filter((c) => c.key !== "hp").map((config) => {
+					const isActive = activeKeys.includes(config.key);
+					return (
+						<button
+							key={config.key}
+							onClick={() =>
+								isActive ? onRemove(config.key) : onAdd(config.key)
+							}
+							style={{
+								display: "flex",
+								alignItems: "center",
+								gap: 12,
+								padding: "clamp(8px, 2vw, 12px)",
+								backgroundColor: isActive
+									? heroColor
+									: "rgba(255,255,255,0.08)",
+								border: "none",
+								borderRadius: 8,
+								cursor: "pointer",
+								color: "#fff",
+								fontFamily: "'Cinzel', serif",
+								fontSize: "clamp(12px, 3vw, 16px)",
+								fontWeight: 700,
+								textTransform: "uppercase",
+								letterSpacing: "0.05em",
+							}}
+						>
+							<div
+								style={{
+									width: "clamp(20px, 5vw, 28px)",
+									height: "clamp(20px, 5vw, 28px)",
+									flexShrink: 0,
+								}}
+							>
+								{config.icon}
+							</div>
+							<span style={{ flex: 1, textAlign: "left" }}>
+								{config.label}
+							</span>
+							{isActive && (
+								<span style={{ fontSize: "clamp(10px, 2.5vw, 14px)", opacity: 0.7 }}>
+									✓
+								</span>
+							)}
+						</button>
+					);
+				})}
 			</div>
 		</div>
 	);
@@ -562,11 +737,42 @@ const STAT_CONFIGS: StatConfig[] = [
 function SubtrackerView({
 	hero,
 	rotation,
+	activeKeys,
+	onRemove: _onRemove,
 }: {
 	hero: Hero;
 	rotation: number;
+	activeKeys: ("hp" | "mana" | "armor" | "attack")[];
+	onRemove: (key: "hp" | "mana" | "armor" | "attack") => void;
 }) {
 	const updateStat = useHeroStore((s) => s.updateStat);
+
+	const [floaters, setFloaters] = useState<
+		(FloatingNumber & { statKey: string })[]
+	>([]);
+	const cleanupTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+
+	useEffect(() => {
+		return () => {
+			cleanupTimers.current.forEach((t) => clearTimeout(t));
+		};
+	}, []);
+
+	const spawnFloater = (statKey: string, isIncrement: boolean) => {
+		const value = isIncrement ? 1 : -1;
+		const direction = isIncrement ? 1 : -1;
+		const arcX = (Math.random() - 0.5) * 20;
+		const arcY = direction * -(30 + Math.random() * 25);
+		const id = nextId++;
+
+		setFloaters((prev) => [...prev, { id, value, arcX, arcY, statKey }]);
+
+		const timer = setTimeout(() => {
+			setFloaters((prev) => prev.filter((f) => f.id !== id));
+			cleanupTimers.current.delete(timer);
+		}, 800);
+		cleanupTimers.current.add(timer);
+	};
 
 	const handleStatClick = (
 		e: React.MouseEvent,
@@ -594,12 +800,42 @@ function SubtrackerView({
 
 		const change = isIncrement ? 1 : -1;
 		updateStat(hero.id, statKey, "current", currentValue + change);
+		spawnFloater(statKey, isIncrement);
 	};
 
-	const stats = STAT_CONFIGS.map((config) => ({
-		...config,
-		value: hero[config.key].current,
-	}));
+	// HP is always first, then user-added subtrackers
+	const allKeys: StatKey[] = ["hp", ...activeKeys.filter((k) => k !== "hp")];
+	const statsBase = allKeys
+		.map((key) => {
+			const config = STAT_CONFIGS.find((c) => c.key === key);
+			if (!config) return null;
+			return { ...config, value: hero[config.key].current };
+		})
+		.filter(Boolean) as (StatConfig & { value: number })[];
+
+	// Reorder stats for rotated cards so layout mirrors correctly
+	// 90°: HP in top row paired with first subtracker, odd one alone at bottom
+	// 270°: HP alone at top, subtrackers paired at bottom (mirror of 90°)
+	const norm = ((rotation % 360) + 360) % 360;
+	let stats = statsBase;
+	if (norm === 90 && statsBase.length >= 4) {
+		// 4 items: [Attack, HP, Mana, Armor]
+		const [hp, ...rest] = statsBase;
+		stats = [rest[0], hp, rest[2], rest[1]];
+	} else if (norm === 90 && statsBase.length >= 2) {
+		// 2-3 items: [other, HP, ...rest]
+		const [hp, ...rest] = statsBase;
+		stats = [rest[0], hp, ...rest.slice(1)];
+	} else if (norm === 270 && statsBase.length === 3) {
+		// 3 items: [second_sub, HP, first_sub] — second sub spans top, HP bottom-left, first sub bottom-right
+		const [hp, ...rest] = statsBase;
+		stats = [rest[1], hp, rest[0]];
+	} else if (norm === 270 && statsBase.length >= 4) {
+		// 4 items: [Armor, Mana, HP, Attack]
+		const [hp, ...rest] = statsBase;
+		stats = [rest[1], rest[2], hp, rest[0]];
+	}
+	// 270° with 2 items: default order [HP, rest] — HP on left = player's top ✓
 
 	const is90or270 = rotation === 90 || rotation === 270;
 
@@ -608,77 +844,168 @@ function SubtrackerView({
 			style={{
 				position: "absolute",
 				zIndex: 1,
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
 				...(is90or270
 					? {
-							top: "50%",
-							left: "50%",
-							width: "200%",
-							height: "200%",
-							transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+							top: 0,
+							left: 0,
+							width: "100%",
+							height: "100%",
 						}
 					: {
 							inset: 0,
 							transform: rotation ? `rotate(${rotation}deg)` : undefined,
 						}),
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
 			}}
 		>
 			<div
-				style={{
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					width: "100%",
-					height: "100%",
-				}}
+				style={
+					is90or270
+						? {
+								display: "grid",
+								gridTemplateColumns:
+									stats.length === 1 ? "1fr" : "1fr 1fr",
+								gridTemplateRows:
+									stats.length <= 2 ? "1fr" : "1fr 1fr",
+								width: "100%",
+								height: "100%",
+							}
+						: {
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+								width: "100%",
+								height: "100%",
+							}
+				}
 			>
-				{stats.map((stat, i) => (
+				{stats.map((stat, i) => {
+					// For odd-count grids, one item spans both columns:
+					// 90°: last item spans bottom row
+					// 270°: first item spans top row (mirror of 90°)
+					const isOddCount = is90or270 && stats.length > 1 && stats.length % 2 === 1;
+					const isAloneInRow =
+						isOddCount &&
+						(norm === 270 ? i === 0 : i === stats.length - 1);
+
+					// Border logic: determine if this cell needs right/bottom borders
+					const needsRightBorder = (() => {
+						if (!is90or270 || isAloneInRow) return false;
+						if (norm === 270 && isOddCount) {
+							// First item spans, so indices 1+ fill bottom row
+							// Odd indices in the bottom row need right border
+							const rowIndex = i - 1; // offset by 1 since index 0 spans
+							return rowIndex % 2 === 0 && i < stats.length - 1;
+						}
+						return i % 2 === 0 && i < stats.length - 1;
+					})();
+
+					const needsBottomBorder = (() => {
+						if (!is90or270 || stats.length <= 2) return false;
+						if (norm === 270 && isOddCount) {
+							// First item (spanning) gets bottom border
+							return i === 0;
+						}
+						return i < 2;
+					})();
+
+					return (
 					<div
 						key={stat.key}
 						onClick={(e) => handleStatClick(e, stat.key, stat.value)}
 						style={{
-							flex: 1,
-							height: "100%",
+							...(is90or270
+								? {
+										width: "100%",
+										height: "100%",
+										...(isAloneInRow
+											? { gridColumn: "1 / -1" }
+											: {}),
+									}
+								: { flex: 1, height: "100%" }),
 							display: "flex",
 							flexDirection: "column",
 							alignItems: "center",
 							justifyContent: "center",
-							gap: "clamp(2px, 0.5vw, 6px)",
 							cursor: "pointer",
-							borderRight:
-								i < stats.length - 1
-									? "1px solid rgba(255,255,255,0.2)"
-									: "none",
+							position: "relative",
+							overflow: "hidden",
+							...(is90or270
+								? {
+										borderRight: needsRightBorder
+											? "1px solid rgba(255,255,255,0.15)"
+											: "none",
+										borderBottom: needsBottomBorder
+											? "1px solid rgba(255,255,255,0.15)"
+											: "none",
+									}
+								: {
+										borderRight:
+											i < stats.length - 1
+												? "1px solid rgba(255,255,255,0.2)"
+												: "none",
+									}),
 						}}
 					>
-						<span
-							style={{
-								fontFamily: "'Cinzel', serif",
-								fontSize: "clamp(24px, 8vw, 56px)",
-								fontWeight: 900,
-								color: "#fff",
-								lineHeight: 1,
-								textShadow:
-									"0 2px 8px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.6)",
-								letterSpacing: "-0.02em",
-							}}
-						>
-							{stat.value}
-						</span>
 						<div
 							style={{
-								width: "clamp(14px, 4vw, 28px)",
-								height: "clamp(14px, 4vw, 28px)",
-								opacity: 0.85,
-								filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))",
+								display: "flex",
+								flexDirection: "column",
+								alignItems: "center",
+								gap: "clamp(2px, 0.5vw, 4px)",
+								transform: is90or270
+									? `rotate(${rotation}deg)`
+									: undefined,
 							}}
 						>
-							{stat.icon}
+							<span
+								style={{
+									fontFamily: "'Cinzel', serif",
+									fontSize: is90or270
+										? "clamp(16px, 4vw, 28px)"
+										: "clamp(24px, 8vw, 56px)",
+									fontWeight: 900,
+									color: "#fff",
+									lineHeight: 1,
+									textShadow:
+										"0 2px 8px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.6)",
+									letterSpacing: "-0.02em",
+								}}
+							>
+								{stat.value}
+							</span>
+							<div
+								style={{
+									width: is90or270
+										? "clamp(10px, 3vw, 18px)"
+										: "clamp(14px, 4vw, 28px)",
+									height: is90or270
+										? "clamp(10px, 3vw, 18px)"
+										: "clamp(14px, 4vw, 28px)",
+									opacity: 0.85,
+									filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))",
+								}}
+							>
+								{stat.icon}
+							</div>
 						</div>
+						{/* Floating +1/-1 particles for this stat */}
+						{floaters
+							.filter((f) => f.statKey === stat.key)
+							.map((f) => (
+								<FloatingParticle
+									key={f.id}
+									value={f.value}
+									arcX={f.arcX}
+									arcY={f.arcY}
+									rotation={is90or270 ? rotation : 0}
+								/>
+							))}
 					</div>
-				))}
+					);
+				})}
 			</div>
 		</div>
 	);

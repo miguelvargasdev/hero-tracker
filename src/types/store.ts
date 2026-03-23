@@ -10,6 +10,7 @@ export interface HeroStore {
   navigateTo: (view: ViewName, heroId?: string) => void;
 
   startGame: (mode: GameMode, playerCount: number) => void;
+  resetCounter: number;
   resetGame: () => void;
   selectHero: (playerId: string, templateId: string) => void;
 
