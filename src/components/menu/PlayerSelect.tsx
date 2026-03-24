@@ -129,10 +129,10 @@ export function PlayerSelect() {
 				<div
 					style={{
 						display: "grid",
-						gridTemplateColumns: "1fr 1fr",
+						gridTemplateColumns: "repeat(2, 1fr)",
 						gap: 16,
-						maxWidth: 260,
-						width: "100%",
+						width: "clamp(240px, 65vw, 300px)",
+						margin: "0 auto",
 					}}
 				>
 					{PLAYER_COUNTS.map((count) => (
