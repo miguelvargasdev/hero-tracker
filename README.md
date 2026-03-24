@@ -12,12 +12,9 @@ This is a mobile-first health tracker designed to be placed flat on a table duri
 - **8 playable heroes** - Each with unique HP, attack, mana, and armor values
 - **Tap to increment/decrement** - Tap the top half to increase, bottom half to decrease (rotation-aware)
 - **Subtrackers** - Long-press any tracker to open a drawer, then add attack, armor, or mana subtrackers one at a time
-- **Rotated layouts** - 90/270 degree trackers use a 2x2 quadrant grid with HP positioned at each player's top-left perspective
-- **Floating particles** - +1/-1 animations on every stat change
 - **Hero artwork backgrounds** - Each tracker displays the hero's artwork
 - **Responsive design** - Works across phones, tablets, and desktops
 - **Installable PWA** - Add to home screen for a native app experience
-- **Game reset** - Resets all stats to base values and clears subtrackers
 
 ### Tech Stack
 
