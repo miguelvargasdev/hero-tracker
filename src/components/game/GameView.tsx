@@ -137,7 +137,7 @@ export function GameView() {
 				aria-label="Menu"
 			>
 				<img
-					src={`${import.meta.env.BASE_URL}icons/crown.png`}
+					src={`${import.meta.env.BASE_URL}crown.png`}
 					alt="Menu"
 					style={{
 						width: 26,

@@ -831,29 +831,13 @@ function SubtrackerView({
 		})
 		.filter(Boolean) as (StatConfig & { value: number })[];
 
-	// Reorder stats for rotated cards so layout mirrors correctly
-	// 90°: HP in top row paired with first subtracker, odd one alone at bottom
-	// 270°: HP alone at top, subtrackers paired at bottom (mirror of 90°)
+	// Reorder stats for rotated cards so HP appears at the player's "top"
+	// For single-column layout: 90° keeps default order, 270° reverses it
 	const norm = ((rotation % 360) + 360) % 360;
 	let stats = statsBase;
-	if (norm === 90 && statsBase.length >= 4) {
-		// 4 items: [Attack, HP, Mana, Armor]
-		const [hp, ...rest] = statsBase;
-		stats = [rest[0], hp, rest[2], rest[1]];
-	} else if (norm === 90 && statsBase.length >= 2) {
-		// 2-3 items: [other, HP, ...rest]
-		const [hp, ...rest] = statsBase;
-		stats = [rest[0], hp, ...rest.slice(1)];
-	} else if (norm === 270 && statsBase.length === 3) {
-		// 3 items: [second_sub, HP, first_sub] — second sub spans top, HP bottom-left, first sub bottom-right
-		const [hp, ...rest] = statsBase;
-		stats = [rest[1], hp, rest[0]];
-	} else if (norm === 270 && statsBase.length >= 4) {
-		// 4 items: [Armor, Mana, HP, Attack]
-		const [hp, ...rest] = statsBase;
-		stats = [rest[1], rest[2], hp, rest[0]];
+	if (norm === 270) {
+		stats = [...statsBase].reverse();
 	}
-	// 270° with 2 items: default order [HP, rest] — HP on left = player's top ✓
 
 	const is90or270 = rotation === 90 || rotation === 270;
 
@@ -879,69 +863,25 @@ function SubtrackerView({
 			}}
 		>
 			<div
-				style={
-					is90or270
-						? {
-								display: "grid",
-								gridTemplateColumns:
-									stats.length === 1 ? "1fr" : "1fr 1fr",
-								gridTemplateRows:
-									stats.length <= 2 ? "1fr" : "1fr 1fr",
-								width: "100%",
-								height: "100%",
-							}
-						: {
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "center",
-								width: "100%",
-								height: "100%",
-							}
-				}
+				style={{
+					display: "flex",
+					alignItems: is90or270 ? "stretch" : "center",
+					justifyContent: "center",
+					width: "100%",
+					height: "100%",
+					...(is90or270
+						? { flexDirection: "column" as const }
+						: {}),
+				}}
 			>
 				{stats.map((stat, i) => {
-					// For odd-count grids, one item spans both columns:
-					// 90°: last item spans bottom row
-					// 270°: first item spans top row (mirror of 90°)
-					const isOddCount = is90or270 && stats.length > 1 && stats.length % 2 === 1;
-					const isAloneInRow =
-						isOddCount &&
-						(norm === 270 ? i === 0 : i === stats.length - 1);
-
-					// Border logic: determine if this cell needs right/bottom borders
-					const needsRightBorder = (() => {
-						if (!is90or270 || isAloneInRow) return false;
-						if (norm === 270 && isOddCount) {
-							// First item spans, so indices 1+ fill bottom row
-							// Odd indices in the bottom row need right border
-							const rowIndex = i - 1; // offset by 1 since index 0 spans
-							return rowIndex % 2 === 0 && i < stats.length - 1;
-						}
-						return i % 2 === 0 && i < stats.length - 1;
-					})();
-
-					const needsBottomBorder = (() => {
-						if (!is90or270 || stats.length <= 2) return false;
-						if (norm === 270 && isOddCount) {
-							// First item (spanning) gets bottom border
-							return i === 0;
-						}
-						return i < 2;
-					})();
-
 					return (
 					<div
 						key={stat.key}
 						onClick={(e) => handleStatClick(e, stat.key, stat.value)}
 						style={{
 							...(is90or270
-								? {
-										width: "100%",
-										height: "100%",
-										...(isAloneInRow
-											? { gridColumn: "1 / -1" }
-											: {}),
-									}
+								? { width: "100%", flex: 1 }
 								: { flex: 1, height: "100%" }),
 							display: "flex",
 							flexDirection: "column",
@@ -952,12 +892,10 @@ function SubtrackerView({
 							overflow: "hidden",
 							...(is90or270
 								? {
-										borderRight: needsRightBorder
-											? "1px solid rgba(255,255,255,0.15)"
-											: "none",
-										borderBottom: needsBottomBorder
-											? "1px solid rgba(255,255,255,0.15)"
-											: "none",
+										borderBottom:
+											i < stats.length - 1
+												? "1px solid rgba(255,255,255,0.15)"
+												: "none",
 									}
 								: {
 										borderRight:
@@ -982,7 +920,7 @@ function SubtrackerView({
 								style={{
 									fontFamily: "'Cinzel', serif",
 									fontSize: is90or270
-										? "clamp(16px, 4vw, 28px)"
+										? "clamp(20px, 5vw, 36px)"
 										: "clamp(24px, 8vw, 56px)",
 									fontWeight: 900,
 									color: "#fff",
@@ -997,10 +935,10 @@ function SubtrackerView({
 							<div
 								style={{
 									width: is90or270
-										? "clamp(10px, 3vw, 18px)"
+										? "clamp(14px, 4vw, 24px)"
 										: "clamp(14px, 4vw, 28px)",
 									height: is90or270
-										? "clamp(10px, 3vw, 18px)"
+										? "clamp(14px, 4vw, 24px)"
 										: "clamp(14px, 4vw, 28px)",
 									opacity: 0.85,
 									filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))",
