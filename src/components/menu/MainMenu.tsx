@@ -16,11 +16,6 @@ const MENU_ITEMS = [
     description: "1 vs All",
     action: "tyrant" as const,
   },
-  {
-    label: "Skirmish",
-    description: "Two vs Two",
-    action: "skirmish" as const,
-  },
 ];
 
 export function MainMenu() {
@@ -36,9 +31,6 @@ export function MainMenu() {
         navigateTo("player-select");
         break;
       case "tyrant":
-        break;
-      case "skirmish":
-        startGame("skirmish", 4);
         break;
     }
   };
