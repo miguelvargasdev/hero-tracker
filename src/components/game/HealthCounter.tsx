@@ -688,20 +688,21 @@ interface StatConfig {
 	icon: React.ReactNode;
 }
 
+const STAT_ICON_STYLE: React.CSSProperties = {
+	width: "100%",
+	height: "100%",
+	filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.8))",
+};
+
 const STAT_CONFIGS: StatConfig[] = [
 	{
 		key: "hp",
 		label: "HP",
 		icon: (
 			<img
-				src={`${import.meta.env.BASE_URL}hp-icon.png`}
+				src={`${import.meta.env.BASE_URL}icons/health.png`}
 				alt="HP"
-				style={{
-					width: "100%",
-					height: "100%",
-					filter:
-						"brightness(0) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,0.8))",
-				}}
+				style={STAT_ICON_STYLE}
 			/>
 		),
 	},
@@ -709,27 +710,33 @@ const STAT_CONFIGS: StatConfig[] = [
 		key: "attack",
 		label: "Attack",
 		icon: (
-			<svg viewBox="0 0 24 24" fill="white" width="100%" height="100%">
-				<path d="M14.5 2.5L22 10l-2.5 2.5-3-1.5-3 3 1.5 3L12.5 19.5 10 17l-3 3-2.5-1L2 21.5 4.5 19l-1-2.5 3-3-3-3L2 12l2.5-2.5 3 1.5 3-3-1.5-3z" />
-			</svg>
+			<img
+				src={`${import.meta.env.BASE_URL}icons/attack.png`}
+				alt="Attack"
+				style={STAT_ICON_STYLE}
+			/>
 		),
 	},
 	{
 		key: "armor",
 		label: "Armor",
 		icon: (
-			<svg viewBox="0 0 24 24" fill="white" width="100%" height="100%">
-				<path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" />
-			</svg>
+			<img
+				src={`${import.meta.env.BASE_URL}icons/armor.png`}
+				alt="Armor"
+				style={STAT_ICON_STYLE}
+			/>
 		),
 	},
 	{
 		key: "mana",
 		label: "Mana",
 		icon: (
-			<svg viewBox="0 0 24 24" fill="white" width="100%" height="100%">
-				<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-			</svg>
+			<img
+				src={`${import.meta.env.BASE_URL}icons/mana.png`}
+				alt="Mana"
+				style={STAT_ICON_STYLE}
+			/>
 		),
 	},
 ];
@@ -1016,13 +1023,13 @@ function SubtrackerView({
 function HealthIcon() {
 	return (
 		<img
-			src={`${import.meta.env.BASE_URL}hp-icon.png`}
+			src={`${import.meta.env.BASE_URL}icons/health.png`}
 			alt="HP"
 			style={{
 				width: "clamp(18px, 5vw, 36px)",
 				height: "clamp(18px, 5vw, 36px)",
 				filter:
-					"brightness(0) invert(1) drop-shadow(0 2px 12px rgba(0,0,0,0.8)) drop-shadow(0 0 4px rgba(0,0,0,0.6))",
+					"drop-shadow(0 2px 12px rgba(0,0,0,0.8)) drop-shadow(0 0 4px rgba(0,0,0,0.6))",
 				opacity: 0.85,
 			}}
 		/>
