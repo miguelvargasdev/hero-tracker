@@ -244,6 +244,17 @@ export function HealthCounter({
 				/>
 			)}
 
+			{/* Dim overlay for readability */}
+			{template && (
+				<div
+					style={{
+						position: "absolute",
+						inset: 0,
+						backgroundColor: "rgba(0,0,0,0.2)",
+					}}
+				/>
+			)}
+
 			{/* Content */}
 			{isUnselected ? (
 				<svg
