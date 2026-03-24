@@ -116,7 +116,6 @@ export function PlayerSelect() {
 						color: "#eee",
 						fontWeight: 700,
 						textTransform: "uppercase",
-						letterSpacing: "0.04em",
 						textAlign: "center",
 						lineHeight: 1.2,
 					}}
@@ -132,7 +131,6 @@ export function PlayerSelect() {
 						gridTemplateColumns: "repeat(2, 1fr)",
 						gap: 16,
 						width: "clamp(240px, 65vw, 300px)",
-						margin: "0 auto",
 					}}
 				>
 					{PLAYER_COUNTS.map((count) => (
@@ -140,7 +138,6 @@ export function PlayerSelect() {
 							key={count}
 							onClick={() => startGame("standard", count)}
 							style={{
-								aspectRatio: "1",
 								padding: 8,
 								backgroundColor: "transparent",
 								border: "none",
