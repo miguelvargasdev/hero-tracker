@@ -75,6 +75,7 @@ export function PlayerSelect() {
 				display: "flex",
 				flexDirection: "column",
 				alignItems: "center",
+				justifyContent: "center",
 				height: "100%",
 				padding: 32,
 				position: "relative",
@@ -84,7 +85,9 @@ export function PlayerSelect() {
 			<button
 				onClick={() => navigateTo("main-menu")}
 				style={{
-					alignSelf: "flex-start",
+					position: "absolute",
+					top: 32,
+					left: 32,
 					background: "none",
 					border: "none",
 					color: "#eee",
@@ -92,7 +95,6 @@ export function PlayerSelect() {
 					fontSize: 14,
 					fontWeight: "bold",
 					padding: 0,
-					marginBottom: 16,
 				}}
 			>
 				&larr; Back
@@ -100,11 +102,10 @@ export function PlayerSelect() {
 
 			<div
 				style={{
-					flex: 1,
 					display: "flex",
 					flexDirection: "column",
 					alignItems: "center",
-					justifyContent: "center",
+					width: "100%",
 				}}
 			>
 				<h2
