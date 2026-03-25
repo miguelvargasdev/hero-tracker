@@ -15,6 +15,7 @@ export interface Hero {
   name: string;
   templateId: string | null;
   color: string | null;
+  role?: "boss" | "team";
   hp: Stat;
   mana: Stat;
   armor: Stat;

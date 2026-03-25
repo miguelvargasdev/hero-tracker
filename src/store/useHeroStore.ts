@@ -39,8 +39,28 @@ export const useHeroStore = create<HeroStore>()(
       startGame: (mode, playerCount) =>
         set(() => {
           const heroes: Hero[] = [];
-          for (let i = 0; i < playerCount; i++) {
+          if (mode === "solo") {
             heroes.push(createEmptySlot());
+          } else if (mode === "tyrant") {
+            const onyxKing = HERO_TEMPLATES.find((t) => t.id === "onyxking")!;
+            heroes.push({
+              ...createEmptySlot(),
+              role: "boss",
+              name: onyxKing.name,
+              templateId: onyxKing.id,
+              color: onyxKing.color,
+              hp: { current: onyxKing.hp, max: onyxKing.hp },
+              attack: { current: onyxKing.attack, max: onyxKing.attack },
+              mana: { current: onyxKing.mana, max: onyxKing.mana },
+              armor: { current: onyxKing.armor, max: onyxKing.armor },
+            });
+            for (let i = 1; i < playerCount; i++) {
+              heroes.push({ ...createEmptySlot(), role: "team" });
+            }
+          } else {
+            for (let i = 0; i < playerCount; i++) {
+              heroes.push(createEmptySlot());
+            }
           }
           return {
             heroes,

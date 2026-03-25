@@ -7,8 +7,12 @@ export interface HeroTemplate {
 	armor: number;
 	color: string;
 	image: string;
+	/** Wide version of artwork for rotated trackers (90°/270°) */
+	wideImage: string;
 	/** background-position for tracker cards (moderate zoom) */
 	focus: string;
+	/** background-position for wide image on rotated trackers */
+	wideFocus: string;
 	/** background-position for select thumbnails (tight zoom on face) */
 	selectFocus: string;
 }
@@ -23,7 +27,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 0,
 		color: "#2a4dff",
 		image: `${import.meta.env.BASE_URL}heroes/arcanas.jpg`,
+		wideImage: `${import.meta.env.BASE_URL}heroes/arcanas_wide.jpg`,
 		focus: "50% 15%",
+		wideFocus: "50% 50%",
 		selectFocus: "50% 19%",
 	},
 	{
@@ -35,7 +41,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 1,
 		color: "#efbf00",
 		image: `${import.meta.env.BASE_URL}heroes/darren.jpg`,
+		wideImage: `${import.meta.env.BASE_URL}heroes/darren_wide.jpg`,
 		focus: "50% 20%",
+		wideFocus: "50% 50%",
 		selectFocus: "50% 26%",
 	},
 	{
@@ -47,7 +55,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 0,
 		color: "#1ea100",
 		image: `${import.meta.env.BASE_URL}heroes/heathanmoore.jpg`,
+		wideImage: `${import.meta.env.BASE_URL}heroes/heathanmoore_wide.jpg`,
 		focus: "50% 15%",
+		wideFocus: "50% 50%",
 		selectFocus: "45% 15%",
 	},
 	{
@@ -59,7 +69,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 0,
 		color: "#f16623",
 		image: `${import.meta.env.BASE_URL}heroes/nascha.jpg`,
+		wideImage: `${import.meta.env.BASE_URL}heroes/nascha_wide.jpg`,
 		focus: "50% 20%",
+		wideFocus: "50% 50%",
 		selectFocus: "50% 18%",
 	},
 	{
@@ -71,7 +83,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 0,
 		color: "#d20707",
 		image: `${import.meta.env.BASE_URL}heroes/scathtassia.jpg`,
+		wideImage: `${import.meta.env.BASE_URL}heroes/scathtassia_wide.jpg`,
 		focus: "50% 15%",
+		wideFocus: "50% 50%",
 		selectFocus: "50% 12%",
 	},
 	{
@@ -83,7 +97,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 0,
 		color: "#72553c",
 		image: `${import.meta.env.BASE_URL}heroes/briar.jpg`,
+		wideImage: `${import.meta.env.BASE_URL}heroes/briar_wide.jpg`,
 		focus: "50% 25%",
+		wideFocus: "50% 50%",
 		selectFocus: "50% 28%",
 	},
 	{
@@ -95,7 +111,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 0,
 		color: "#9f3bb5",
 		image: `${import.meta.env.BASE_URL}heroes/gwendolyn.jpg`,
+		wideImage: `${import.meta.env.BASE_URL}heroes/gwendolyn_wide.jpg`,
 		focus: "50% 20%",
+		wideFocus: "50% 50%",
 		selectFocus: "50% 20%",
 	},
 	{
@@ -107,7 +125,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 1,
 		color: "#f20039",
 		image: `${import.meta.env.BASE_URL}heroes/jugolach.jpg`,
+		wideImage: `${import.meta.env.BASE_URL}heroes/jugolach_wide.jpg`,
 		focus: "50% 30%",
+		wideFocus: "50% 50%",
 		selectFocus: "50% 30%",
 	},
 	{
@@ -119,7 +139,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 3,
 		color: "#000000",
 		image: `${import.meta.env.BASE_URL}heroes/onyxking.jpg`,
-		focus: "50% 12%",
+		wideImage: `${import.meta.env.BASE_URL}heroes/onyxking_wide.jpg`,
+		focus: "50% 10%",
+		wideFocus: "50% 55%",
 		selectFocus: "50% 12%",
 	},
 	{
@@ -131,7 +153,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 0,
 		color: "#f7e353",
 		image: `${import.meta.env.BASE_URL}heroes/ias.jpg`,
+		wideImage: `${import.meta.env.BASE_URL}heroes/ias_wide.jpg`,
 		focus: "45% 20%",
+		wideFocus: "50% 50%",
 		selectFocus: "45% 22%",
 	},
 	{
@@ -143,7 +167,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 3,
 		color: "#469c7d",
 		image: `${import.meta.env.BASE_URL}heroes/llawamai.jpg`,
+		wideImage: `${import.meta.env.BASE_URL}heroes/llawamai_wide.jpg`,
 		focus: "55% 15%",
+		wideFocus: "50% 50%",
 		selectFocus: "55% 15%",
 	},
 	{
@@ -155,7 +181,9 @@ export const HERO_TEMPLATES: HeroTemplate[] = [
 		armor: 0,
 		color: "#767478",
 		image: `${import.meta.env.BASE_URL}heroes/sarah.jpg`,
+		wideImage: `${import.meta.env.BASE_URL}heroes/sarah_wide.jpg`,
 		focus: "48% 15%",
+		wideFocus: "50% 50%",
 		selectFocus: "48% 18%",
 	},
 ];
