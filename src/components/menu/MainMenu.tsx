@@ -74,12 +74,17 @@ export function MainMenu() {
         <img
           src={`${import.meta.env.BASE_URL}Logo_Gold.png`}
           alt="HERO – Tales of the Tomes"
+          draggable={false}
+          onDragStart={(e) => e.preventDefault()}
           style={{
             width: "clamp(200px, 40vw, 360px)",
             maxWidth: "90%",
             height: "auto",
             marginBottom: "clamp(4px, 1vh, 12px)",
-          }}
+            userSelect: "none",
+            WebkitUserSelect: "none",
+            WebkitTouchCallout: "none",
+          } as React.CSSProperties}
         />
         <h1
           style={{
