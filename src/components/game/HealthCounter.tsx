@@ -222,7 +222,8 @@ export function HealthCounter({
 				position: "relative",
 				overflow: "hidden",
 				touchAction: "manipulation",
-			}}
+				containerType: "size",
+			} as React.CSSProperties}
 		>
 			{/* Hero artwork background */}
 			{template && (
@@ -233,8 +234,8 @@ export function HealthCounter({
 							? {
 									top: "50%",
 									left: "50%",
-									width: "max(200%, 200vh)",
-									height: "max(200%, 200vh)",
+									width: "100cqh",
+									height: "100cqw",
 									transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
 								}
 							: {
@@ -242,7 +243,7 @@ export function HealthCounter({
 									transform: rotation ? `rotate(${rotation}deg)` : undefined,
 								}),
 						backgroundImage: `url(${rotation === 90 || rotation === 270 ? template.wideImage : template.image})`,
-						backgroundSize: "auto",
+						backgroundSize: "cover",
 						backgroundPosition:
 							rotation === 90 || rotation === 270
 								? template.wideFocus
