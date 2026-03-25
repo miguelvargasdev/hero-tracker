@@ -275,9 +275,9 @@ export function HealthCounter({
 					// Direction points from the outer edge inward
 					let gradDir: string;
 					if (norm === 90) {
-						gradDir = isTop ? "to right" : "to left";
-					} else if (norm === 270) {
 						gradDir = isTop ? "to left" : "to right";
+					} else if (norm === 270) {
+						gradDir = isTop ? "to right" : "to left";
 					} else if (norm === 180) {
 						gradDir = isTop ? "to top" : "to bottom";
 					} else {
@@ -286,14 +286,14 @@ export function HealthCounter({
 					const clipStyle: React.CSSProperties =
 						norm === 90
 							? {
-									[isTop ? "left" : "right"]: 0,
+									[isTop ? "right" : "left"]: 0,
 									width: "50%",
 									height: "100%",
 									top: 0,
 								}
 							: norm === 270
 								? {
-										[isTop ? "right" : "left"]: 0,
+										[isTop ? "left" : "right"]: 0,
 										width: "50%",
 										height: "100%",
 										top: 0,
@@ -1052,9 +1052,9 @@ function SubtrackerView({
 									const n = ((rotation % 360) + 360) % 360;
 									let gradDir: string;
 									if (n === 90) {
-										gradDir = isTop ? "to right" : "to left";
-									} else if (n === 270) {
 										gradDir = isTop ? "to left" : "to right";
+									} else if (n === 270) {
+										gradDir = isTop ? "to right" : "to left";
 									} else if (n === 180) {
 										gradDir = isTop ? "to top" : "to bottom";
 									} else {
