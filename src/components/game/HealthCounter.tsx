@@ -233,17 +233,20 @@ export function HealthCounter({
 							? {
 									top: "50%",
 									left: "50%",
-									width: "200%",
-									height: "200%",
+									width: "max(200%, 200vh)",
+									height: "max(200%, 200vh)",
 									transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
 								}
 							: {
 									inset: 0,
 									transform: rotation ? `rotate(${rotation}deg)` : undefined,
 								}),
-						backgroundImage: `url(${template.image})`,
-						backgroundSize: "200%",
-						backgroundPosition: template.focus,
+						backgroundImage: `url(${rotation === 90 || rotation === 270 ? template.wideImage : template.image})`,
+						backgroundSize: "auto",
+						backgroundPosition:
+							rotation === 90 || rotation === 270
+								? template.wideFocus
+								: template.focus,
 						backgroundRepeat: "no-repeat",
 					}}
 				/>
@@ -261,45 +264,66 @@ export function HealthCounter({
 			)}
 
 			{/* Tap flash overlay */}
-			{tapFlash !== "none" && (() => {
-				const norm = ((rotation % 360) + 360) % 360;
-				const isTop = tapFlash === "top";
-				const color = isTop
-					? "rgba(74, 222, 128, 0.2)"
-					: "rgba(248, 113, 113, 0.2)";
-				// Gradient from edge (color) to center (transparent)
-				// Direction points from the outer edge inward
-				let gradDir: string;
-				if (norm === 90) {
-					gradDir = isTop ? "to right" : "to left";
-				} else if (norm === 270) {
-					gradDir = isTop ? "to left" : "to right";
-				} else if (norm === 180) {
-					gradDir = isTop ? "to top" : "to bottom";
-				} else {
-					gradDir = isTop ? "to bottom" : "to top";
-				}
-				const clipStyle: React.CSSProperties =
-					norm === 90
-						? { [isTop ? "left" : "right"]: 0, width: "50%", height: "100%", top: 0 }
-						: norm === 270
-							? { [isTop ? "right" : "left"]: 0, width: "50%", height: "100%", top: 0 }
-							: norm === 180
-								? { [isTop ? "bottom" : "top"]: 0, height: "50%", width: "100%", left: 0 }
-								: { [isTop ? "top" : "bottom"]: 0, height: "50%", width: "100%", left: 0 };
-				return (
-					<div
-						style={{
-							position: "absolute",
-							...clipStyle,
-							background: `linear-gradient(${gradDir}, ${color}, transparent)`,
-							zIndex: 2,
-							pointerEvents: "none",
-							animation: "tapFlashFade 0.15s ease-out forwards",
-						}}
-					/>
-				);
-			})()}
+			{tapFlash !== "none" &&
+				(() => {
+					const norm = ((rotation % 360) + 360) % 360;
+					const isTop = tapFlash === "top";
+					const color = isTop
+						? "rgba(74, 222, 128, 0.2)"
+						: "rgba(248, 113, 113, 0.2)";
+					// Gradient from edge (color) to center (transparent)
+					// Direction points from the outer edge inward
+					let gradDir: string;
+					if (norm === 90) {
+						gradDir = isTop ? "to right" : "to left";
+					} else if (norm === 270) {
+						gradDir = isTop ? "to left" : "to right";
+					} else if (norm === 180) {
+						gradDir = isTop ? "to top" : "to bottom";
+					} else {
+						gradDir = isTop ? "to bottom" : "to top";
+					}
+					const clipStyle: React.CSSProperties =
+						norm === 90
+							? {
+									[isTop ? "left" : "right"]: 0,
+									width: "50%",
+									height: "100%",
+									top: 0,
+								}
+							: norm === 270
+								? {
+										[isTop ? "right" : "left"]: 0,
+										width: "50%",
+										height: "100%",
+										top: 0,
+									}
+								: norm === 180
+									? {
+											[isTop ? "bottom" : "top"]: 0,
+											height: "50%",
+											width: "100%",
+											left: 0,
+										}
+									: {
+											[isTop ? "top" : "bottom"]: 0,
+											height: "50%",
+											width: "100%",
+											left: 0,
+										};
+					return (
+						<div
+							style={{
+								position: "absolute",
+								...clipStyle,
+								background: `linear-gradient(${gradDir}, ${color}, transparent)`,
+								zIndex: 2,
+								pointerEvents: "none",
+								animation: "tapFlashFade 0.15s ease-out forwards",
+							}}
+						/>
+					);
+				})()}
 			<style>{`
 				@keyframes tapFlashFade {
 					from { opacity: 1; }
@@ -503,14 +527,20 @@ function DrawerOverlay({
 								gap: 4,
 								color: "#fff",
 								padding: is90or270 ? 4 : 8,
-								...(is90or270
-									? { transform: `rotate(${rotation}deg)` }
-									: {}),
+								...(is90or270 ? { transform: `rotate(${rotation}deg)` } : {}),
 							}}
 						>
 							<svg
-								width={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
-								height={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
+								width={
+									is90or270
+										? "clamp(18px, 4vw, 28px)"
+										: "clamp(28px, 6vw, 44px)"
+								}
+								height={
+									is90or270
+										? "clamp(18px, 4vw, 28px)"
+										: "clamp(28px, 6vw, 44px)"
+								}
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="white"
@@ -553,14 +583,20 @@ function DrawerOverlay({
 								gap: 4,
 								color: "#fff",
 								padding: is90or270 ? 4 : 8,
-								...(is90or270
-									? { transform: `rotate(${rotation}deg)` }
-									: {}),
+								...(is90or270 ? { transform: `rotate(${rotation}deg)` } : {}),
 							}}
 						>
 							<svg
-								width={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
-								height={is90or270 ? "clamp(18px, 4vw, 28px)" : "clamp(28px, 6vw, 44px)"}
+								width={
+									is90or270
+										? "clamp(18px, 4vw, 28px)"
+										: "clamp(28px, 6vw, 44px)"
+								}
+								height={
+									is90or270
+										? "clamp(18px, 4vw, 28px)"
+										: "clamp(28px, 6vw, 44px)"
+								}
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="white"
@@ -673,9 +709,7 @@ function SubtrackerModal({
 					minWidth: is90or270 ? undefined : "70%",
 					maxWidth: is90or270 ? "80%" : "85%",
 					border: `1px solid ${heroColor}`,
-					...(is90or270
-						? { transform: `rotate(${rotation}deg)` }
-						: {}),
+					...(is90or270 ? { transform: `rotate(${rotation}deg)` } : {}),
 				}}
 			>
 				<h3
@@ -727,11 +761,11 @@ function SubtrackerModal({
 							>
 								{config.icon}
 							</div>
-							<span style={{ flex: 1, textAlign: "left" }}>
-								{config.label}
-							</span>
+							<span style={{ flex: 1, textAlign: "left" }}>{config.label}</span>
 							{isActive && (
-								<span style={{ fontSize: "clamp(10px, 2.5vw, 14px)", opacity: 0.7 }}>
+								<span
+									style={{ fontSize: "clamp(10px, 2.5vw, 14px)", opacity: 0.7 }}
+								>
 									✓
 								</span>
 							)}
@@ -817,7 +851,9 @@ function SubtrackerView({
 }) {
 	const updateStat = useHeroStore((s) => s.updateStat);
 
-	const [flashMap, setFlashMap] = useState<Record<string, "top" | "bottom" | null>>({});
+	const [flashMap, setFlashMap] = useState<
+		Record<string, "top" | "bottom" | null>
+	>({});
 	const [floaters, setFloaters] = useState<
 		(FloatingNumber & { statKey: string })[]
 	>([]);
@@ -874,8 +910,14 @@ function SubtrackerView({
 		spawnFloater(statKey, isIncrement);
 
 		// Tap flash
-		setFlashMap((prev) => ({ ...prev, [statKey]: isIncrement ? "top" : "bottom" }));
-		setTimeout(() => setFlashMap((prev) => ({ ...prev, [statKey]: null })), 150);
+		setFlashMap((prev) => ({
+			...prev,
+			[statKey]: isIncrement ? "top" : "bottom",
+		}));
+		setTimeout(
+			() => setFlashMap((prev) => ({ ...prev, [statKey]: null })),
+			150,
+		);
 	};
 
 	// HP is always first, then user-added subtrackers
@@ -926,135 +968,152 @@ function SubtrackerView({
 					justifyContent: "center",
 					width: "100%",
 					height: "100%",
-					...(is90or270
-						? { flexDirection: "column" as const }
-						: {}),
+					...(is90or270 ? { flexDirection: "column" as const } : {}),
 				}}
 			>
 				{stats.map((stat, i) => {
 					return (
-					<div
-						key={stat.key}
-						onClick={(e) => handleStatClick(e, stat.key, stat.value)}
-						style={{
-							...(is90or270
-								? { width: "100%", flex: 1 }
-								: { flex: 1, height: "100%" }),
-							display: "flex",
-							flexDirection: "column",
-							alignItems: "center",
-							justifyContent: "center",
-							cursor: "pointer",
-							position: "relative",
-							overflow: "hidden",
-							...(is90or270
-								? {
-										borderBottom:
-											i < stats.length - 1
-												? "1px solid rgba(255,255,255,0.15)"
-												: "none",
-									}
-								: {
-										borderRight:
-											i < stats.length - 1
-												? "1px solid rgba(255,255,255,0.2)"
-												: "none",
-									}),
-						}}
-					>
 						<div
+							key={stat.key}
+							onClick={(e) => handleStatClick(e, stat.key, stat.value)}
 							style={{
+								...(is90or270
+									? { width: "100%", flex: 1 }
+									: { flex: 1, height: "100%" }),
 								display: "flex",
 								flexDirection: "column",
 								alignItems: "center",
-								gap: "clamp(2px, 0.5vw, 4px)",
-								transform: is90or270
-									? `rotate(${rotation}deg)`
-									: undefined,
+								justifyContent: "center",
+								cursor: "pointer",
+								position: "relative",
+								overflow: "hidden",
+								...(is90or270
+									? {
+											borderBottom:
+												i < stats.length - 1
+													? "1px solid rgba(255,255,255,0.15)"
+													: "none",
+										}
+									: {
+											borderRight:
+												i < stats.length - 1
+													? "1px solid rgba(255,255,255,0.2)"
+													: "none",
+										}),
 							}}
 						>
-							<span
-								style={{
-									fontFamily: "'Cinzel', serif",
-									fontSize: is90or270
-										? "clamp(20px, 5vw, 36px)"
-										: "clamp(24px, 8vw, 56px)",
-									fontWeight: 900,
-									color: "#fff",
-									lineHeight: 1,
-									textShadow:
-										"0 2px 8px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.6)",
-									letterSpacing: "-0.02em",
-								}}
-							>
-								{stat.value}
-							</span>
 							<div
 								style={{
-									width: is90or270
-										? "clamp(14px, 4vw, 24px)"
-										: "clamp(14px, 4vw, 28px)",
-									height: is90or270
-										? "clamp(14px, 4vw, 24px)"
-										: "clamp(14px, 4vw, 28px)",
-									opacity: 0.85,
-									filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))",
+									display: "flex",
+									flexDirection: "column",
+									alignItems: "center",
+									gap: "clamp(2px, 0.5vw, 4px)",
+									transform: is90or270 ? `rotate(${rotation}deg)` : undefined,
 								}}
 							>
-								{stat.icon}
-							</div>
-						</div>
-						{/* Tap flash for this stat */}
-						{flashMap[stat.key] && (() => {
-							const isTop = flashMap[stat.key] === "top";
-							const color = isTop
-								? "rgba(74, 222, 128, 0.2)"
-								: "rgba(248, 113, 113, 0.2)";
-							const n = ((rotation % 360) + 360) % 360;
-							let gradDir: string;
-							if (n === 90) {
-								gradDir = isTop ? "to right" : "to left";
-							} else if (n === 270) {
-								gradDir = isTop ? "to left" : "to right";
-							} else if (n === 180) {
-								gradDir = isTop ? "to top" : "to bottom";
-							} else {
-								gradDir = isTop ? "to bottom" : "to top";
-							}
-							const pos: React.CSSProperties =
-								n === 90
-									? { [isTop ? "right" : "left"]: 0, width: "50%", height: "100%", top: 0 }
-									: n === 270
-										? { [isTop ? "left" : "right"]: 0, width: "50%", height: "100%", top: 0 }
-										: n === 180
-											? { [isTop ? "bottom" : "top"]: 0, height: "50%", width: "100%", left: 0 }
-											: { [isTop ? "top" : "bottom"]: 0, height: "50%", width: "100%", left: 0 };
-							return (
+								<span
+									style={{
+										fontFamily: "'Cinzel', serif",
+										fontSize: is90or270
+											? "clamp(20px, 5vw, 36px)"
+											: "clamp(24px, 8vw, 56px)",
+										fontWeight: 900,
+										color: "#fff",
+										lineHeight: 1,
+										textShadow:
+											"0 2px 8px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.6)",
+										letterSpacing: "-0.02em",
+									}}
+								>
+									{stat.value}
+								</span>
 								<div
 									style={{
-										position: "absolute",
-										...pos,
-										background: `linear-gradient(${gradDir}, ${color}, transparent)`,
-										zIndex: 2,
-										pointerEvents: "none",
-										animation: "tapFlashFade 0.15s ease-out forwards",
+										width: is90or270
+											? "clamp(14px, 4vw, 24px)"
+											: "clamp(14px, 4vw, 28px)",
+										height: is90or270
+											? "clamp(14px, 4vw, 24px)"
+											: "clamp(14px, 4vw, 28px)",
+										opacity: 0.85,
+										filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))",
 									}}
-								/>
-							);
-						})()}
-						{/* Floating +1/-1 particles for this stat */}
-						{floaters
-							.filter((f) => f.statKey === stat.key)
-							.map((f) => (
-								<FloatingParticle
-									key={f.id}
-									value={f.value}
-									arcX={f.arcX}
-									arcY={f.arcY}
-									rotation={is90or270 ? rotation : 0}
-								/>
-							))}
-					</div>
+								>
+									{stat.icon}
+								</div>
+							</div>
+							{/* Tap flash for this stat */}
+							{flashMap[stat.key] &&
+								(() => {
+									const isTop = flashMap[stat.key] === "top";
+									const color = isTop
+										? "rgba(74, 222, 128, 0.2)"
+										: "rgba(248, 113, 113, 0.2)";
+									const n = ((rotation % 360) + 360) % 360;
+									let gradDir: string;
+									if (n === 90) {
+										gradDir = isTop ? "to right" : "to left";
+									} else if (n === 270) {
+										gradDir = isTop ? "to left" : "to right";
+									} else if (n === 180) {
+										gradDir = isTop ? "to top" : "to bottom";
+									} else {
+										gradDir = isTop ? "to bottom" : "to top";
+									}
+									const pos: React.CSSProperties =
+										n === 90
+											? {
+													[isTop ? "right" : "left"]: 0,
+													width: "50%",
+													height: "100%",
+													top: 0,
+												}
+											: n === 270
+												? {
+														[isTop ? "left" : "right"]: 0,
+														width: "50%",
+														height: "100%",
+														top: 0,
+													}
+												: n === 180
+													? {
+															[isTop ? "bottom" : "top"]: 0,
+															height: "50%",
+															width: "100%",
+															left: 0,
+														}
+													: {
+															[isTop ? "top" : "bottom"]: 0,
+															height: "50%",
+															width: "100%",
+															left: 0,
+														};
+									return (
+										<div
+											style={{
+												position: "absolute",
+												...pos,
+												background: `linear-gradient(${gradDir}, ${color}, transparent)`,
+												zIndex: 2,
+												pointerEvents: "none",
+												animation: "tapFlashFade 0.15s ease-out forwards",
+											}}
+										/>
+									);
+								})()}
+							{/* Floating +1/-1 particles for this stat */}
+							{floaters
+								.filter((f) => f.statKey === stat.key)
+								.map((f) => (
+									<FloatingParticle
+										key={f.id}
+										value={f.value}
+										arcX={f.arcX}
+										arcY={f.arcY}
+										rotation={is90or270 ? rotation : 0}
+									/>
+								))}
+						</div>
 					);
 				})}
 			</div>

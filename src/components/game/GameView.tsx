@@ -3,6 +3,7 @@ import { useHeroStore } from "../../store/useHeroStore";
 import { HealthCounter } from "./HealthCounter";
 import { HeroSelectModal } from "./HeroSelectModal";
 import { TutorialModal, useTutorialSeen } from "./TutorialModal";
+import type { Hero } from "../../types/hero";
 
 const MENU_KEYFRAMES = `
 	@keyframes menuBackdropIn {
@@ -61,9 +62,13 @@ export function GameView() {
 	}
 
 	const isSolo = gameMode === "solo";
+	const isTyrant = gameMode === "tyrant";
 
-	// Crown button sits at the gap between row 1 and row 2
+	// Crown button sits at the gap between columns/rows
 	const getMenuTopPercent = () => {
+		if (isTyrant) {
+			return "50%"; // Vertical center between left/right columns
+		}
 		const count = heroes.length;
 		if (count === 5) return "33.3%"; // 3 rows → 1/3
 		return "50%"; // 2 rows → 1/2
@@ -200,6 +205,11 @@ export function GameView() {
 					hero={heroes[0]}
 					onSelect={() => setSelectingPlayerId(heroes[0].id)}
 				/>
+			) : isTyrant ? (
+				<TyrantLayout
+					heroes={heroes}
+					onSelect={(id) => setSelectingPlayerId(id)}
+				/>
 			) : (
 				<div
 					style={{
@@ -301,4 +311,51 @@ function getRotation(index: number, total: number): number {
 		default:
 			return 0;
 	}
+}
+
+/* ─── Tyrant Layout ─── */
+
+function TyrantLayout({
+	heroes,
+	onSelect,
+}: {
+	heroes: Hero[];
+	onSelect: (id: string) => void;
+}) {
+	const boss = heroes.find((h) => h.role === "boss");
+	const team = heroes.filter((h) => h.role === "team");
+
+	if (!boss) return null;
+
+	return (
+		<div
+			style={{
+				display: "grid",
+				gridTemplateColumns: "1fr 1fr",
+				gridTemplateRows: `repeat(${team.length}, 1fr)`,
+				gap: 8,
+				flex: 1,
+				padding: 4,
+			}}
+		>
+			{/* Boss: right column, spans all rows */}
+			<div style={{ gridColumn: 2, gridRow: `1 / ${team.length + 1}`, height: "100%" }}>
+				<HealthCounter
+					hero={boss}
+					rotation={270}
+					onSelect={() => onSelect(boss.id)}
+				/>
+			</div>
+			{/* Team: stacked vertically in left column, rotated 90° */}
+			{team.map((hero, i) => (
+				<div key={hero.id} style={{ gridColumn: 1, gridRow: i + 1, height: "100%" }}>
+					<HealthCounter
+						hero={hero}
+						rotation={90}
+						onSelect={() => onSelect(hero.id)}
+					/>
+				</div>
+			))}
+		</div>
+	);
 }

@@ -46,6 +46,7 @@ export function MainMenu() {
         navigateTo("player-select");
         break;
       case "tyrant":
+        navigateTo("tyrant-select");
         break;
     }
   };
@@ -111,20 +112,17 @@ export function MainMenu() {
             style={{
               padding: "14px 20px",
               fontSize: 18,
-              backgroundColor:
-                item.action === "tyrant" ? "#1a1a1e" : "#2a2a2e",
-              color: item.action === "tyrant" ? "#555" : "#eee",
+              backgroundColor: "#2a2a2e",
+              color: "#eee",
               border: "1px solid #444",
               borderRadius: 8,
-              cursor: item.action === "tyrant" ? "default" : "pointer",
+              cursor: "pointer",
               textAlign: "left",
-              opacity: item.action === "tyrant" ? 0.5 : 1,
               animation: `mainBtnIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) ${0.15 + i * 0.05}s both`,
               transition: "transform 0.15s, box-shadow 0.15s, border-color 0.2s",
             }}
             onMouseDown={(e) => {
-              if (item.action !== "tyrant")
-                (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.97)";
+              (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.97)";
             }}
             onMouseUp={(e) => {
               (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
@@ -135,7 +133,7 @@ export function MainMenu() {
           >
             <div style={{ fontFamily: "'Cinzel', serif", fontWeight: 700, textTransform: "uppercase" }}>{item.label}</div>
             <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
-              {item.action === "tyrant" ? "Coming soon" : item.description}
+              {item.description}
             </div>
           </button>
         ))}
