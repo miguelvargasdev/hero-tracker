@@ -34,6 +34,7 @@ export function HealthCounter({
 		: HERO_TEMPLATES.find((t) => t.id === hero.templateId);
 
 	const [floaters, setFloaters] = useState<FloatingNumber[]>([]);
+	const [tapFlash, setTapFlash] = useState<"none" | "top" | "bottom">("none");
 	const [drawerState, setDrawerState] = useState<
 		"closed" | "opening" | "open" | "closing"
 	>("closed");
@@ -164,6 +165,10 @@ export function HealthCounter({
 		const change = isIncrement ? 1 : -1;
 		updateStat(hero.id, "hp", "current", hero.hp.current + change);
 		spawnFloater(isIncrement);
+
+		// Tap flash
+		setTapFlash(isIncrement ? "top" : "bottom");
+		setTimeout(() => setTapFlash("none"), 150);
 	};
 
 	const closeDrawer = useCallback((onDone?: () => void) => {
@@ -254,6 +259,42 @@ export function HealthCounter({
 					}}
 				/>
 			)}
+
+			{/* Tap flash overlay */}
+			{tapFlash !== "none" && (() => {
+				const norm = ((rotation % 360) + 360) % 360;
+				const isTop = tapFlash === "top";
+				const color = isTop
+					? "rgba(74, 222, 128, 0.15)"
+					: "rgba(248, 113, 113, 0.15)";
+				// Position the flash on the correct half based on rotation
+				const clipStyle: React.CSSProperties =
+					norm === 90
+						? { [isTop ? "left" : "right"]: 0, width: "50%", height: "100%", top: 0 }
+						: norm === 270
+							? { [isTop ? "right" : "left"]: 0, width: "50%", height: "100%", top: 0 }
+							: norm === 180
+								? { [isTop ? "bottom" : "top"]: 0, height: "50%", width: "100%", left: 0 }
+								: { [isTop ? "top" : "bottom"]: 0, height: "50%", width: "100%", left: 0 };
+				return (
+					<div
+						style={{
+							position: "absolute",
+							...clipStyle,
+							backgroundColor: color,
+							zIndex: 2,
+							pointerEvents: "none",
+							animation: "tapFlashFade 0.15s ease-out forwards",
+						}}
+					/>
+				);
+			})()}
+			<style>{`
+				@keyframes tapFlashFade {
+					from { opacity: 1; }
+					to { opacity: 0; }
+				}
+			`}</style>
 
 			{/* Content */}
 			{isUnselected ? (
@@ -765,6 +806,7 @@ function SubtrackerView({
 }) {
 	const updateStat = useHeroStore((s) => s.updateStat);
 
+	const [flashMap, setFlashMap] = useState<Record<string, "top" | "bottom" | null>>({});
 	const [floaters, setFloaters] = useState<
 		(FloatingNumber & { statKey: string })[]
 	>([]);
@@ -819,6 +861,10 @@ function SubtrackerView({
 		const change = isIncrement ? 1 : -1;
 		updateStat(hero.id, statKey, "current", currentValue + change);
 		spawnFloater(statKey, isIncrement);
+
+		// Tap flash
+		setFlashMap((prev) => ({ ...prev, [statKey]: isIncrement ? "top" : "bottom" }));
+		setTimeout(() => setFlashMap((prev) => ({ ...prev, [statKey]: null })), 150);
 	};
 
 	// HP is always first, then user-added subtrackers
@@ -947,6 +993,34 @@ function SubtrackerView({
 								{stat.icon}
 							</div>
 						</div>
+						{/* Tap flash for this stat */}
+						{flashMap[stat.key] && (() => {
+							const isTop = flashMap[stat.key] === "top";
+							const color = isTop
+								? "rgba(74, 222, 128, 0.15)"
+								: "rgba(248, 113, 113, 0.15)";
+							const n = ((rotation % 360) + 360) % 360;
+							const pos: React.CSSProperties =
+								n === 90
+									? { [isTop ? "right" : "left"]: 0, width: "50%", height: "100%", top: 0 }
+									: n === 270
+										? { [isTop ? "left" : "right"]: 0, width: "50%", height: "100%", top: 0 }
+										: n === 180
+											? { [isTop ? "bottom" : "top"]: 0, height: "50%", width: "100%", left: 0 }
+											: { [isTop ? "top" : "bottom"]: 0, height: "50%", width: "100%", left: 0 };
+							return (
+								<div
+									style={{
+										position: "absolute",
+										...pos,
+										backgroundColor: color,
+										zIndex: 2,
+										pointerEvents: "none",
+										animation: "tapFlashFade 0.15s ease-out forwards",
+									}}
+								/>
+							);
+						})()}
 						{/* Floating +1/-1 particles for this stat */}
 						{floaters
 							.filter((f) => f.statKey === stat.key)

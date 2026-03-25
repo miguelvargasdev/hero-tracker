@@ -1,17 +1,59 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import { HealthCounter } from "./HealthCounter";
 import { HeroSelectModal } from "./HeroSelectModal";
+import { TutorialModal, useTutorialSeen } from "./TutorialModal";
+
+const MENU_KEYFRAMES = `
+	@keyframes menuBackdropIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+	@keyframes menuBackdropOut {
+		from { opacity: 1; }
+		to { opacity: 0; }
+	}
+	@keyframes menuCardIn {
+		from { opacity: 0; transform: scale(0.9); }
+		to { opacity: 1; transform: scale(1); }
+	}
+	@keyframes menuCardOut {
+		from { opacity: 1; transform: scale(1); }
+		to { opacity: 0; transform: scale(0.85) translateY(10px); }
+	}
+	@keyframes menuBtnIn {
+		from { opacity: 0; transform: translateY(8px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+`;
 
 export function GameView() {
 	const heroes = useHeroStore((s) => s.heroes);
 	const gameMode = useHeroStore((s) => s.gameMode);
 	const navigateTo = useHeroStore((s) => s.navigateTo);
 	const resetGame = useHeroStore((s) => s.resetGame);
-	const [menuOpen, setMenuOpen] = useState(false);
+	const [menuVisible, setMenuVisible] = useState(false);
+	const [menuExiting, setMenuExiting] = useState(false);
 	const [selectingPlayerId, setSelectingPlayerId] = useState<string | null>(
 		null,
 	);
+	const tutorialSeen = useTutorialSeen();
+	const [tutorialDismissed, setTutorialDismissed] = useState(false);
+	const [showTutorial, setShowTutorial] = useState(false);
+
+	const openMenu = useCallback(() => {
+		setMenuVisible(true);
+		setMenuExiting(false);
+	}, []);
+
+	const closeMenu = useCallback((onDone?: () => void) => {
+		setMenuExiting(true);
+		setTimeout(() => {
+			setMenuVisible(false);
+			setMenuExiting(false);
+			onDone?.();
+		}, 180);
+	}, []);
 
 	if (heroes.length === 0) {
 		navigateTo("main-menu");
@@ -39,7 +81,7 @@ export function GameView() {
 			}}
 		>
 			{/* Menu overlay */}
-			{menuOpen && (
+			{menuVisible && (
 				<div
 					style={{
 						position: "absolute",
@@ -49,9 +91,13 @@ export function GameView() {
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "center",
+						animation: menuExiting
+							? "menuBackdropOut 0.18s ease-in forwards"
+							: "menuBackdropIn 0.15s ease-out",
 					}}
-					onClick={() => setMenuOpen(false)}
+					onClick={() => closeMenu()}
 				>
+					<style>{MENU_KEYFRAMES}</style>
 					<div
 						onClick={(e) => e.stopPropagation()}
 						style={{
@@ -63,41 +109,38 @@ export function GameView() {
 							gap: 12,
 							minWidth: 200,
 							border: "1px solid #444",
+							animation: menuExiting
+								? "menuCardOut 0.18s ease-in forwards"
+								: "menuCardIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
 						}}
 					>
+						{[
+							{ label: "Reset", action: () => closeMenu(() => resetGame()) },
+							{ label: "Main Menu", action: () => closeMenu(() => navigateTo("main-menu")) },
+							{ label: "Help", action: () => closeMenu(() => setShowTutorial(true)) },
+						].map((item, i) => (
+							<button
+								key={item.label}
+								onClick={item.action}
+								style={{
+									padding: "10px 20px",
+									fontSize: 16,
+									backgroundColor: "#3a3a3e",
+									color: "#eee",
+									border: "none",
+									borderRadius: 8,
+									cursor: "pointer",
+									animation: menuExiting
+										? undefined
+										: `menuBtnIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.03}s both`,
+									transition: "transform 0.15s",
+								}}
+							>
+								{item.label}
+							</button>
+						))}
 						<button
-							onClick={() => {
-								resetGame();
-								setMenuOpen(false);
-							}}
-							style={{
-								padding: "10px 20px",
-								fontSize: 16,
-								backgroundColor: "#3a3a3e",
-								color: "#eee",
-								border: "none",
-								borderRadius: 8,
-								cursor: "pointer",
-							}}
-						>
-							Reset
-						</button>
-						<button
-							onClick={() => navigateTo("main-menu")}
-							style={{
-								padding: "10px 20px",
-								fontSize: 16,
-								backgroundColor: "#3a3a3e",
-								color: "#eee",
-								border: "none",
-								borderRadius: 8,
-								cursor: "pointer",
-							}}
-						>
-							Main Menu
-						</button>
-						<button
-							onClick={() => setMenuOpen(false)}
+							onClick={() => closeMenu()}
 							style={{
 								padding: "10px 20px",
 								fontSize: 16,
@@ -106,6 +149,10 @@ export function GameView() {
 								border: "1px solid #555",
 								borderRadius: 8,
 								cursor: "pointer",
+								animation: menuExiting
+									? undefined
+									: `menuBtnIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) ${3 * 0.03}s both`,
+								transition: "transform 0.15s",
 							}}
 						>
 							Cancel
@@ -116,7 +163,7 @@ export function GameView() {
 
 			{/* Center menu button (crown icon) */}
 			<button
-				onClick={() => setMenuOpen(true)}
+				onClick={openMenu}
 				style={{
 					position: "absolute",
 					...(isSolo
@@ -181,6 +228,11 @@ export function GameView() {
 				isOpen={selectingPlayerId !== null}
 				onClose={() => setSelectingPlayerId(null)}
 			/>
+
+			{/* First-use tutorial (auto on first launch, or from Help button) */}
+			{((!tutorialSeen && !tutorialDismissed) || showTutorial) && (
+				<TutorialModal onClose={() => { setTutorialDismissed(true); setShowTutorial(false); }} />
+			)}
 		</div>
 	);
 }

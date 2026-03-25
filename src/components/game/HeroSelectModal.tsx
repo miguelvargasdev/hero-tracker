@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { HERO_TEMPLATES } from "../../data/heroes";
 import { useHeroStore } from "../../store/useHeroStore";
 
@@ -7,6 +8,29 @@ interface HeroSelectModalProps {
 	onClose: () => void;
 }
 
+const KEYFRAMES = `
+	@keyframes heroSelectBackdropIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+	@keyframes heroSelectBackdropOut {
+		from { opacity: 1; }
+		to { opacity: 0; }
+	}
+	@keyframes heroSelectGridIn {
+		from { opacity: 0; transform: scale(0.92); }
+		to { opacity: 1; transform: scale(1); }
+	}
+	@keyframes heroSelectGridOut {
+		from { opacity: 1; transform: scale(1); }
+		to { opacity: 0; transform: scale(0.88) translateY(10px); }
+	}
+	@keyframes heroCardIn {
+		from { transform: scale(0.85); }
+		to { transform: scale(1); }
+	}
+`;
+
 export function HeroSelectModal({
 	playerId,
 	isOpen,
@@ -14,8 +38,30 @@ export function HeroSelectModal({
 }: HeroSelectModalProps) {
 	const heroes = useHeroStore((s) => s.heroes);
 	const selectHero = useHeroStore((s) => s.selectHero);
+	const [visible, setVisible] = useState(false);
+	const [exiting, setExiting] = useState(false);
 
-	if (!isOpen || !playerId) return null;
+	useEffect(() => {
+		if (isOpen) {
+			setVisible(true);
+			setExiting(false);
+		} else if (visible && !exiting) {
+			// Parent closed without animation (edge case)
+			setVisible(false);
+		}
+	}, [isOpen]);
+
+	const handleClose = () => {
+		if (exiting) return;
+		setExiting(true);
+		setTimeout(() => {
+			setVisible(false);
+			setExiting(false);
+			onClose();
+		}, 180);
+	};
+
+	if (!visible || !playerId) return null;
 
 	const takenTemplateIds = new Set(
 		heroes
@@ -35,12 +81,17 @@ export function HeroSelectModal({
 				alignItems: "center",
 				justifyContent: "center",
 				padding: 16,
+				animation: exiting
+					? "heroSelectBackdropOut 0.18s ease-in forwards"
+					: "heroSelectBackdropIn 0.15s ease-out",
 			}}
-			onClick={onClose}
+			onClick={handleClose}
 		>
+			<style>{KEYFRAMES}</style>
+
 			{/* Close button */}
 			<button
-				onClick={onClose}
+				onClick={handleClose}
 				style={{
 					position: "absolute",
 					top: 12,
@@ -71,9 +122,12 @@ export function HeroSelectModal({
 					gap: 10,
 					maxWidth: 340,
 					width: "100%",
+					animation: exiting
+						? "heroSelectGridOut 0.18s ease-in forwards"
+						: "heroSelectGridIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
 				}}
 			>
-				{HERO_TEMPLATES.map((template) => {
+				{HERO_TEMPLATES.map((template, i) => {
 					const taken = takenTemplateIds.has(template.id);
 					return (
 						<button
@@ -81,7 +135,7 @@ export function HeroSelectModal({
 							disabled={taken}
 							onClick={() => {
 								selectHero(playerId, template.id);
-								onClose();
+								handleClose();
 							}}
 							style={{
 								aspectRatio: "1",
@@ -93,6 +147,10 @@ export function HeroSelectModal({
 								overflow: "hidden",
 								opacity: taken ? 0.3 : 1,
 								position: "relative",
+								animation: exiting
+									? undefined
+									: `heroCardIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.02}s both`,
+								transition: "transform 0.1s",
 							}}
 						>
 							<div
