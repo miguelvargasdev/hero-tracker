@@ -265,9 +265,20 @@ export function HealthCounter({
 				const norm = ((rotation % 360) + 360) % 360;
 				const isTop = tapFlash === "top";
 				const color = isTop
-					? "rgba(74, 222, 128, 0.15)"
-					: "rgba(248, 113, 113, 0.15)";
-				// Position the flash on the correct half based on rotation
+					? "rgba(74, 222, 128, 0.2)"
+					: "rgba(248, 113, 113, 0.2)";
+				// Gradient from edge (color) to center (transparent)
+				// Direction points from the outer edge inward
+				let gradDir: string;
+				if (norm === 90) {
+					gradDir = isTop ? "to right" : "to left";
+				} else if (norm === 270) {
+					gradDir = isTop ? "to left" : "to right";
+				} else if (norm === 180) {
+					gradDir = isTop ? "to top" : "to bottom";
+				} else {
+					gradDir = isTop ? "to bottom" : "to top";
+				}
 				const clipStyle: React.CSSProperties =
 					norm === 90
 						? { [isTop ? "left" : "right"]: 0, width: "50%", height: "100%", top: 0 }
@@ -281,7 +292,7 @@ export function HealthCounter({
 						style={{
 							position: "absolute",
 							...clipStyle,
-							backgroundColor: color,
+							background: `linear-gradient(${gradDir}, ${color}, transparent)`,
 							zIndex: 2,
 							pointerEvents: "none",
 							animation: "tapFlashFade 0.15s ease-out forwards",
@@ -997,9 +1008,19 @@ function SubtrackerView({
 						{flashMap[stat.key] && (() => {
 							const isTop = flashMap[stat.key] === "top";
 							const color = isTop
-								? "rgba(74, 222, 128, 0.15)"
-								: "rgba(248, 113, 113, 0.15)";
+								? "rgba(74, 222, 128, 0.2)"
+								: "rgba(248, 113, 113, 0.2)";
 							const n = ((rotation % 360) + 360) % 360;
+							let gradDir: string;
+							if (n === 90) {
+								gradDir = isTop ? "to right" : "to left";
+							} else if (n === 270) {
+								gradDir = isTop ? "to left" : "to right";
+							} else if (n === 180) {
+								gradDir = isTop ? "to top" : "to bottom";
+							} else {
+								gradDir = isTop ? "to bottom" : "to top";
+							}
 							const pos: React.CSSProperties =
 								n === 90
 									? { [isTop ? "right" : "left"]: 0, width: "50%", height: "100%", top: 0 }
@@ -1013,7 +1034,7 @@ function SubtrackerView({
 									style={{
 										position: "absolute",
 										...pos,
-										backgroundColor: color,
+										background: `linear-gradient(${gradDir}, ${color}, transparent)`,
 										zIndex: 2,
 										pointerEvents: "none",
 										animation: "tapFlashFade 0.15s ease-out forwards",
