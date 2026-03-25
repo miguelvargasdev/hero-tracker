@@ -121,8 +121,14 @@ export function GameView() {
 					>
 						{[
 							{ label: "Reset", action: () => closeMenu(() => resetGame()) },
-							{ label: "Main Menu", action: () => closeMenu(() => navigateTo("main-menu")) },
-							{ label: "Help", action: () => closeMenu(() => setShowTutorial(true)) },
+							{
+								label: "Main Menu",
+								action: () => closeMenu(() => navigateTo("main-menu")),
+							},
+							{
+								label: "Help",
+								action: () => closeMenu(() => setShowTutorial(true)),
+							},
 						].map((item, i) => (
 							<button
 								key={item.label}
@@ -170,27 +176,33 @@ export function GameView() {
 			<button
 				onClick={openMenu}
 				onDragStart={(e) => e.preventDefault()}
-				style={{
-					position: "absolute",
-					...(isSolo
-						? { top: 8, right: 8 }
-						: { top: getMenuTopPercent(), left: "50%", transform: "translate(-50%, -50%)" }),
-					zIndex: 5,
-					width: 40,
-					height: 40,
-					backgroundColor: "rgba(0, 0, 0, 0.8)",
-					border: "none",
-					borderRadius: "50%",
-					cursor: "pointer",
-					padding: 0,
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					touchAction: "none",
-					userSelect: "none",
-					WebkitUserSelect: "none",
-					WebkitTouchCallout: "none",
-				} as React.CSSProperties}
+				style={
+					{
+						position: "absolute",
+						...(isSolo
+							? { top: 8, right: 8 }
+							: {
+									top: getMenuTopPercent(),
+									left: "50%",
+									transform: "translate(-50%, -50%)",
+								}),
+						zIndex: 5,
+						width: 40,
+						height: 40,
+						backgroundColor: "rgba(0, 0, 0, 0.8)",
+						border: "none",
+						borderRadius: "50%",
+						cursor: "pointer",
+						padding: 0,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						touchAction: "none",
+						userSelect: "none",
+						WebkitUserSelect: "none",
+						WebkitTouchCallout: "none",
+					} as React.CSSProperties
+				}
 				aria-label="Menu"
 			>
 				<img
@@ -201,7 +213,7 @@ export function GameView() {
 						width: 26,
 						height: 26,
 						objectFit: "contain",
-						transform: isTyrant ? "rotate(90deg)" : undefined,
+						transform: isTyrant ? "rotate(-90deg)" : undefined,
 						transition: "transform 0.3s ease",
 						pointerEvents: "none",
 					}}
@@ -250,7 +262,12 @@ export function GameView() {
 
 			{/* First-use tutorial (auto on first launch, or from Help button) */}
 			{((!tutorialSeen && !tutorialDismissed) || showTutorial) && (
-				<TutorialModal onClose={() => { setTutorialDismissed(true); setShowTutorial(false); }} />
+				<TutorialModal
+					onClose={() => {
+						setTutorialDismissed(true);
+						setShowTutorial(false);
+					}}
+				/>
 			)}
 		</div>
 	);
@@ -348,7 +365,13 @@ function TyrantLayout({
 			}}
 		>
 			{/* Boss: right column, spans all rows */}
-			<div style={{ gridColumn: 2, gridRow: `1 / ${team.length + 1}`, height: "100%" }}>
+			<div
+				style={{
+					gridColumn: 2,
+					gridRow: `1 / ${team.length + 1}`,
+					height: "100%",
+				}}
+			>
 				<HealthCounter
 					hero={boss}
 					rotation={270}
@@ -357,7 +380,10 @@ function TyrantLayout({
 			</div>
 			{/* Team: stacked vertically in left column, rotated 90° */}
 			{team.map((hero, i) => (
-				<div key={hero.id} style={{ gridColumn: 1, gridRow: i + 1, height: "100%" }}>
+				<div
+					key={hero.id}
+					style={{ gridColumn: 1, gridRow: i + 1, height: "100%" }}
+				>
 					<HealthCounter
 						hero={hero}
 						rotation={90}
