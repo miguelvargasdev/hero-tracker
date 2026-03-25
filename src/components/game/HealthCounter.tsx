@@ -270,8 +270,8 @@ export function HealthCounter({
 					const norm = ((rotation % 360) + 360) % 360;
 					const isTop = tapFlash === "top";
 					const color = isTop
-						? "rgba(74, 222, 128, 0.2)"
-						: "rgba(248, 113, 113, 0.2)";
+						? "rgba(34, 197, 94, 0.4)"
+						: "rgba(220, 38, 38, 0.4)";
 					// Gradient from edge (color) to center (transparent)
 					// Direction points from the outer edge inward
 					let gradDir: string;
@@ -1048,8 +1048,8 @@ function SubtrackerView({
 								(() => {
 									const isTop = flashMap[stat.key] === "top";
 									const color = isTop
-										? "rgba(74, 222, 128, 0.2)"
-										: "rgba(248, 113, 113, 0.2)";
+										? "rgba(34, 197, 94, 0.4)"
+										: "rgba(220, 38, 38, 0.4)";
 									const n = ((rotation % 360) + 360) % 360;
 									let gradDir: string;
 									if (n === 90) {
