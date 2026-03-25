@@ -2,8 +2,28 @@ import { useHeroStore } from "../../store/useHeroStore";
 
 const PLAYER_COUNTS = [2, 3, 4, 5];
 
+const KEYFRAMES = `
+	@keyframes psHeaderIn {
+		from { opacity: 0; transform: translateY(-16px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+	@keyframes psDiceIn {
+		from { opacity: 0; transform: scale(0.8) rotate(-8deg); }
+		to { opacity: 1; transform: scale(1) rotate(0deg); }
+	}
+	@keyframes psBackIn {
+		from { opacity: 0; transform: translateX(-10px); }
+		to { opacity: 1; transform: translateX(0); }
+	}
+	@keyframes psPipPop {
+		0% { r: 0; opacity: 0; }
+		60% { r: 12; opacity: 1; }
+		100% { r: 10; opacity: 1; }
+	}
+`;
+
 /** Renders a dice face SVG with the given number of pips */
-function DiceFace({ count }: { count: number }) {
+function DiceFace({ count, index }: { count: number; index: number }) {
 	const pipPositions: [number, number][] = (() => {
 		switch (count) {
 			case 2:
@@ -46,6 +66,9 @@ function DiceFace({ count }: { count: number }) {
 		}
 	})();
 
+	// Base delay for this dice card + per-pip stagger
+	const baseDelay = 0.12 + index * 0.05;
+
 	return (
 		<svg viewBox="0 0 100 100" width="100%" height="100%">
 			<rect
@@ -59,7 +82,16 @@ function DiceFace({ count }: { count: number }) {
 				strokeWidth="2"
 			/>
 			{pipPositions.map(([cx, cy], i) => (
-				<circle key={i} cx={cx} cy={cy} r="10" fill="#eee" />
+				<circle
+					key={i}
+					cx={cx}
+					cy={cy}
+					r="10"
+					fill="#eee"
+					style={{
+						animation: `psPipPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) ${baseDelay + i * 0.03}s both`,
+					}}
+				/>
 			))}
 		</svg>
 	);
@@ -82,6 +114,8 @@ export function PlayerSelect() {
 				backgroundColor: "#111",
 			}}
 		>
+			<style>{KEYFRAMES}</style>
+
 			<button
 				onClick={() => navigateTo("main-menu")}
 				style={{
@@ -95,6 +129,17 @@ export function PlayerSelect() {
 					fontSize: 14,
 					fontWeight: "bold",
 					padding: 0,
+					animation: "psBackIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both",
+					transition: "transform 0.15s",
+				}}
+				onMouseDown={(e) => {
+					(e.currentTarget as HTMLButtonElement).style.transform = "translateX(-3px)";
+				}}
+				onMouseUp={(e) => {
+					(e.currentTarget as HTMLButtonElement).style.transform = "translateX(0)";
+				}}
+				onMouseLeave={(e) => {
+					(e.currentTarget as HTMLButtonElement).style.transform = "translateX(0)";
 				}}
 			>
 				&larr; Back
@@ -118,6 +163,7 @@ export function PlayerSelect() {
 						textTransform: "uppercase",
 						textAlign: "center",
 						lineHeight: 1.2,
+						animation: "psHeaderIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.03s both",
 					}}
 				>
 					Number of
@@ -133,7 +179,7 @@ export function PlayerSelect() {
 						width: "clamp(240px, 65vw, 300px)",
 					}}
 				>
-					{PLAYER_COUNTS.map((count) => (
+					{PLAYER_COUNTS.map((count, i) => (
 						<button
 							key={count}
 							onClick={() => startGame("standard", count)}
@@ -143,9 +189,20 @@ export function PlayerSelect() {
 								border: "none",
 								borderRadius: 12,
 								cursor: "pointer",
+								animation: `psDiceIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) ${0.08 + i * 0.05}s both`,
+								transition: "transform 0.15s",
+							}}
+							onMouseDown={(e) => {
+								(e.currentTarget as HTMLButtonElement).style.transform = "scale(0.93)";
+							}}
+							onMouseUp={(e) => {
+								(e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
+							}}
+							onMouseLeave={(e) => {
+								(e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
 							}}
 						>
-							<DiceFace count={count} />
+							<DiceFace count={count} index={i} />
 						</button>
 					))}
 				</div>

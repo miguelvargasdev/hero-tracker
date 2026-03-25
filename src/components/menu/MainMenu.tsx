@@ -18,6 +18,21 @@ const MENU_ITEMS = [
   },
 ];
 
+const KEYFRAMES = `
+  @keyframes mainLogoIn {
+    from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes mainTitleIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes mainBtnIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
+
 export function MainMenu() {
   const startGame = useHeroStore((s) => s.startGame);
   const navigateTo = useHeroStore((s) => s.navigateTo);
@@ -48,7 +63,13 @@ export function MainMenu() {
         backgroundColor: "#111",
       }}
     >
-      <div style={{ textAlign: "center", marginBottom: "clamp(8px, 2vh, 24px)" }}>
+      <style>{KEYFRAMES}</style>
+
+      <div style={{
+        textAlign: "center",
+        marginBottom: "clamp(8px, 2vh, 24px)",
+        animation: "mainLogoIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both",
+      }}>
         <img
           src={`${import.meta.env.BASE_URL}Logo_Gold.png`}
           alt="HERO – Tales of the Tomes"
@@ -59,7 +80,17 @@ export function MainMenu() {
             marginBottom: "clamp(4px, 1vh, 12px)",
           }}
         />
-        <h1 style={{ margin: 0, fontSize: "clamp(18px, 2.5vw, 24px)", color: "#eee", fontFamily: "'Cinzel', serif", fontWeight: 700, textTransform: "uppercase" }}>
+        <h1
+          style={{
+            margin: 0,
+            fontSize: "clamp(18px, 2.5vw, 24px)",
+            color: "#eee",
+            fontFamily: "'Cinzel', serif",
+            fontWeight: 700,
+            textTransform: "uppercase",
+            animation: "mainTitleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both",
+          }}
+        >
           Health Tracker
         </h1>
       </div>
@@ -73,7 +104,7 @@ export function MainMenu() {
           maxWidth: 400,
         }}
       >
-        {MENU_ITEMS.map((item) => (
+        {MENU_ITEMS.map((item, i) => (
           <button
             key={item.action}
             onClick={() => handleSelect(item.action)}
@@ -88,6 +119,18 @@ export function MainMenu() {
               cursor: item.action === "tyrant" ? "default" : "pointer",
               textAlign: "left",
               opacity: item.action === "tyrant" ? 0.5 : 1,
+              animation: `mainBtnIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) ${0.15 + i * 0.05}s both`,
+              transition: "transform 0.15s, box-shadow 0.15s, border-color 0.2s",
+            }}
+            onMouseDown={(e) => {
+              if (item.action !== "tyrant")
+                (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.97)";
+            }}
+            onMouseUp={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
             }}
           >
             <div style={{ fontFamily: "'Cinzel', serif", fontWeight: 700, textTransform: "uppercase" }}>{item.label}</div>
