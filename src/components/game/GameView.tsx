@@ -5,23 +5,6 @@ import { HeroSelectModal } from "./HeroSelectModal";
 import { TutorialModal, useTutorialSeen } from "./TutorialModal";
 import type { Hero } from "../../types/hero";
 
-/** Returns crown rotation angle based on screen orientation */
-function useOrientationAngle(): number {
-	const getAngle = () => {
-		if (screen.orientation) return screen.orientation.angle;
-		return 0;
-	};
-	const [angle, setAngle] = useState(getAngle);
-	useEffect(() => {
-		const handler = () => setAngle(getAngle());
-		if (screen.orientation) {
-			screen.orientation.addEventListener("change", handler);
-			return () => screen.orientation.removeEventListener("change", handler);
-		}
-	}, []);
-	return angle;
-}
-
 const MENU_KEYFRAMES = `
 	@keyframes menuBackdropIn {
 		from { opacity: 0; }
@@ -58,7 +41,6 @@ export function GameView() {
 	const tutorialSeen = useTutorialSeen();
 	const [tutorialDismissed, setTutorialDismissed] = useState(false);
 	const [showTutorial, setShowTutorial] = useState(false);
-	const orientationAngle = useOrientationAngle();
 
 	const openMenu = useCallback(() => {
 		setMenuVisible(true);
@@ -219,7 +201,7 @@ export function GameView() {
 						width: 26,
 						height: 26,
 						objectFit: "contain",
-						transform: `rotate(${isTyrant ? 90 : orientationAngle}deg)`,
+						transform: isTyrant ? "rotate(90deg)" : undefined,
 						transition: "transform 0.3s ease",
 						pointerEvents: "none",
 					}}
