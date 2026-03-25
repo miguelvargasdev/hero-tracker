@@ -1,9 +1,26 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import { HealthCounter } from "./HealthCounter";
 import { HeroSelectModal } from "./HeroSelectModal";
 import { TutorialModal, useTutorialSeen } from "./TutorialModal";
 import type { Hero } from "../../types/hero";
+
+/** Returns crown rotation angle based on screen orientation */
+function useOrientationAngle(): number {
+	const getAngle = () => {
+		if (screen.orientation) return screen.orientation.angle;
+		return 0;
+	};
+	const [angle, setAngle] = useState(getAngle);
+	useEffect(() => {
+		const handler = () => setAngle(getAngle());
+		if (screen.orientation) {
+			screen.orientation.addEventListener("change", handler);
+			return () => screen.orientation.removeEventListener("change", handler);
+		}
+	}, []);
+	return angle;
+}
 
 const MENU_KEYFRAMES = `
 	@keyframes menuBackdropIn {
@@ -41,6 +58,7 @@ export function GameView() {
 	const tutorialSeen = useTutorialSeen();
 	const [tutorialDismissed, setTutorialDismissed] = useState(false);
 	const [showTutorial, setShowTutorial] = useState(false);
+	const orientationAngle = useOrientationAngle();
 
 	const openMenu = useCallback(() => {
 		setMenuVisible(true);
@@ -169,6 +187,7 @@ export function GameView() {
 			{/* Center menu button (crown icon) */}
 			<button
 				onClick={openMenu}
+				onDragStart={(e) => e.preventDefault()}
 				style={{
 					position: "absolute",
 					...(isSolo
@@ -185,16 +204,24 @@ export function GameView() {
 					display: "flex",
 					alignItems: "center",
 					justifyContent: "center",
-				}}
+					touchAction: "none",
+					userSelect: "none",
+					WebkitUserSelect: "none",
+					WebkitTouchCallout: "none",
+				} as React.CSSProperties}
 				aria-label="Menu"
 			>
 				<img
 					src={`${import.meta.env.BASE_URL}crown.png`}
 					alt="Menu"
+					draggable={false}
 					style={{
 						width: 26,
 						height: 26,
 						objectFit: "contain",
+						transform: `rotate(${isTyrant ? 90 : orientationAngle}deg)`,
+						transition: "transform 0.3s ease",
+						pointerEvents: "none",
 					}}
 				/>
 			</button>
