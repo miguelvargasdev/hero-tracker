@@ -189,7 +189,6 @@ export function HealthCounter({
 
 	const handleAddSubtracker = (key: "hp" | "mana" | "armor" | "attack") => {
 		setActiveSubtrackers((prev) => [...prev, key]);
-		setShowSubtrackerModal(false);
 	};
 
 	const handleRemoveSubtracker = (key: "hp" | "mana" | "armor" | "attack") => {
@@ -1016,8 +1015,8 @@ function SubtrackerView({
 									style={{
 										fontFamily: "'Cinzel', serif",
 										fontSize: is90or270
-											? "clamp(20px, 5vw, 36px)"
-											: "clamp(24px, 8vw, 56px)",
+											? `clamp(32px, ${30 / stats.length}cqmax, 90px)`
+											: `clamp(28px, ${35 / stats.length}cqi, 72px)`,
 										fontWeight: 900,
 										color: "#fff",
 										lineHeight: 1,
@@ -1031,11 +1030,11 @@ function SubtrackerView({
 								<div
 									style={{
 										width: is90or270
-											? "clamp(14px, 4vw, 24px)"
-											: "clamp(14px, 4vw, 28px)",
+											? `clamp(20px, ${10 / stats.length}cqmax, 46px)`
+											: `clamp(18px, ${14 / stats.length}cqi, 38px)`,
 										height: is90or270
-											? "clamp(14px, 4vw, 24px)"
-											: "clamp(14px, 4vw, 28px)",
+											? `clamp(20px, ${10 / stats.length}cqmax, 46px)`
+											: `clamp(18px, ${14 / stats.length}cqi, 38px)`,
 										opacity: 0.85,
 										filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))",
 									}}
