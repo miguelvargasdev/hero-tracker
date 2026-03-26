@@ -130,7 +130,7 @@ export const useHeroStore = create<HeroStore>()(
           heroes: state.heroes.map((h) =>
             h.id !== heroId
               ? h
-              : { ...h, [statKey]: { ...h[statKey], [field]: Math.max(0, value) } }
+              : { ...h, [statKey]: { ...h[statKey], [field]: statKey === "hp" ? value : Math.max(0, value) } }
           ),
         })),
 

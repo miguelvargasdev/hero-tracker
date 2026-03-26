@@ -157,7 +157,7 @@ export function HeroSelectModal({
 								style={{
 									width: "100%",
 									height: "100%",
-									backgroundImage: `url(${template.image})`,
+									backgroundImage: `url(${template.wideImage})`,
 									backgroundSize: "400%",
 									backgroundPosition: template.selectFocus,
 									backgroundRepeat: "no-repeat",
