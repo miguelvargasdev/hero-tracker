@@ -128,7 +128,7 @@ export function MainMenu() {
 						style={{
 							padding: "14px 21px",
 							fontSize: 28,
-							background: "linear-gradient(180deg, #e8cc6e 0%, #d4af37 25%, #c49a2c 50%, #b8860b 75%, #a67c1a 100%)",
+							background: "linear-gradient(130deg, #8b6914 0%, #b8860b 20%, #e8cc6e 40%, #e8cc6e 60%, #b8860b 80%, #8b6914 100%)",
 							color: "#111",
 							border: "1px solid #d4af37",
 							borderRadius: 8,
@@ -154,7 +154,7 @@ export function MainMenu() {
 						<div
 							style={{
 								fontFamily: "'Cinzel', serif",
-								fontWeight: 700,
+								fontWeight: 900,
 								textTransform: "uppercase",
 								textAlign: "center",
 							}}
