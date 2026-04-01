@@ -4,7 +4,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-	const base = mode === "production" ? "/hero-tracker/" : "/";
+	const base = "/";
 	return {
 	base,
 	plugins: [
