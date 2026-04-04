@@ -156,6 +156,24 @@ export function MainMenu() {
 							btn.style.filter = "";
 							btn.style.boxShadow = "";
 						}}
+						onTouchStart={(e) => {
+							const btn = e.currentTarget as HTMLButtonElement;
+							btn.style.transform = "scale(0.94)";
+							btn.style.filter = "brightness(0.85)";
+							btn.style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.4)";
+						}}
+						onTouchEnd={(e) => {
+							const btn = e.currentTarget as HTMLButtonElement;
+							btn.style.transform = "scale(1)";
+							btn.style.filter = "";
+							btn.style.boxShadow = "";
+						}}
+						onTouchCancel={(e) => {
+							const btn = e.currentTarget as HTMLButtonElement;
+							btn.style.transform = "scale(1)";
+							btn.style.filter = "";
+							btn.style.boxShadow = "";
+						}}
 					>
 						<div
 							style={{
