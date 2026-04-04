@@ -136,19 +136,25 @@ export function MainMenu() {
 							textAlign: "left",
 							animation: `mainBtnIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) ${0.15 + i * 0.05}s both`,
 							transition:
-								"transform 0.15s, box-shadow 0.15s, border-color 0.2s",
+								"transform 0.15s, box-shadow 0.15s, border-color 0.2s, filter 0.15s",
 						}}
 						onMouseDown={(e) => {
-							(e.currentTarget as HTMLButtonElement).style.transform =
-								"scale(0.97)";
+							const btn = e.currentTarget as HTMLButtonElement;
+							btn.style.transform = "scale(0.94)";
+							btn.style.filter = "brightness(0.85)";
+							btn.style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.4)";
 						}}
 						onMouseUp={(e) => {
-							(e.currentTarget as HTMLButtonElement).style.transform =
-								"scale(1)";
+							const btn = e.currentTarget as HTMLButtonElement;
+							btn.style.transform = "scale(1)";
+							btn.style.filter = "";
+							btn.style.boxShadow = "";
 						}}
 						onMouseLeave={(e) => {
-							(e.currentTarget as HTMLButtonElement).style.transform =
-								"scale(1)";
+							const btn = e.currentTarget as HTMLButtonElement;
+							btn.style.transform = "scale(1)";
+							btn.style.filter = "";
+							btn.style.boxShadow = "";
 						}}
 					>
 						<div

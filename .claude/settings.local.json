@@ -22,7 +22,32 @@
       "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Scathtasscia_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\scathtassia.png\")",
       "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Briar_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\briar.png\")",
       "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Gwendolyn_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\gwendolyn.png\")",
-      "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Jugolach_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\jugolach.png\")"
+      "Bash(cp \"/c/Users/ignan/Downloads/Large Hero Artwork/Large Hero Artwork/Jugolach_large artwork.png\" \"C:\\\\Users\\\\ignan\\\\Documents\\\\React Projects\\\\hero-tracker\\\\hero-tracker\\\\public\\\\heroes\\\\jugolach.png\")",
+      "Bash(gh pr:*)",
+      "Bash(NODE=\"C:/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation/node.exe\")",
+      "Bash(\"$NODE\" node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/tsc -b)",
+      "Bash(export PATH=\"C:/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation:$PATH\")",
+      "Bash(npx tsc:*)",
+      "Bash(export PATH=\"/c/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation:$PATH\")",
+      "WebFetch(domain:old.reddit.com)",
+      "WebFetch(domain:www.reddit.com)",
+      "Bash(\"C:/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation/node.exe\" ./node_modules/vitest/vitest.mjs run)",
+      "Bash(\"C:/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation/node.exe\" -e \"try { require\\(''sharp''\\); console.log\\(''sharp available''\\); } catch\\(e\\) { console.log\\(''sharp not available''\\); }\")",
+      "Bash(\"C:/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation/npx.cmd\" sharp-cli:*)",
+      "Bash(\"C:/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation/node.exe\" -e \":*)",
+      "Bash(\"C:/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation/npx.cmd\" sharp:*)",
+      "Bash(python -c \"from PIL import Image; print\\(''Pillow available''\\)\")",
+      "Bash(pip install:*)",
+      "Bash(\"C:/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation/node.exe\" -e \"const sharp = require\\(''sharp''\\); sharp\\(''C:/Users/ignan/Downloads/Small Uniform Artwork/Small Uniform Artwork/Arcanas.jpg''\\).metadata\\(\\).then\\(m => console.log\\(m.width, m.height\\)\\)\")",
+      "Bash(\"C:/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation/node.exe\" ./node_modules/typescript/bin/tsc --noEmit)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(PATH=\"C:/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation/:$PATH\" npx tsc --noEmit)",
+      "Bash(\"C:/Users/ignan/AppData/Roaming/fnm/node-versions/v24.0.2/installation/npx.cmd\" tsc:*)",
+      "Bash(cp \"C:\\\\Users\\\\ignan\\\\Downloads\\\\Heroes_wide\\\\Arcanas_wide.jpg\" arcanas_wide.jpg)",
+      "Bash(cp \"C:\\\\Users\\\\ignan\\\\Downloads\\\\Heroes_wide\\\\Briar_wide.jpg\" briar_wide.jpg)",
+      "Bash(cp \"C:\\\\Users\\\\ignan\\\\Downloads\\\\Heroes_wide\\\\Darren_wide.jpg\" darren_wide.jpg)",
+      "Bash(cp \"C:\\\\Users\\\\ignan\\\\Downloads\\\\Heroes_wide\\\\Gwendolyn_wide.jpg\" gwendolyn_wide.jpg)",
+      "Bash(cp \"C:\\\\Users\\\\ignan\\\\Downloads\\\\Heroes_wide\\\\Heathanmoore_wide.jpg\" heathanmoore_wide.jpg)"
     ]
   }
 }
