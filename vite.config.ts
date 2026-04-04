@@ -11,7 +11,7 @@ export default defineConfig(() => {
 		react(),
 		VitePWA({
 			registerType: "autoUpdate",
-			includeAssets: ["icons/*.png"],
+			includeAssets: ["favicon.ico", "favicon.svg", "favicon-96x96.png", "apple-touch-icon.png"],
 			manifest: {
 				name: "Hero: Tales of the Tomes Health Tracker",
 				short_name: "Hero Tracker",
@@ -25,20 +25,16 @@ export default defineConfig(() => {
 				orientation: "portrait-primary",
 				icons: [
 					{
-						src: "crown.png",
+						src: "web-app-manifest-192x192.png",
 						sizes: "192x192",
 						type: "image/png",
+						purpose: "maskable",
 					},
 					{
-						src: "crown.png",
+						src: "web-app-manifest-512x512.png",
 						sizes: "512x512",
 						type: "image/png",
-					},
-					{
-						src: "crown.png",
-						sizes: "512x512",
-						type: "image/png",
-						purpose: "any maskable",
+						purpose: "maskable",
 					},
 				],
 			},
