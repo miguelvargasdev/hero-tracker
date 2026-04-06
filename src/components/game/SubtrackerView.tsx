@@ -28,10 +28,6 @@ export function SubtrackerView({
 	>([]);
 	const cleanupTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
-	// Scroll tracking for dot indicators
-	const scrollRef = useRef<HTMLDivElement>(null);
-	const [activePage, setActivePage] = useState(0);
-
 	useEffect(() => {
 		return () => {
 			cleanupTimers.current.forEach((t) => clearTimeout(t));
@@ -77,15 +73,6 @@ export function SubtrackerView({
 		);
 	};
 
-	const handleScroll = () => {
-		const el = scrollRef.current;
-		if (!el) return;
-		const pageSize = is90or270 ? el.clientHeight : el.clientWidth;
-		const scrollPos = is90or270 ? el.scrollTop : el.scrollLeft;
-		const halfPage = pageSize / 2;
-		setActivePage(Math.round(scrollPos / halfPage));
-	};
-
 	// HP is always first, then user-added subtrackers
 	const allKeys: StatKey[] = ["hp", ...activeKeys.filter((k) => k !== "hp")];
 	const statsBase = allKeys
@@ -105,33 +92,23 @@ export function SubtrackerView({
 
 	const is90or270 = rotation === 90 || rotation === 270;
 	const rotDeg = `${rotation}deg`;
-	const visibleCount = Math.min(stats.length, 2);
 	const statFontSize = is90or270
-		? `clamp(32px, ${30 / visibleCount}cqmax, 90px)`
-		: `clamp(28px, ${35 / visibleCount}cqi, 72px)`;
+		? `clamp(32px, ${30 / stats.length}cqmax, 90px)`
+		: `clamp(28px, ${35 / stats.length}cqi, 72px)`;
 	const statIconSize = is90or270
-		? `clamp(20px, ${10 / visibleCount}cqmax, 46px)`
-		: `clamp(18px, ${14 / visibleCount}cqi, 38px)`;
+		? `clamp(20px, ${10 / stats.length}cqmax, 46px)`
+		: `clamp(18px, ${14 / stats.length}cqi, 38px)`;
 
 	const rootClass = `${styles.subtrackerRoot} ${is90or270 ? styles.subtrackerRootRotated : styles.subtrackerRootDefault}`;
 	const flexClass = `${styles.subtrackerFlex} ${is90or270 ? styles.subtrackerFlexRotated : styles.subtrackerFlexDefault}`;
 	const cellVariant = is90or270 ? styles.statCellHoriz : styles.statCellVert;
-
-	const showDots = stats.length > 2;
-	const dotContainerClass = is90or270
-		? `${styles.scrollDots} ${styles.scrollDotsRotated} ${norm === 90 ? styles.scrollDotsRot90 : styles.scrollDotsRot270}`
-		: `${styles.scrollDots} ${styles.scrollDotsDefault}`;
 
 	return (
 		<div
 			className={rootClass}
 			style={!is90or270 && rotation ? { "--rotation": rotDeg } as React.CSSProperties : undefined}
 		>
-			<div
-				ref={scrollRef}
-				className={flexClass}
-				onScroll={handleScroll}
-			>
+			<div className={flexClass}>
 				{stats.map((stat) => {
 					return (
 						<div
@@ -181,16 +158,6 @@ export function SubtrackerView({
 					);
 				})}
 			</div>
-			{showDots && (
-				<div className={dotContainerClass}>
-					{stats.map((_, i) => (
-						<div
-							key={i}
-							className={`${styles.scrollDot} ${i === activePage ? styles.scrollDotActive : ""}`}
-						/>
-					))}
-				</div>
-			)}
 		</div>
 	);
 }
