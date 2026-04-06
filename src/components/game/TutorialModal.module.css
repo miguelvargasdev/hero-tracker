@@ -1,0 +1,249 @@
+/* ─── Keyframes ─── */
+
+@keyframes tutModalIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes tutModalOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.85) translateY(10px); }
+}
+
+@keyframes tutBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes tutBackdropOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes tutStepIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tutFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes tutPulse {
+  0% { transform: scale(0.8); opacity: 0.9; box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+  50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+  100% { transform: scale(0.8); opacity: 0.9; box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+}
+
+@keyframes tutTapTop {
+  0%, 40%, 100% { background-color: rgba(74, 222, 128, 0.25); }
+  20% { background-color: rgba(74, 222, 128, 0.5); }
+}
+
+@keyframes tutTapBottom {
+  0%, 60%, 100% { background-color: rgba(248, 113, 113, 0.25); }
+  70% { background-color: rgba(248, 113, 113, 0.5); }
+}
+
+@keyframes tutBounceDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+@keyframes tutSlideUp {
+  0%, 30% { opacity: 0; transform: translateY(8px); }
+  60%, 100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tutDotPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+
+/* ─── Animation utility classes (used in STEPS visuals) ─── */
+
+.tutFloat {
+  animation: tutFloat 2.5s ease-in-out infinite;
+}
+
+.tutPulse {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  animation: tutPulse 1.8s ease-in-out infinite;
+}
+
+.tutTapTop {
+  animation: tutTapTop 2.5s ease-in-out infinite;
+}
+
+.tutTapBottom {
+  animation: tutTapBottom 2.5s ease-in-out infinite;
+}
+
+.tutBounceDown {
+  animation: tutBounceDown 1.5s ease-in-out infinite;
+}
+
+.tutSlideUp {
+  animation: tutSlideUp 2.5s ease-in-out infinite;
+}
+
+/* ─── Backdrop ─── */
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.backdropIn {
+  animation: tutBackdropIn 0.2s ease-out;
+}
+
+.backdropOut {
+  animation: tutBackdropOut 0.2s ease-in forwards;
+}
+
+/* ─── Modal card ─── */
+
+.modalCard {
+  background-color: #1e1e22;
+  border-radius: 16px;
+  padding: clamp(20px, 5vw, 32px);
+  max-width: min(85vw, 340px);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid #444;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.modalIn {
+  animation: tutModalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modalOut {
+  animation: tutModalOut 0.2s ease-in forwards;
+}
+
+/* ─── Dots wrapper ─── */
+
+.dotsWrapper {
+  display: flex;
+  gap: 8px;
+}
+
+/* ─── Dot ─── */
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.25);
+  transition: background-color 0.3s ease;
+}
+
+.dotActive {
+  background-color: #c9a84c;
+  box-shadow: 0 0 6px rgba(201, 168, 76, 0.5);
+}
+
+/* ─── Visual container ─── */
+
+.visualContainer {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: tutStepIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Title ─── */
+
+.title {
+  margin: 0;
+  color: #fff;
+  font-family: 'Cinzel', serif;
+  font-size: clamp(16px, 4vw, 22px);
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  animation: tutStepIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.03s both;
+}
+
+/* ─── Description ─── */
+
+.description {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: clamp(13px, 3.5vw, 16px);
+  text-align: center;
+  line-height: 1.5;
+  animation: tutStepIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both;
+}
+
+/* ─── Buttons wrapper ─── */
+
+.buttonsWrapper {
+  display: flex;
+  width: 100%;
+  gap: 12px;
+  margin-top: 4px;
+  animation: tutStepIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.09s both;
+}
+
+/* ─── Skip button ─── */
+
+.skipBtn {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: clamp(12px, 3vw, 15px);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+/* ─── Next button ─── */
+
+.nextBtn {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: clamp(12px, 3vw, 15px);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  background-color: #c9a84c;
+  color: #1a1a1e;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.nextBtn:active {
+  transform: scale(0.96);
+}
+
+.fullWidth {
+  flex: unset;
+  width: 100%;
+}

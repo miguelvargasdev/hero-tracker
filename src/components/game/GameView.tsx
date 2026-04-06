@@ -4,29 +4,7 @@ import { HealthCounter } from "./HealthCounter";
 import { HeroSelectModal } from "./HeroSelectModal";
 import { TutorialModal, useTutorialSeen } from "./TutorialModal";
 import type { Hero } from "../../types/hero";
-
-const MENU_KEYFRAMES = `
-	@keyframes menuBackdropIn {
-		from { opacity: 0; }
-		to { opacity: 1; }
-	}
-	@keyframes menuBackdropOut {
-		from { opacity: 1; }
-		to { opacity: 0; }
-	}
-	@keyframes menuCardIn {
-		from { opacity: 0; transform: scale(0.9); }
-		to { opacity: 1; transform: scale(1); }
-	}
-	@keyframes menuCardOut {
-		from { opacity: 1; transform: scale(1); }
-		to { opacity: 0; transform: scale(0.85) translateY(10px); }
-	}
-	@keyframes menuBtnIn {
-		from { opacity: 0; transform: translateY(8px); }
-		to { opacity: 1; transform: translateY(0); }
-	}
-`;
+import styles from "./GameView.module.css";
 
 export function GameView() {
 	const heroes = useHeroStore((s) => s.heroes);
@@ -75,49 +53,16 @@ export function GameView() {
 	};
 
 	return (
-		<div
-			style={{
-				position: "absolute",
-				inset: 0,
-				display: "flex",
-				flexDirection: "column",
-				backgroundColor: "#000",
-				padding: 8,
-			}}
-		>
+		<div className={styles.root}>
 			{/* Menu overlay */}
 			{menuVisible && (
 				<div
-					style={{
-						position: "absolute",
-						inset: 0,
-						zIndex: 10,
-						backgroundColor: "rgba(0,0,0,0.7)",
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "center",
-						animation: menuExiting
-							? "menuBackdropOut 0.18s ease-in forwards"
-							: "menuBackdropIn 0.15s ease-out",
-					}}
+					className={`${styles.menuOverlay} ${menuExiting ? styles.backdropOut : styles.backdropIn}`}
 					onClick={() => closeMenu()}
 				>
-					<style>{MENU_KEYFRAMES}</style>
 					<div
 						onClick={(e) => e.stopPropagation()}
-						style={{
-							backgroundColor: "#2a2a2e",
-							borderRadius: 12,
-							padding: 24,
-							display: "flex",
-							flexDirection: "column",
-							gap: 12,
-							minWidth: 200,
-							border: "1px solid #444",
-							animation: menuExiting
-								? "menuCardOut 0.18s ease-in forwards"
-								: "menuCardIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-						}}
+						className={`${styles.menuCard} ${menuExiting ? styles.cardOut : styles.cardIn}`}
 					>
 						{[
 							{ label: "Reset", action: () => closeMenu(() => resetGame()) },
@@ -133,38 +78,19 @@ export function GameView() {
 							<button
 								key={item.label}
 								onClick={item.action}
-								style={{
-									padding: "10px 20px",
-									fontSize: 16,
-									backgroundColor: "#3a3a3e",
-									color: "#eee",
-									border: "none",
-									borderRadius: 8,
-									cursor: "pointer",
-									animation: menuExiting
+								className={`${styles.menuBtn} ${menuExiting ? "" : styles.menuBtnAnimated}`}
+								style={
+									menuExiting
 										? undefined
-										: `menuBtnIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.03}s both`,
-									transition: "transform 0.15s",
-								}}
+										: ({ "--delay": `${i * 0.03}s` } as React.CSSProperties)
+								}
 							>
 								{item.label}
 							</button>
 						))}
 						<button
 							onClick={() => closeMenu()}
-							style={{
-								padding: "10px 20px",
-								fontSize: 16,
-								backgroundColor: "transparent",
-								color: "#888",
-								border: "1px solid #555",
-								borderRadius: 8,
-								cursor: "pointer",
-								animation: menuExiting
-									? undefined
-									: `menuBtnIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) ${3 * 0.03}s both`,
-								transition: "transform 0.15s",
-							}}
+							className={`${styles.cancelBtn} ${menuExiting ? "" : styles.cancelBtnAnimated}`}
 						>
 							Cancel
 						</button>
@@ -176,32 +102,15 @@ export function GameView() {
 			<button
 				onClick={openMenu}
 				onDragStart={(e) => e.preventDefault()}
+				className={styles.crownBtn}
 				style={
-					{
-						position: "absolute",
-						...(isSolo
-							? { top: 8, right: 8 }
-							: {
-									top: getMenuTopPercent(),
-									left: "50%",
-									transform: "translate(-50%, -50%)",
-								}),
-						zIndex: 5,
-						width: 40,
-						height: 40,
-						backgroundColor: "rgba(0, 0, 0, 0.8)",
-						border: "none",
-						borderRadius: "50%",
-						cursor: "pointer",
-						padding: 0,
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "center",
-						touchAction: "none",
-						userSelect: "none",
-						WebkitUserSelect: "none",
-						WebkitTouchCallout: "none",
-					} as React.CSSProperties
+					isSolo
+						? { top: 8, right: 8 }
+						: {
+								top: getMenuTopPercent(),
+								left: "50%",
+								transform: "translate(-50%, -50%)",
+							}
 				}
 				aria-label="Menu"
 			>
@@ -209,13 +118,9 @@ export function GameView() {
 					src={`${import.meta.env.BASE_URL}crown.png`}
 					alt="Menu"
 					draggable={false}
+					className={styles.crownImg}
 					style={{
-						width: 26,
-						height: 26,
-						objectFit: "contain",
 						transform: isTyrant ? "rotate(-90deg)" : undefined,
-						transition: "transform 0.3s ease",
-						pointerEvents: "none",
 					}}
 				/>
 			</button>
@@ -233,16 +138,15 @@ export function GameView() {
 				/>
 			) : (
 				<div
-					style={{
-						display: "grid",
-						...getGridLayout(heroes.length),
-						gap: 12,
-						flex: 1,
-						padding: 4,
-					}}
+					className={styles.counterGrid}
+					style={getGridLayout(heroes.length)}
 				>
 					{heroes.map((hero, index) => (
-						<div key={hero.id} style={getItemStyle(index, heroes.length)}>
+						<div
+							key={hero.id}
+							className={styles.gridItem}
+							style={getItemStyle(index, heroes.length)}
+						>
 							<HealthCounter
 								hero={hero}
 								rotation={getRotation(index, heroes.length)}
@@ -274,13 +178,9 @@ export function GameView() {
 }
 
 function getItemStyle(index: number, total: number): React.CSSProperties {
-	if (total === 5 && index === 4) {
-		return { gridColumn: "span 2", height: "100%" };
-	}
-	if (total === 3 && index === 2) {
-		return { gridColumn: "span 2", height: "100%" };
-	}
-	return { height: "100%" };
+	return (total === 5 && index === 4) || (total === 3 && index === 2)
+		? { gridColumn: "span 2" }
+		: {};
 }
 
 function getGridLayout(count: number): React.CSSProperties {
@@ -291,10 +191,6 @@ function getGridLayout(count: number): React.CSSProperties {
 				gridTemplateRows: "1fr 1fr",
 			};
 		case 3:
-			return {
-				gridTemplateColumns: "1fr 1fr",
-				gridTemplateRows: "1fr 1fr",
-			};
 		case 4:
 			return {
 				gridTemplateColumns: "1fr 1fr",
@@ -324,7 +220,6 @@ function getRotation(index: number, total: number): number {
 		case 2:
 			return index === 0 ? 180 : 0;
 		case 3:
-			return index < 2 ? 180 : 0;
 		case 4:
 			return index < 2 ? 180 : 0;
 		case 5:
@@ -355,13 +250,9 @@ function TyrantLayout({
 
 	return (
 		<div
+			className={styles.tyrantGrid}
 			style={{
-				display: "grid",
-				gridTemplateColumns: "1fr 1fr",
 				gridTemplateRows: `repeat(${team.length}, 1fr)`,
-				gap: 8,
-				flex: 1,
-				padding: 4,
 			}}
 		>
 			{/* Boss: right column, spans all rows */}

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import styles from "./Modal.module.css";
 
 interface ModalProps {
   isOpen: boolean;
@@ -25,17 +26,9 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      style={{
-        border: "1px solid #444",
-        borderRadius: 8,
-        padding: 20,
-        backgroundColor: "#2a2a3e",
-        color: "#eee",
-        maxWidth: 400,
-        width: "90%",
-      }}
+      className={styles.dialog}
     >
-      <h2 style={{ margin: "0 0 16px" }}>{title}</h2>
+      <h2 className={styles.title}>{title}</h2>
       {children}
     </dialog>
   );

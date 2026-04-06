@@ -1,6 +1,7 @@
 import type { CustomStat } from "../../types/hero";
 import { useHeroStore } from "../../store/useHeroStore";
 import { NumberInput } from "../shared/NumberInput";
+import styles from "./CustomStatList.module.css";
 
 interface CustomStatListProps {
   heroId: string;
@@ -17,29 +18,17 @@ export function CustomStatList({ heroId, stats }: CustomStatListProps) {
 
   return (
     <div>
-      <h3 style={{ marginBottom: 8 }}>Custom Stats</h3>
+      <h3 className={styles.heading}>Custom Stats</h3>
       {stats.map((stat) => {
         const percent = stat.max > 0 ? (stat.current / stat.max) * 100 : 0;
         return (
           <div
             key={stat.id}
-            style={{
-              backgroundColor: "#2a2a3e",
-              borderRadius: 8,
-              padding: 16,
-              marginBottom: 12,
-            }}
+            className={styles.card}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 8,
-              }}
-            >
-              <span style={{ fontWeight: "bold" }}>{stat.label}</span>
-              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <div className={styles.header}>
+              <span className={styles.label}>{stat.label}</span>
+              <div className={styles.inputs}>
                 <NumberInput
                   value={stat.current}
                   label={`${stat.label} current`}
@@ -47,7 +36,7 @@ export function CustomStatList({ heroId, stats }: CustomStatListProps) {
                     updateCustomStat(heroId, stat.id, { current: v })
                   }
                 />
-                <span style={{ color: "#888" }}>/</span>
+                <span className={styles.separator}>/</span>
                 <NumberInput
                   value={stat.max}
                   min={0}
@@ -58,14 +47,7 @@ export function CustomStatList({ heroId, stats }: CustomStatListProps) {
                 />
                 <button
                   onClick={() => removeCustomStat(heroId, stat.id)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#888",
-                    cursor: "pointer",
-                    fontSize: 16,
-                    marginLeft: 4,
-                  }}
+                  className={styles.removeBtn}
                   aria-label={`Remove ${stat.label}`}
                 >
                   x
@@ -73,33 +55,16 @@ export function CustomStatList({ heroId, stats }: CustomStatListProps) {
               </div>
             </div>
 
-            <div
-              style={{
-                height: 6,
-                backgroundColor: "#444",
-                borderRadius: 3,
-                overflow: "hidden",
-                marginBottom: 8,
-              }}
-            >
+            <div className={styles.barTrack}>
               <div
+                className={styles.barFill}
                 style={{
-                  height: "100%",
                   width: `${Math.max(0, Math.min(100, percent))}%`,
-                  backgroundColor: "#6a8fc4",
-                  borderRadius: 3,
-                  transition: "width 0.3s",
                 }}
               />
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                gap: 6,
-                justifyContent: "center",
-              }}
-            >
+            <div className={styles.quickButtons}>
               {QUICK_VALUES.map((v) => (
                 <button
                   key={v}
@@ -108,15 +73,7 @@ export function CustomStatList({ heroId, stats }: CustomStatListProps) {
                       current: stat.current + v,
                     })
                   }
-                  style={{
-                    padding: "4px 10px",
-                    fontSize: 13,
-                    backgroundColor: v < 0 ? "#5a2a2a" : "#2a5a2a",
-                    color: "#eee",
-                    border: "none",
-                    borderRadius: 4,
-                    cursor: "pointer",
-                  }}
+                  className={`${styles.quickBtn} ${v < 0 ? styles.quickBtnNeg : styles.quickBtnPos}`}
                 >
                   {v > 0 ? `+${v}` : v}
                 </button>

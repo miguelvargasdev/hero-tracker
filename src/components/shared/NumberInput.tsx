@@ -1,3 +1,5 @@
+import styles from "./NumberInput.module.css";
+
 interface NumberInputProps {
   value: number;
   min?: number;
@@ -26,16 +28,7 @@ export function NumberInput({
           onChange(parsed);
         }
       }}
-      style={{
-        width: 60,
-        padding: "4px 8px",
-        fontSize: 16,
-        textAlign: "center",
-        backgroundColor: "#1a1a2e",
-        color: "#eee",
-        border: "1px solid #444",
-        borderRadius: 4,
-      }}
+      className={styles.input}
     />
   );
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import styles from "./InstallPrompt.module.css";
 
 interface BeforeInstallPromptEvent extends Event {
 	prompt: () => Promise<void>;
@@ -36,23 +37,8 @@ const IOS_STEPS = [
 		text: (
 			<>
 				Tap the{" "}
-				<span
-					style={{
-						display: "inline-flex",
-						alignItems: "center",
-						justifyContent: "center",
-						width: 22,
-						height: 22,
-						borderRadius: "50%",
-						backgroundColor: "rgba(255,255,255,0.15)",
-						verticalAlign: "middle",
-						fontSize: 10,
-						fontWeight: "bold",
-						color: "#ccc",
-						letterSpacing: 1,
-					}}
-				>
-					•••
+				<span className={styles.iconCircle}>
+					&bull;&bull;&bull;
 				</span>{" "}
 				button
 			</>
@@ -63,14 +49,7 @@ const IOS_STEPS = [
 		text: (
 			<>
 				Tap{" "}
-				<span
-					style={{
-						display: "inline-flex",
-						alignItems: "center",
-						verticalAlign: "middle",
-						gap: 4,
-					}}
-				>
+				<span className={styles.shareIcon}>
 					<svg
 						width="14"
 						height="14"
@@ -86,7 +65,7 @@ const IOS_STEPS = [
 						<polyline points="16 6 12 2 8 6" />
 						<line x1="12" y1="2" x2="12" y2="15" />
 					</svg>
-					<strong style={{ color: "#ccc" }}>Share</strong>
+					<strong className={styles.shareLabel}>Share</strong>
 				</span>
 			</>
 		),
@@ -96,33 +75,11 @@ const IOS_STEPS = [
 		text: (
 			<>
 				Tap the{" "}
-				<span
-					style={{
-						display: "inline-flex",
-						flexDirection: "column",
-						alignItems: "center",
-						verticalAlign: "middle",
-						gap: 1,
-					}}
-				>
-					<span
-						style={{
-							display: "inline-flex",
-							alignItems: "center",
-							justifyContent: "center",
-							width: 22,
-							height: 22,
-							borderRadius: "50%",
-							backgroundColor: "rgba(255,255,255,0.15)",
-							fontSize: 10,
-							fontWeight: "bold",
-							color: "#ccc",
-							letterSpacing: 1,
-						}}
-					>
-						•••
+				<span className={styles.moreWrapper}>
+					<span className={styles.iconCircle}>
+						&bull;&bull;&bull;
 					</span>
-					<span style={{ fontSize: 8, color: "#999" }}>More</span>
+					<span className={styles.moreLabel}>More</span>
 				</span>{" "}
 				button
 			</>
@@ -133,25 +90,10 @@ const IOS_STEPS = [
 		text: (
 			<>
 				Tap{" "}
-				<span
-					style={{
-						display: "inline-flex",
-						alignItems: "center",
-						justifyContent: "center",
-						width: 20,
-						height: 20,
-						borderRadius: 5,
-						border: "1.5px solid #ccc",
-						verticalAlign: "middle",
-						fontSize: 16,
-						fontWeight: "bold",
-						color: "#ccc",
-						lineHeight: 1,
-					}}
-				>
+				<span className={styles.addIcon}>
 					+
 				</span>{" "}
-				<strong style={{ color: "#ccc" }}>Add to Home Screen</strong>
+				<strong className={styles.addLabel}>Add to Home Screen</strong>
 			</>
 		),
 	},
@@ -227,30 +169,16 @@ export function InstallPrompt() {
 		<>
 			{/* Banner */}
 			<div
-				style={{
-					position: "fixed",
-					bottom: 16,
-					left: 16,
-					right: 16,
-					backgroundColor: "#2a2a2e",
-					border: "1px solid #444",
-					borderRadius: 12,
-					padding: "12px 16px",
-					display: "flex",
-					alignItems: "center",
-					gap: 12,
-					zIndex: 100,
-					boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-					cursor: showIOSPrompt ? "pointer" : undefined,
-				}}
+				className={styles.banner}
+				style={{ cursor: showIOSPrompt ? "pointer" : undefined }}
 				onClick={showIOSPrompt ? () => setShowIOSSteps(true) : undefined}
 			>
-				<div style={{ fontSize: 24 }}>{showIOSPrompt ? "📱" : "📲"}</div>
-				<div style={{ flex: 1 }}>
-					<div style={{ color: "#eee", fontSize: 14, fontWeight: "bold" }}>
+				<div className={styles.bannerIcon}>{showIOSPrompt ? "\u{1F4F1}" : "\u{1F4F2}"}</div>
+				<div className={styles.bannerBody}>
+					<div className={styles.bannerTitle}>
 						Install App
 					</div>
-					<div style={{ color: "#999", fontSize: 12, marginTop: 2 }}>
+					<div className={styles.bannerSubtitle}>
 						{showIOSPrompt
 							? "Tap here for instructions"
 							: "Add to your home screen for the best experience"}
@@ -259,17 +187,7 @@ export function InstallPrompt() {
 				{!showIOSPrompt && (
 					<button
 						onClick={handleInstall}
-						style={{
-							padding: "8px 14px",
-							fontSize: 13,
-							fontWeight: "bold",
-							backgroundColor: "#e0a050",
-							color: "#111",
-							border: "none",
-							borderRadius: 8,
-							cursor: "pointer",
-							whiteSpace: "nowrap",
-						}}
+						className={styles.installButton}
 					>
 						Install
 					</button>
@@ -279,18 +197,10 @@ export function InstallPrompt() {
 						e.stopPropagation();
 						handleDismiss();
 					}}
-					style={{
-						padding: 4,
-						backgroundColor: "transparent",
-						color: "#666",
-						border: "none",
-						cursor: "pointer",
-						fontSize: 18,
-						lineHeight: 1,
-					}}
+					className={styles.dismissButton}
 					aria-label="Dismiss"
 				>
-					×
+					&times;
 				</button>
 			</div>
 
@@ -298,73 +208,25 @@ export function InstallPrompt() {
 			{showIOSSteps && (
 				<div
 					onClick={() => setShowIOSSteps(false)}
-					style={{
-						position: "fixed",
-						inset: 0,
-						backgroundColor: "rgba(0,0,0,0.7)",
-						zIndex: 200,
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "center",
-						padding: 24,
-					}}
+					className={styles.overlay}
 				>
 					<div
 						onClick={(e) => e.stopPropagation()}
-						style={{
-							backgroundColor: "#2a2a2e",
-							border: "1px solid #444",
-							borderRadius: 16,
-							padding: "20px 24px",
-							maxWidth: 340,
-							width: "100%",
-						}}
+						className={styles.modal}
 					>
-						<h3
-							style={{
-								margin: "0 0 16px",
-								color: "#eee",
-								fontSize: 16,
-								fontWeight: "bold",
-								textAlign: "center",
-							}}
-						>
+						<h3 className={styles.modalTitle}>
 							Install on iPhone / iPad
 						</h3>
-						<div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+						<div className={styles.stepList}>
 							{IOS_STEPS.map((s) => (
 								<div
 									key={s.step}
-									style={{
-										display: "flex",
-										alignItems: "center",
-										gap: 12,
-									}}
+									className={styles.stepRow}
 								>
-									<div
-										style={{
-											width: 28,
-											height: 28,
-											borderRadius: "50%",
-											backgroundColor: "#e0a050",
-											color: "#111",
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
-											fontSize: 14,
-											fontWeight: "bold",
-											flexShrink: 0,
-										}}
-									>
+									<div className={styles.stepBadge}>
 										{s.step}
 									</div>
-									<div
-										style={{
-											color: "#999",
-											fontSize: 14,
-											lineHeight: 1.4,
-										}}
-									>
+									<div className={styles.stepText}>
 										{s.text}
 									</div>
 								</div>
@@ -372,18 +234,7 @@ export function InstallPrompt() {
 						</div>
 						<button
 							onClick={() => setShowIOSSteps(false)}
-							style={{
-								marginTop: 20,
-								width: "100%",
-								padding: "10px 0",
-								fontSize: 14,
-								fontWeight: "bold",
-								backgroundColor: "#e0a050",
-								color: "#111",
-								border: "none",
-								borderRadius: 8,
-								cursor: "pointer",
-							}}
+							className={styles.gotItButton}
 						>
 							Got it
 						</button>

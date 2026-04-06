@@ -1,0 +1,283 @@
+/* ─── Keyframes ─── */
+
+@keyframes tapFlashFade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ─── Root Card ─── */
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  user-select: none;
+  background-color: #2a2a2e;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  touch-action: manipulation;
+  container-type: size;
+}
+
+.unselected {
+  border: 2px solid #555;
+}
+
+/* ─── Dim Overlay ─── */
+
+.dimOverlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* ─── Unselected Plus Icon ─── */
+
+.unselectedPlus {
+  opacity: 0.4;
+}
+
+/* ─── HP Display Wrapper ─── */
+
+.hpDisplay {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2px, 0.5vw, 6px);
+}
+
+/* ─── HP Text ─── */
+
+.hpText {
+  font-family: "Cinzel", serif;
+  font-size: clamp(48px, 15vw, 120px);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  text-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.8),
+    0 0 4px rgba(0, 0, 0, 0.6);
+  letter-spacing: -0.02em;
+}
+
+/* ─── Health Icon ─── */
+
+.healthIcon {
+  width: clamp(18px, 5vw, 36px);
+  height: clamp(18px, 5vw, 36px);
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.8))
+    drop-shadow(0 0 4px rgba(0, 0, 0, 0.6));
+  opacity: 0.85;
+}
+
+/* ─── Stat Icon (used inside STAT_CONFIGS) ─── */
+
+.statIcon {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8));
+}
+
+/* ─── Tap Flash ─── */
+
+.tapFlash {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  animation: tapFlashFade 0.15s ease-out forwards;
+}
+
+/* ─── Drawer Overlay Root ─── */
+
+.drawerOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ─── Drawer Dim Area ─── */
+
+.drawerDim {
+  flex: 1;
+  transition: background-color 0.3s ease;
+}
+
+/* ─── Drawer Button ─── */
+
+.drawerBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+}
+
+/* ─── Drawer Button Label ─── */
+
+.drawerBtnLabel {
+  font-family: "Cinzel", serif;
+  font-weight: 700;
+  font-size: clamp(10px, 2.5vw, 14px);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Drawer Divider ─── */
+
+.dividerBase {
+  background-color: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.dividerHoriz {
+  width: 60%;
+  height: 1px;
+  align-self: center;
+}
+
+.dividerVert {
+  width: 1px;
+  height: 60%;
+  align-self: center;
+}
+
+/* ─── Drawer Content ─── */
+
+.drawerContent {
+  padding: clamp(8px, 2vw, 16px);
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.drawerContentDefault {
+  justify-content: space-evenly;
+  gap: 16px;
+}
+
+.drawerContentHoriz {
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 8px;
+}
+
+/* ─── Subtracker Modal Backdrop ─── */
+
+.modalBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* ─── Subtracker Modal Card ─── */
+
+.modalCard {
+  background-color: #1a1a1e;
+  border-radius: 12px;
+  padding: clamp(12px, 3vw, 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ─── Subtracker Modal Heading ─── */
+
+.modalHeading {
+  margin: 0;
+  color: #fff;
+  font-family: "Cinzel", serif;
+  font-size: clamp(12px, 3vw, 16px);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Stat Button (modal) ─── */
+
+.statBtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: clamp(8px, 2vw, 12px);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  font-family: "Cinzel", serif;
+  font-size: clamp(12px, 3vw, 16px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statBtnLabel {
+  flex: 1;
+  text-align: left;
+}
+
+.statBtnCheck {
+  font-size: clamp(10px, 2.5vw, 14px);
+  opacity: 0.7;
+}
+
+/* ─── SubtrackerView Stat Cell ─── */
+
+.statCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── SubtrackerView Stat Value ─── */
+
+.statValue {
+  font-family: "Cinzel", serif;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.8),
+    0 0 4px rgba(0, 0, 0, 0.6);
+  letter-spacing: -0.02em;
+}
+
+/* ─── Floating Particle ─── */
+
+.floatingParticle {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  font-family: "Cinzel", serif;
+  font-size: clamp(16px, 4vw, 28px);
+  font-weight: 700;
+  line-height: 1;
+  text-shadow:
+    0 1px 6px rgba(0, 0, 0, 0.9),
+    0 0 3px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}

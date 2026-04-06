@@ -1,0 +1,13 @@
+.dialog {
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #2a2a3e;
+  color: #eee;
+  max-width: 400px;
+  width: 90%;
+}
+
+.title {
+  margin: 0 0 16px;
+}

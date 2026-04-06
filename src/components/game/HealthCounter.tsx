@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import { HERO_TEMPLATES } from "../../data/heroes";
 import type { Hero } from "../../types/hero";
+import styles from "./HealthCounter.module.css";
 
 interface FloatingNumber {
 	id: number;
@@ -19,6 +20,34 @@ interface HealthCounterProps {
 }
 
 const LONG_PRESS_MS = 500;
+
+// Normalize rotation to 0–359
+const normRot = (r: number) => ((r % 360) + 360) % 360;
+
+// Determine if a click/tap is an "increment" based on rotation
+function isClickIncr(rot: number, x: number, y: number, w: number, h: number) {
+	const n = normRot(rot);
+	return n === 90 ? x > w / 2 : n === 270 ? x < w / 2 : n === 180 ? y > h / 2 : y < h / 2;
+}
+
+// Compute tap flash gradient direction and clip region
+function flashStyle(rot: number, isTop: boolean) {
+	const n = normRot(rot);
+	const color = isTop ? "rgba(34, 197, 94, 0.4)" : "rgba(220, 38, 38, 0.4)";
+	const horiz = n === 90 || n === 270;
+	const gd: Record<number, [string, string]> = { 0: ["to bottom", "to top"], 90: ["to left", "to right"], 180: ["to top", "to bottom"], 270: ["to right", "to left"] };
+	const sd: Record<number, [string, string]> = { 0: ["top", "bottom"], 90: ["right", "left"], 180: ["bottom", "top"], 270: ["left", "right"] };
+	const [tg, bg] = gd[n] ?? gd[0];
+	const [ts, bs] = sd[n] ?? sd[0];
+	const side = isTop ? ts : bs;
+	return {
+		color,
+		gradDir: isTop ? tg : bg,
+		clip: (horiz
+			? { [side]: 0, width: "50%", height: "100%", top: 0 }
+			: { [side]: 0, height: "50%", width: "100%", left: 0 }) as React.CSSProperties,
+	};
+}
 
 export function HealthCounter({
 	hero,
@@ -147,21 +176,7 @@ export function HealthCounter({
 		}
 
 		const rect = e.currentTarget.getBoundingClientRect();
-		const clickX = e.clientX - rect.left;
-		const clickY = e.clientY - rect.top;
-
-		let isIncrement: boolean;
-		const norm = ((rotation % 360) + 360) % 360;
-		if (norm === 90) {
-			isIncrement = clickX > rect.width / 2;
-		} else if (norm === 270) {
-			isIncrement = clickX < rect.width / 2;
-		} else if (norm === 180) {
-			isIncrement = clickY > rect.height / 2;
-		} else {
-			isIncrement = clickY < rect.height / 2;
-		}
-
+		const isIncrement = isClickIncr(rotation, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height);
 		const change = isIncrement ? 1 : -1;
 		updateStat(hero.id, "hp", "current", hero.hp.current + change);
 		spawnFloater(isIncrement);
@@ -199,6 +214,7 @@ export function HealthCounter({
 
 	return (
 		<div
+			className={`${styles.card}${isUnselected ? ` ${styles.unselected}` : ""}`}
 			onClick={handleClick}
 			onTouchStart={handleTouchStart}
 			onTouchMove={handleTouchMove}
@@ -207,22 +223,6 @@ export function HealthCounter({
 			onMouseUp={cancelLongPress}
 			onMouseLeave={cancelLongPress}
 			onContextMenu={(e) => e.preventDefault()}
-			style={{
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
-				width: "100%",
-				height: "100%",
-				cursor: "pointer",
-				userSelect: "none",
-				backgroundColor: "#2a2a2e",
-				borderRadius: 12,
-				border: isUnselected ? "2px solid #555" : "none",
-				position: "relative",
-				overflow: "hidden",
-				touchAction: "manipulation",
-				containerType: "size",
-			} as React.CSSProperties}
 		>
 			{/* Hero artwork background */}
 			{template && (
@@ -253,91 +253,30 @@ export function HealthCounter({
 			)}
 
 			{/* Dim overlay for readability */}
-			{template && (
-				<div
-					style={{
-						position: "absolute",
-						inset: 0,
-						backgroundColor: "rgba(0,0,0,0.2)",
-					}}
-				/>
-			)}
+			{template && <div className={styles.dimOverlay} />}
 
 			{/* Tap flash overlay */}
 			{tapFlash !== "none" &&
 				(() => {
-					const norm = ((rotation % 360) + 360) % 360;
-					const isTop = tapFlash === "top";
-					const color = isTop
-						? "rgba(34, 197, 94, 0.4)"
-						: "rgba(220, 38, 38, 0.4)";
-					// Gradient from edge (color) to center (transparent)
-					// Direction points from the outer edge inward
-					let gradDir: string;
-					if (norm === 90) {
-						gradDir = isTop ? "to left" : "to right";
-					} else if (norm === 270) {
-						gradDir = isTop ? "to right" : "to left";
-					} else if (norm === 180) {
-						gradDir = isTop ? "to top" : "to bottom";
-					} else {
-						gradDir = isTop ? "to bottom" : "to top";
-					}
-					const clipStyle: React.CSSProperties =
-						norm === 90
-							? {
-									[isTop ? "right" : "left"]: 0,
-									width: "50%",
-									height: "100%",
-									top: 0,
-								}
-							: norm === 270
-								? {
-										[isTop ? "left" : "right"]: 0,
-										width: "50%",
-										height: "100%",
-										top: 0,
-									}
-								: norm === 180
-									? {
-											[isTop ? "bottom" : "top"]: 0,
-											height: "50%",
-											width: "100%",
-											left: 0,
-										}
-									: {
-											[isTop ? "top" : "bottom"]: 0,
-											height: "50%",
-											width: "100%",
-											left: 0,
-										};
+					const { color, gradDir, clip } = flashStyle(rotation, tapFlash === "top");
 					return (
 						<div
+							className={styles.tapFlash}
 							style={{
-								position: "absolute",
-								...clipStyle,
+								...clip,
 								background: `linear-gradient(${gradDir}, ${color}, transparent)`,
-								zIndex: 2,
-								pointerEvents: "none",
-								animation: "tapFlashFade 0.15s ease-out forwards",
 							}}
 						/>
 					);
 				})()}
-			<style>{`
-				@keyframes tapFlashFade {
-					from { opacity: 1; }
-					to { opacity: 0; }
-				}
-			`}</style>
 
 			{/* Content */}
 			{isUnselected ? (
 				<svg
+					className={styles.unselectedPlus}
 					width="40%"
 					height="40%"
 					viewBox="0 0 40 40"
-					style={{ opacity: 0.4 }}
 				>
 					<rect x="16" y="4" width="8" height="32" rx="2" fill="#888" />
 					<rect x="4" y="16" width="32" height="8" rx="2" fill="#888" />
@@ -347,28 +286,12 @@ export function HealthCounter({
 					{/* Main HP display (hidden when subtrackers are showing) */}
 					{!hasSubtrackers && (
 						<div
+							className={styles.hpDisplay}
 							style={{
-								position: "relative",
-								zIndex: 1,
-								display: "flex",
-								flexDirection: "column",
-								alignItems: "center",
-								gap: "clamp(2px, 0.5vw, 6px)",
 								transform: rotation ? `rotate(${rotation}deg)` : undefined,
 							}}
 						>
-							<span
-								style={{
-									fontFamily: "'Cinzel', serif",
-									fontSize: "clamp(48px, 15vw, 120px)",
-									fontWeight: 900,
-									color: "#fff",
-									lineHeight: 1,
-									textShadow:
-										"0 2px 12px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.6)",
-									letterSpacing: "-0.02em",
-								}}
-							>
+							<span className={styles.hpText}>
 								{hero.hp.current}
 							</span>
 							<HealthIcon />
@@ -466,14 +389,10 @@ function DrawerOverlay({
 
 	return (
 		<div
+			className={styles.drawerOverlay}
 			style={{
-				position: "absolute",
-				inset: 0,
-				...(norm === 180 ? { transform: "rotate(180deg)" } : {}),
-				zIndex: 5,
-				display: "flex",
 				flexDirection: flexDir,
-				overflow: "hidden",
+				...(norm === 180 ? { transform: "rotate(180deg)" } : {}),
 			}}
 			onClick={(e) => {
 				e.stopPropagation();
@@ -482,50 +401,30 @@ function DrawerOverlay({
 		>
 			{/* Dim area */}
 			<div
+				className={styles.drawerDim}
 				style={{
-					flex: 1,
 					backgroundColor: isVisible ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0)",
-					transition: "background-color 0.3s ease",
 				}}
 			/>
 
 			{/* Drawer content */}
 			<div
+				className={`${styles.drawerContent}${is90or270 ? ` ${styles.drawerContentHoriz}` : ` ${styles.drawerContentDefault}`}`}
 				onClick={(e) => e.stopPropagation()}
 				style={{
-					backgroundColor: heroColor,
-					padding: "clamp(8px, 2vw, 16px)",
-					display: "flex",
-					...(is90or270
-						? {
-								flexDirection: "column" as const,
-								justifyContent: "space-evenly",
-								alignItems: "center",
-							}
-						: {
-								justifyContent: "space-evenly",
-								alignItems: "center",
-							}),
-					gap: is90or270 ? 8 : 16,
+					"--hero-color": heroColor,
+					backgroundColor: "var(--hero-color)",
 					transform: isVisible ? slideVisible : slideHidden,
-					transition: "transform 0.3s ease",
-				}}
+				} as React.CSSProperties}
 			>
 				{(() => {
 					const is270 = rotation === 270;
 					const changeHeroBtn = (
 						<button
 							key="change-hero"
+							className={styles.drawerBtn}
 							onClick={onChangeHero}
 							style={{
-								background: "none",
-								border: "none",
-								cursor: "pointer",
-								display: "flex",
-								flexDirection: "column",
-								alignItems: "center",
-								gap: 4,
-								color: "#fff",
 								padding: is90or270 ? 4 : 8,
 								...(is90or270 ? { transform: `rotate(${rotation}deg)` } : {}),
 							}}
@@ -554,16 +453,7 @@ function DrawerOverlay({
 								<path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
 							</svg>
 							{!is90or270 && (
-								<span
-									style={{
-										fontFamily: "'Cinzel', serif",
-										fontWeight: 700,
-										fontSize: "clamp(10px, 2.5vw, 14px)",
-										textTransform: "uppercase",
-										letterSpacing: "0.05em",
-										textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-									}}
-								>
+								<span className={styles.drawerBtnLabel}>
 									Change Hero
 								</span>
 							)}
@@ -572,16 +462,9 @@ function DrawerOverlay({
 					const subtrackersBtn = (
 						<button
 							key="subtrackers"
+							className={styles.drawerBtn}
 							onClick={onToggleSubtrackers}
 							style={{
-								background: "none",
-								border: "none",
-								cursor: "pointer",
-								display: "flex",
-								flexDirection: "column",
-								alignItems: "center",
-								gap: 4,
-								color: "#fff",
 								padding: is90or270 ? 4 : 8,
 								...(is90or270 ? { transform: `rotate(${rotation}deg)` } : {}),
 							}}
@@ -610,16 +493,7 @@ function DrawerOverlay({
 								<path d="M4 14v4c0 1.66 3.58 3 8 3s8-1.34 8-3v-4" />
 							</svg>
 							{!is90or270 && (
-								<span
-									style={{
-										fontFamily: "'Cinzel', serif",
-										fontWeight: 700,
-										fontSize: "clamp(10px, 2.5vw, 14px)",
-										textTransform: "uppercase",
-										letterSpacing: "0.05em",
-										textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-									}}
-								>
+								<span className={styles.drawerBtnLabel}>
 									Subtrackers
 								</span>
 							)}
@@ -628,21 +502,7 @@ function DrawerOverlay({
 					const divider = (
 						<div
 							key="divider"
-							style={{
-								...(is90or270
-									? {
-											width: "60%",
-											height: 1,
-											alignSelf: "center",
-										}
-									: {
-											width: 1,
-											height: "60%",
-											alignSelf: "center",
-										}),
-								backgroundColor: "rgba(255,255,255,0.3)",
-								flexShrink: 0,
-							}}
+							className={`${styles.dividerBase}${is90or270 ? ` ${styles.dividerHoriz}` : ` ${styles.dividerVert}`}`}
 						/>
 					);
 					return is270
@@ -678,14 +538,8 @@ function SubtrackerModal({
 
 	return (
 		<div
+			className={styles.modalBackdrop}
 			style={{
-				position: "absolute",
-				inset: 0,
-				zIndex: 10,
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
-				backgroundColor: "rgba(0,0,0,0.7)",
 				...(is90or270
 					? {}
 					: norm === 180
@@ -698,31 +552,16 @@ function SubtrackerModal({
 			}}
 		>
 			<div
+				className={styles.modalCard}
 				onClick={(e) => e.stopPropagation()}
 				style={{
-					backgroundColor: "#1a1a1e",
-					borderRadius: 12,
-					padding: "clamp(12px, 3vw, 20px)",
-					display: "flex",
-					flexDirection: "column",
-					gap: 8,
 					minWidth: is90or270 ? undefined : "70%",
 					maxWidth: is90or270 ? "80%" : "85%",
 					border: `1px solid ${heroColor}`,
 					...(is90or270 ? { transform: `rotate(${rotation}deg)` } : {}),
 				}}
 			>
-				<h3
-					style={{
-						margin: 0,
-						color: "#fff",
-						fontFamily: "'Cinzel', serif",
-						fontSize: "clamp(12px, 3vw, 16px)",
-						textAlign: "center",
-						textTransform: "uppercase",
-						letterSpacing: "0.05em",
-					}}
-				>
+				<h3 className={styles.modalHeading}>
 					Add Subtracker
 				</h3>
 				{STAT_CONFIGS.filter((c) => c.key !== "hp").map((config) => {
@@ -730,26 +569,14 @@ function SubtrackerModal({
 					return (
 						<button
 							key={config.key}
+							className={styles.statBtn}
 							onClick={() =>
 								isActive ? onRemove(config.key) : onAdd(config.key)
 							}
 							style={{
-								display: "flex",
-								alignItems: "center",
-								gap: 12,
-								padding: "clamp(8px, 2vw, 12px)",
 								backgroundColor: isActive
 									? heroColor
 									: "rgba(255,255,255,0.08)",
-								border: "none",
-								borderRadius: 8,
-								cursor: "pointer",
-								color: "#fff",
-								fontFamily: "'Cinzel', serif",
-								fontSize: "clamp(12px, 3vw, 16px)",
-								fontWeight: 700,
-								textTransform: "uppercase",
-								letterSpacing: "0.05em",
 							}}
 						>
 							<div
@@ -761,11 +588,9 @@ function SubtrackerModal({
 							>
 								{config.icon}
 							</div>
-							<span style={{ flex: 1, textAlign: "left" }}>{config.label}</span>
+							<span className={styles.statBtnLabel}>{config.label}</span>
 							{isActive && (
-								<span
-									style={{ fontSize: "clamp(10px, 2.5vw, 14px)", opacity: 0.7 }}
-								>
+								<span className={styles.statBtnCheck}>
 									✓
 								</span>
 							)}
@@ -785,12 +610,6 @@ interface StatConfig {
 	icon: React.ReactNode;
 }
 
-const STAT_ICON_STYLE: React.CSSProperties = {
-	width: "100%",
-	height: "100%",
-	filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.8))",
-};
-
 const STAT_CONFIGS: StatConfig[] = [
 	{
 		key: "hp",
@@ -799,7 +618,7 @@ const STAT_CONFIGS: StatConfig[] = [
 			<img
 				src={`${import.meta.env.BASE_URL}icons/health.png`}
 				alt="HP"
-				style={STAT_ICON_STYLE}
+				className={styles.statIcon}
 			/>
 		),
 	},
@@ -810,7 +629,7 @@ const STAT_CONFIGS: StatConfig[] = [
 			<img
 				src={`${import.meta.env.BASE_URL}icons/attack.png`}
 				alt="Attack"
-				style={STAT_ICON_STYLE}
+				className={styles.statIcon}
 			/>
 		),
 	},
@@ -821,7 +640,7 @@ const STAT_CONFIGS: StatConfig[] = [
 			<img
 				src={`${import.meta.env.BASE_URL}icons/armor.png`}
 				alt="Armor"
-				style={STAT_ICON_STYLE}
+				className={styles.statIcon}
 			/>
 		),
 	},
@@ -832,7 +651,7 @@ const STAT_CONFIGS: StatConfig[] = [
 			<img
 				src={`${import.meta.env.BASE_URL}icons/mana.png`}
 				alt="Mana"
-				style={STAT_ICON_STYLE}
+				className={styles.statIcon}
 			/>
 		),
 	},
@@ -888,23 +707,7 @@ function SubtrackerView({
 	) => {
 		e.stopPropagation();
 		const rect = e.currentTarget.getBoundingClientRect();
-		const clickX = e.clientX - rect.left;
-		const clickY = e.clientY - rect.top;
-
-		// Account for rotation — the container is rotated so screen coords
-		// map differently to the logical top/bottom
-		let isIncrement: boolean;
-		const norm = ((rotation % 360) + 360) % 360;
-		if (norm === 90) {
-			isIncrement = clickX > rect.width / 2;
-		} else if (norm === 270) {
-			isIncrement = clickX < rect.width / 2;
-		} else if (norm === 180) {
-			isIncrement = clickY > rect.height / 2;
-		} else {
-			isIncrement = clickY < rect.height / 2;
-		}
-
+		const isIncrement = isClickIncr(rotation, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height);
 		const change = isIncrement ? 1 : -1;
 		updateStat(hero.id, statKey, "current", currentValue + change);
 		spawnFloater(statKey, isIncrement);
@@ -975,18 +778,12 @@ function SubtrackerView({
 					return (
 						<div
 							key={stat.key}
+							className={styles.statCell}
 							onClick={(e) => handleStatClick(e, stat.key, stat.value)}
 							style={{
 								...(is90or270
 									? { width: "100%", flex: 1 }
 									: { flex: 1, height: "100%" }),
-								display: "flex",
-								flexDirection: "column",
-								alignItems: "center",
-								justifyContent: "center",
-								cursor: "pointer",
-								position: "relative",
-								overflow: "hidden",
 								...(is90or270
 									? {
 											borderBottom:
@@ -1012,17 +809,11 @@ function SubtrackerView({
 								}}
 							>
 								<span
+									className={styles.statValue}
 									style={{
-										fontFamily: "'Cinzel', serif",
 										fontSize: is90or270
 											? `clamp(32px, ${30 / stats.length}cqmax, 90px)`
 											: `clamp(28px, ${35 / stats.length}cqi, 72px)`,
-										fontWeight: 900,
-										color: "#fff",
-										lineHeight: 1,
-										textShadow:
-											"0 2px 8px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.6)",
-										letterSpacing: "-0.02em",
 									}}
 								>
 									{stat.value}
@@ -1045,58 +836,13 @@ function SubtrackerView({
 							{/* Tap flash for this stat */}
 							{flashMap[stat.key] &&
 								(() => {
-									const isTop = flashMap[stat.key] === "top";
-									const color = isTop
-										? "rgba(34, 197, 94, 0.4)"
-										: "rgba(220, 38, 38, 0.4)";
-									const n = ((rotation % 360) + 360) % 360;
-									let gradDir: string;
-									if (n === 90) {
-										gradDir = isTop ? "to left" : "to right";
-									} else if (n === 270) {
-										gradDir = isTop ? "to right" : "to left";
-									} else if (n === 180) {
-										gradDir = isTop ? "to top" : "to bottom";
-									} else {
-										gradDir = isTop ? "to bottom" : "to top";
-									}
-									const pos: React.CSSProperties =
-										n === 90
-											? {
-													[isTop ? "right" : "left"]: 0,
-													width: "50%",
-													height: "100%",
-													top: 0,
-												}
-											: n === 270
-												? {
-														[isTop ? "left" : "right"]: 0,
-														width: "50%",
-														height: "100%",
-														top: 0,
-													}
-												: n === 180
-													? {
-															[isTop ? "bottom" : "top"]: 0,
-															height: "50%",
-															width: "100%",
-															left: 0,
-														}
-													: {
-															[isTop ? "top" : "bottom"]: 0,
-															height: "50%",
-															width: "100%",
-															left: 0,
-														};
+									const { color, gradDir, clip } = flashStyle(rotation, flashMap[stat.key] === "top");
 									return (
 										<div
+											className={styles.tapFlash}
 											style={{
-												position: "absolute",
-												...pos,
+												...clip,
 												background: `linear-gradient(${gradDir}, ${color}, transparent)`,
-												zIndex: 2,
-												pointerEvents: "none",
-												animation: "tapFlashFade 0.15s ease-out forwards",
 											}}
 										/>
 									);
@@ -1128,13 +874,7 @@ function HealthIcon() {
 		<img
 			src={`${import.meta.env.BASE_URL}icons/health.png`}
 			alt="HP"
-			style={{
-				width: "clamp(18px, 5vw, 36px)",
-				height: "clamp(18px, 5vw, 36px)",
-				filter:
-					"drop-shadow(0 2px 12px rgba(0,0,0,0.8)) drop-shadow(0 0 4px rgba(0,0,0,0.6))",
-				opacity: 0.85,
-			}}
+			className={styles.healthIcon}
 		/>
 	);
 }
@@ -1168,18 +908,9 @@ function FloatingParticle({
 
 	return (
 		<span
+			className={styles.floatingParticle}
 			style={{
-				position: "absolute",
-				zIndex: 3,
-				top: "50%",
-				left: "50%",
-				fontFamily: "'Cinzel', serif",
-				fontSize: "clamp(16px, 4vw, 28px)",
-				fontWeight: 700,
 				color: isPositive ? "#4ade80" : "#f87171",
-				lineHeight: 1,
-				textShadow: "0 1px 6px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.7)",
-				pointerEvents: "none",
 				transition: started
 					? "transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.75s ease-out"
 					: "none",

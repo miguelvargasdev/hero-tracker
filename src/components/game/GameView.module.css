@@ -1,0 +1,164 @@
+/* ─── Keyframes ─── */
+
+@keyframes menuBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes menuBackdropOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes menuCardIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes menuCardOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.85) translateY(10px); }
+}
+
+@keyframes menuBtnIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Root container ─── */
+
+.root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #000;
+  padding: 8px;
+}
+
+/* ─── Menu overlay backdrop ─── */
+
+.menuOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backdropIn {
+  animation: menuBackdropIn 0.15s ease-out;
+}
+
+.backdropOut {
+  animation: menuBackdropOut 0.18s ease-in forwards;
+}
+
+/* ─── Menu card ─── */
+
+.menuCard {
+  background-color: #2a2a2e;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 200px;
+  border: 1px solid #444;
+}
+
+.cardIn {
+  animation: menuCardIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cardOut {
+  animation: menuCardOut 0.18s ease-in forwards;
+}
+
+/* ─── Menu buttons ─── */
+
+.menuBtn {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #3a3a3e;
+  color: #eee;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.menuBtnAnimated {
+  animation: menuBtnIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) var(--delay) both;
+}
+
+/* ─── Cancel button ─── */
+
+.cancelBtn {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: transparent;
+  color: #888;
+  border: 1px solid #555;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.cancelBtnAnimated {
+  animation: menuBtnIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0.09s both;
+}
+
+/* ─── Crown button ─── */
+
+.crownBtn {
+  position: absolute;
+  z-index: 5;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.crownImg {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+/* ─── Counter grid ─── */
+
+.counterGrid {
+  display: grid;
+  gap: 12px;
+  flex: 1;
+  padding: 4px;
+}
+
+.gridItem {
+  height: 100%;
+}
+
+/* ─── Tyrant layout ─── */
+
+.tyrantGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  flex: 1;
+  padding: 4px;
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import styles from "./TutorialModal.module.css";
 
 const STORAGE_KEY = "hero-tracker-tutorial-seen";
 
@@ -14,7 +15,7 @@ const STEPS: TutorialStep[] = [
     description: "Tap the + card to choose your hero from the roster.",
     visual: (
       <div
-        className="tut-float"
+        className={styles.tutFloat}
         style={{
           width: 80,
           height: 100,
@@ -50,7 +51,7 @@ const STEPS: TutorialStep[] = [
         }}
       >
         <div
-          className="tut-tap-top"
+          className={styles.tutTapTop}
           style={{
             flex: 1,
             backgroundColor: "rgba(74, 222, 128, 0.25)",
@@ -73,7 +74,7 @@ const STEPS: TutorialStep[] = [
           }}
         />
         <div
-          className="tut-tap-bottom"
+          className={styles.tutTapBottom}
           style={{
             flex: 1,
             backgroundColor: "rgba(248, 113, 113, 0.25)",
@@ -118,11 +119,11 @@ const STEPS: TutorialStep[] = [
           }}
         >
           {/* Ripple effect */}
-          <div className="tut-pulse" />
+          <div className={styles.tutPulse} />
         </div>
         {/* Arrow down */}
         <svg
-          className="tut-bounce-down"
+          className={styles.tutBounceDown}
           width="20"
           height="20"
           viewBox="0 0 24 24"
@@ -137,7 +138,7 @@ const STEPS: TutorialStep[] = [
         </svg>
         {/* Drawer preview */}
         <div
-          className="tut-slide-up"
+          className={styles.tutSlideUp}
           style={{
             width: 80,
             borderRadius: 8,
@@ -186,7 +187,7 @@ const STEPS: TutorialStep[] = [
       "Tap the crown button to access the game menu — reset all stats or return to the main menu.",
     visual: (
       <div
-        className="tut-float"
+        className={styles.tutFloat}
         style={{
           width: 48,
           height: 48,
@@ -207,69 +208,6 @@ const STEPS: TutorialStep[] = [
     ),
   },
 ];
-
-const KEYFRAMES = `
-  @keyframes tutModalIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
-  }
-  @keyframes tutModalOut {
-    from { opacity: 1; transform: scale(1); }
-    to { opacity: 0; transform: scale(0.85) translateY(10px); }
-  }
-  @keyframes tutBackdropIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes tutBackdropOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-  @keyframes tutStepIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes tutFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
-  }
-  @keyframes tutPulse {
-    0% { transform: scale(0.8); opacity: 0.9; box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
-    50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 10px rgba(255,255,255,0); }
-    100% { transform: scale(0.8); opacity: 0.9; box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-  }
-  @keyframes tutTapTop {
-    0%, 40%, 100% { background-color: rgba(74, 222, 128, 0.25); }
-    20% { background-color: rgba(74, 222, 128, 0.5); }
-  }
-  @keyframes tutTapBottom {
-    0%, 60%, 100% { background-color: rgba(248, 113, 113, 0.25); }
-    70% { background-color: rgba(248, 113, 113, 0.5); }
-  }
-  @keyframes tutBounceDown {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(4px); }
-  }
-  @keyframes tutSlideUp {
-    0%, 30% { opacity: 0; transform: translateY(8px); }
-    60%, 100% { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes tutDotPop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.5); }
-    100% { transform: scale(1); }
-  }
-  .tut-float { animation: tutFloat 2.5s ease-in-out infinite; }
-  .tut-pulse {
-    width: 32px; height: 32px; border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.3);
-    animation: tutPulse 1.8s ease-in-out infinite;
-  }
-  .tut-tap-top { animation: tutTapTop 2.5s ease-in-out infinite; }
-  .tut-tap-bottom { animation: tutTapBottom 2.5s ease-in-out infinite; }
-  .tut-bounce-down { animation: tutBounceDown 1.5s ease-in-out infinite; }
-  .tut-slide-up { animation: tutSlideUp 2.5s ease-in-out infinite; }
-`;
 
 export function TutorialModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(0);
@@ -317,165 +255,48 @@ export function TutorialModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        zIndex: 20,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "rgba(0,0,0,0.8)",
-        animation: exiting
-          ? "tutBackdropOut 0.2s ease-in forwards"
-          : "tutBackdropIn 0.2s ease-out",
-      }}
+      className={`${styles.backdrop} ${exiting ? styles.backdropOut : styles.backdropIn}`}
       onClick={(e) => e.stopPropagation()}
     >
-      <style>{KEYFRAMES}</style>
-
       <div
-        style={{
-          backgroundColor: "#1e1e22",
-          borderRadius: 16,
-          padding: "clamp(20px, 5vw, 32px)",
-          maxWidth: "min(85vw, 340px)",
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 20,
-          border: "1px solid #444",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
-          animation: exiting
-            ? "tutModalOut 0.2s ease-in forwards"
-            : "tutModalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
+        className={`${styles.modalCard} ${exiting ? styles.modalOut : styles.modalIn}`}
       >
         {/* Step indicator dots */}
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className={styles.dotsWrapper}>
           {STEPS.map((_, i) => (
             <div
               key={i}
               ref={(el) => { dotRefs.current[i] = el; }}
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                backgroundColor: i === step ? "#c9a84c" : "rgba(255,255,255,0.25)",
-                transition: "background-color 0.3s ease",
-                ...(i === step ? { boxShadow: "0 0 6px rgba(201,168,76,0.5)" } : {}),
-              }}
+              className={`${styles.dot} ${i === step ? styles.dotActive : ""}`}
             />
           ))}
         </div>
 
         {/* Visual — re-keyed per step for enter animation */}
-        <div
-          key={stepKey}
-          style={{
-            minHeight: 120,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            animation: "tutStepIn 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-          }}
-        >
+        <div key={stepKey} className={styles.visualContainer}>
           {current.visual}
         </div>
 
         {/* Title */}
-        <h2
-          key={`title-${stepKey}`}
-          style={{
-            margin: 0,
-            color: "#fff",
-            fontFamily: "'Cinzel', serif",
-            fontSize: "clamp(16px, 4vw, 22px)",
-            fontWeight: 700,
-            textAlign: "center",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            animation: "tutStepIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.03s both",
-          }}
-        >
+        <h2 key={`title-${stepKey}`} className={styles.title}>
           {current.title}
         </h2>
 
         {/* Description */}
-        <p
-          key={`desc-${stepKey}`}
-          style={{
-            margin: 0,
-            color: "rgba(255,255,255,0.7)",
-            fontSize: "clamp(13px, 3.5vw, 16px)",
-            textAlign: "center",
-            lineHeight: 1.5,
-            animation: "tutStepIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both",
-          }}
-        >
+        <p key={`desc-${stepKey}`} className={styles.description}>
           {current.description}
         </p>
 
         {/* Buttons */}
-        <div
-          key={`btns-${stepKey}`}
-          style={{
-            display: "flex",
-            width: "100%",
-            gap: 12,
-            marginTop: 4,
-            animation: "tutStepIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.09s both",
-          }}
-        >
+        <div key={`btns-${stepKey}`} className={styles.buttonsWrapper}>
           {!isLast && (
-            <button
-              onClick={handleSkip}
-              style={{
-                flex: 1,
-                padding: "10px 16px",
-                fontSize: "clamp(12px, 3vw, 15px)",
-                fontFamily: "'Cinzel', serif",
-                fontWeight: 700,
-                backgroundColor: "transparent",
-                color: "rgba(255,255,255,0.4)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: 8,
-                cursor: "pointer",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                transition: "border-color 0.2s, color 0.2s",
-              }}
-            >
+            <button onClick={handleSkip} className={styles.skipBtn}>
               Skip
             </button>
           )}
           <button
             onClick={handleNext}
-            style={{
-              flex: isLast ? undefined : 1,
-              ...(isLast ? { width: "100%" } : {}),
-              padding: "10px 16px",
-              fontSize: "clamp(12px, 3vw, 15px)",
-              fontFamily: "'Cinzel', serif",
-              fontWeight: 700,
-              backgroundColor: "#c9a84c",
-              color: "#1a1a1e",
-              border: "none",
-              borderRadius: 8,
-              cursor: "pointer",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              transition: "transform 0.15s, box-shadow 0.15s",
-            }}
-            onMouseDown={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform = "scale(0.96)";
-            }}
-            onMouseUp={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
-            }}
+            className={`${styles.nextBtn} ${isLast ? styles.fullWidth : ""}`}
           >
             {isLast ? "Got It" : "Next"}
           </button>
