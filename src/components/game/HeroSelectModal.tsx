@@ -70,19 +70,17 @@ export function HeroSelectModal({
 								handleClose();
 							}}
 							className={`${styles.heroCard} ${taken ? styles.taken : ""} ${exiting ? "" : styles.heroCardAnimated}`}
-							style={
-								{
-									backgroundColor: template.color,
-									"--delay": `${i * 0.02}s`,
-								} as React.CSSProperties
-							}
+							style={{
+								"--hero-bg": template.color,
+								"--delay": `${i * 0.02}s`,
+							} as React.CSSProperties}
 						>
 							<div
 								className={styles.heroCardInner}
 								style={{
-									backgroundImage: `url(${template.wideImage})`,
-									backgroundPosition: template.selectFocus,
-								}}
+									"--hero-image": `url(${template.wideImage})`,
+									"--hero-focus": template.selectFocus,
+								} as React.CSSProperties}
 							/>
 						</button>
 					);

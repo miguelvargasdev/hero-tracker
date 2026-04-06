@@ -132,12 +132,27 @@
   -webkit-touch-callout: none;
 }
 
+.crownSolo {
+  top: 8px;
+  right: 8px;
+}
+
+.crownCenter {
+  top: var(--crown-top, 50%);
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .crownImg {
   width: 26px;
   height: 26px;
   object-fit: contain;
   transition: transform 0.3s ease;
   pointer-events: none;
+}
+
+.crownImgTyrant {
+  transform: rotate(-90deg);
 }
 
 /* ─── Counter grid ─── */
@@ -149,8 +164,17 @@
   padding: 4px;
 }
 
+.grid2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+.grid3, .grid4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.grid5 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+.grid6 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+
 .gridItem {
   height: 100%;
+}
+
+.gridItemSpan {
+  grid-column: span 2;
 }
 
 /* ─── Tyrant layout ─── */
@@ -158,7 +182,19 @@
 .tyrantGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: var(--team-rows);
   gap: 8px;
   flex: 1;
   padding: 4px;
+}
+
+.tyrantBoss {
+  grid-column: 2;
+  grid-row: 1 / var(--boss-span);
+  height: 100%;
+}
+
+.tyrantTeam {
+  grid-column: 1;
+  height: 100%;
 }

@@ -59,7 +59,6 @@ const IOS_STEPS = [
 						strokeWidth="2.5"
 						strokeLinecap="round"
 						strokeLinejoin="round"
-						style={{ verticalAlign: "middle" }}
 					>
 						<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
 						<polyline points="16 6 12 2 8 6" />
@@ -169,8 +168,7 @@ export function InstallPrompt() {
 		<>
 			{/* Banner */}
 			<div
-				className={styles.banner}
-				style={{ cursor: showIOSPrompt ? "pointer" : undefined }}
+				className={`${styles.banner}${showIOSPrompt ? ` ${styles.bannerClickable}` : ""}`}
 				onClick={showIOSPrompt ? () => setShowIOSSteps(true) : undefined}
 			>
 				<div className={styles.bannerIcon}>{showIOSPrompt ? "\u{1F4F1}" : "\u{1F4F2}"}</div>

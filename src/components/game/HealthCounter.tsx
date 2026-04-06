@@ -24,22 +24,30 @@ function isClickIncr(rot: number, x: number, y: number, w: number, h: number) {
 	return n === 90 ? x > w / 2 : n === 270 ? x < w / 2 : n === 180 ? y > h / 2 : y < h / 2;
 }
 
-// Compute tap flash gradient direction and clip region
-function flashStyle(rot: number, isTop: boolean) {
+// Map rotation + side to the correct tap flash CSS class
+const FLASH_CLASS: Record<number, [string, string]> = {
+	0: [styles.tapFlashTop0, styles.tapFlashBottom0],
+	90: [styles.tapFlashTop90, styles.tapFlashBottom90],
+	180: [styles.tapFlashTop180, styles.tapFlashBottom180],
+	270: [styles.tapFlashTop270, styles.tapFlashBottom270],
+};
+
+// Map rotation + side to gradient direction
+const FLASH_GRAD: Record<number, [string, string]> = {
+	0: ["to bottom", "to top"],
+	90: ["to left", "to right"],
+	180: ["to top", "to bottom"],
+	270: ["to right", "to left"],
+};
+
+function flashProps(rot: number, isTop: boolean) {
 	const n = normRot(rot);
 	const color = isTop ? "rgba(34, 197, 94, 0.4)" : "rgba(220, 38, 38, 0.4)";
-	const horiz = n === 90 || n === 270;
-	const gd: Record<number, [string, string]> = { 0: ["to bottom", "to top"], 90: ["to left", "to right"], 180: ["to top", "to bottom"], 270: ["to right", "to left"] };
-	const sd: Record<number, [string, string]> = { 0: ["top", "bottom"], 90: ["right", "left"], 180: ["bottom", "top"], 270: ["left", "right"] };
-	const [tg, bg] = gd[n] ?? gd[0];
-	const [ts, bs] = sd[n] ?? sd[0];
-	const side = isTop ? ts : bs;
+	const [topClass, bottomClass] = FLASH_CLASS[n] ?? FLASH_CLASS[0];
+	const [topGrad, bottomGrad] = FLASH_GRAD[n] ?? FLASH_GRAD[0];
 	return {
-		color,
-		gradDir: isTop ? tg : bg,
-		clip: (horiz
-			? { [side]: 0, width: "50%", height: "100%", top: 0 }
-			: { [side]: 0, height: "50%", width: "100%", left: 0 }) as React.CSSProperties,
+		className: `${styles.tapFlash} ${isTop ? topClass : bottomClass}`,
+		bg: `linear-gradient(${isTop ? topGrad : bottomGrad}, ${color}, transparent)`,
 	};
 }
 
@@ -120,6 +128,8 @@ export function HealthCounter({
 		setActiveSubtrackers((prev) => prev.filter((k) => k !== key));
 	};
 
+	const is90or270 = rotation === 90 || rotation === 270;
+	const rotDeg = `${rotation}deg`;
 	const hasSubtrackers = activeSubtrackers.length > 0;
 
 	return (
@@ -132,28 +142,12 @@ export function HealthCounter({
 			{/* Hero artwork background */}
 			{template && (
 				<div
+					className={`${styles.artwork} ${is90or270 ? styles.artworkRotated : styles.artworkDefault}`}
 					style={{
-						position: "absolute",
-						...(rotation === 90 || rotation === 270
-							? {
-									top: "50%",
-									left: "50%",
-									width: "100cqh",
-									height: "100cqw",
-									transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
-								}
-							: {
-									inset: 0,
-									transform: rotation ? `rotate(${rotation}deg)` : undefined,
-								}),
-						backgroundImage: `url(${rotation === 90 || rotation === 270 ? template.wideImage : template.image})`,
-						backgroundSize: "cover",
-						backgroundPosition:
-							rotation === 90 || rotation === 270
-								? template.wideFocus
-								: template.focus,
-						backgroundRepeat: "no-repeat",
-					}}
+						"--rotation": rotDeg,
+						"--bg-image": `url(${is90or270 ? template.wideImage : template.image})`,
+						"--bg-position": is90or270 ? template.wideFocus : template.focus,
+					} as React.CSSProperties}
 				/>
 			)}
 
@@ -163,14 +157,11 @@ export function HealthCounter({
 			{/* Tap flash overlay */}
 			{tapFlash !== "none" &&
 				(() => {
-					const { color, gradDir, clip } = flashStyle(rotation, tapFlash === "top");
+					const { className, bg } = flashProps(rotation, tapFlash === "top");
 					return (
 						<div
-							className={styles.tapFlash}
-							style={{
-								...clip,
-								background: `linear-gradient(${gradDir}, ${color}, transparent)`,
-							}}
+							className={className}
+							style={{ "--flash-bg": bg } as React.CSSProperties}
 						/>
 					);
 				})()}
@@ -192,9 +183,7 @@ export function HealthCounter({
 					{!hasSubtrackers && (
 						<div
 							className={styles.hpDisplay}
-							style={{
-								transform: rotation ? `rotate(${rotation}deg)` : undefined,
-							}}
+							style={{ "--rotation": rotation ? rotDeg : "0deg" } as React.CSSProperties}
 						>
 							<span className={styles.hpText}>
 								{hero.hp.current}
@@ -255,6 +244,19 @@ export function HealthCounter({
 
 /* ─── Drawer Overlay ─── */
 
+const DRAWER_ROT_CLASS: Record<number, string> = {
+	90: styles.drawerRot90,
+	180: styles.drawerRot180,
+	270: styles.drawerRot270,
+};
+
+const SLIDE_TRANSFORMS: Record<number, [string, string]> = {
+	0: ["translateY(100%)", "translateY(0)"],
+	90: ["translateX(-100%)", "translateX(0)"],
+	180: ["translateY(100%)", "translateY(0)"],
+	270: ["translateX(100%)", "translateX(0)"],
+};
+
 function DrawerOverlay({
 	heroColor,
 	rotation,
@@ -272,33 +274,13 @@ function DrawerOverlay({
 }) {
 	const is90or270 = rotation === 90 || rotation === 270;
 	const isVisible = animState === "open";
-
-	// For 90/270: the card is tall & narrow. The visual "bottom" in rotated
-	// space maps to the right edge (90°) or left edge (270°) of the card.
-	// We lay out with flex-direction: row and place the drawer bar on the
-	// appropriate side — no 200% expansion needed.
-	const norm = ((rotation % 360) + 360) % 360;
-	let flexDir: "column" | "row" | "row-reverse" = "column";
-	let slideHidden = "translateY(100%)";
-	let slideVisible = "translateY(0)";
-
-	if (norm === 90) {
-		flexDir = "row-reverse";
-		slideHidden = "translateX(-100%)";
-		slideVisible = "translateX(0)";
-	} else if (norm === 270) {
-		flexDir = "row";
-		slideHidden = "translateX(100%)";
-		slideVisible = "translateX(0)";
-	}
+	const norm = normRot(rotation);
+	const [slideHidden, slideVisible] = SLIDE_TRANSFORMS[norm] ?? SLIDE_TRANSFORMS[0];
+	const rotClass = DRAWER_ROT_CLASS[norm] ?? "";
 
 	return (
 		<div
-			className={styles.drawerOverlay}
-			style={{
-				flexDirection: flexDir,
-				...(norm === 180 ? { transform: "rotate(180deg)" } : {}),
-			}}
+			className={`${styles.drawerOverlay} ${rotClass}`}
 			onClick={(e) => {
 				e.stopPropagation();
 				onClose();
@@ -306,10 +288,7 @@ function DrawerOverlay({
 		>
 			{/* Dim area */}
 			<div
-				className={styles.drawerDim}
-				style={{
-					backgroundColor: isVisible ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0)",
-				}}
+				className={`${styles.drawerDim}${isVisible ? ` ${styles.drawerDimVisible}` : ""}`}
 			/>
 
 			{/* Drawer content */}
@@ -318,33 +297,30 @@ function DrawerOverlay({
 				onClick={(e) => e.stopPropagation()}
 				style={{
 					"--hero-color": heroColor,
-					backgroundColor: "var(--hero-color)",
-					transform: isVisible ? slideVisible : slideHidden,
+					"--slide-transform": isVisible ? slideVisible : slideHidden,
 				} as React.CSSProperties}
 			>
 				{(() => {
 					const is270 = rotation === 270;
+					const btnClass = is90or270
+						? `${styles.drawerBtn} ${styles.drawerBtnCompact}`
+						: styles.drawerBtn;
+					const iconClass = is90or270
+						? styles.drawerBtnIconCompact
+						: styles.drawerBtnIcon;
+					const cssVars = is90or270
+						? ({ "--rotation": `${rotation}deg` } as React.CSSProperties)
+						: undefined;
+
 					const changeHeroBtn = (
 						<button
 							key="change-hero"
-							className={styles.drawerBtn}
+							className={btnClass}
 							onClick={onChangeHero}
-							style={{
-								padding: is90or270 ? 4 : 8,
-								...(is90or270 ? { transform: `rotate(${rotation}deg)` } : {}),
-							}}
+							style={cssVars}
 						>
 							<svg
-								width={
-									is90or270
-										? "clamp(18px, 4vw, 28px)"
-										: "clamp(28px, 6vw, 44px)"
-								}
-								height={
-									is90or270
-										? "clamp(18px, 4vw, 28px)"
-										: "clamp(28px, 6vw, 44px)"
-								}
+								className={iconClass}
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="white"
@@ -367,24 +343,12 @@ function DrawerOverlay({
 					const subtrackersBtn = (
 						<button
 							key="subtrackers"
-							className={styles.drawerBtn}
+							className={btnClass}
 							onClick={onToggleSubtrackers}
-							style={{
-								padding: is90or270 ? 4 : 8,
-								...(is90or270 ? { transform: `rotate(${rotation}deg)` } : {}),
-							}}
+							style={cssVars}
 						>
 							<svg
-								width={
-									is90or270
-										? "clamp(18px, 4vw, 28px)"
-										: "clamp(28px, 6vw, 44px)"
-								}
-								height={
-									is90or270
-										? "clamp(18px, 4vw, 28px)"
-										: "clamp(28px, 6vw, 44px)"
-								}
+								className={iconClass}
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="white"
@@ -439,32 +403,26 @@ function SubtrackerModal({
 	onClose: () => void;
 }) {
 	const is90or270 = rotation === 90 || rotation === 270;
-	const norm = ((rotation % 360) + 360) % 360;
+	const norm = normRot(rotation);
+
+	const backdropClass = `${styles.modalBackdrop}${!is90or270 && norm === 180 ? ` ${styles.modalRot180}` : ""}`;
+	const cardClass = `${styles.modalCard} ${is90or270 ? styles.modalCardRotated : styles.modalCardDefault}`;
 
 	return (
 		<div
-			className={styles.modalBackdrop}
-			style={{
-				...(is90or270
-					? {}
-					: norm === 180
-						? { transform: "rotate(180deg)" }
-						: {}),
-			}}
+			className={backdropClass}
 			onClick={(e) => {
 				e.stopPropagation();
 				onClose();
 			}}
 		>
 			<div
-				className={styles.modalCard}
+				className={cardClass}
 				onClick={(e) => e.stopPropagation()}
 				style={{
-					minWidth: is90or270 ? undefined : "70%",
-					maxWidth: is90or270 ? "80%" : "85%",
-					border: `1px solid ${heroColor}`,
-					...(is90or270 ? { transform: `rotate(${rotation}deg)` } : {}),
-				}}
+					"--hero-color": heroColor,
+					"--rotation": is90or270 ? `${rotation}deg` : undefined,
+				} as React.CSSProperties}
 			>
 				<h3 className={styles.modalHeading}>
 					Add Subtracker
@@ -474,23 +432,13 @@ function SubtrackerModal({
 					return (
 						<button
 							key={config.key}
-							className={styles.statBtn}
+							className={`${styles.statBtn}${isActive ? ` ${styles.statBtnActive}` : ""}`}
 							onClick={() =>
 								isActive ? onRemove(config.key) : onAdd(config.key)
 							}
-							style={{
-								backgroundColor: isActive
-									? heroColor
-									: "rgba(255,255,255,0.08)",
-							}}
+							style={{ "--hero-color": heroColor } as React.CSSProperties}
 						>
-							<div
-								style={{
-									width: "clamp(20px, 5vw, 28px)",
-									height: "clamp(20px, 5vw, 28px)",
-									flexShrink: 0,
-								}}
-							>
+							<div className={styles.statIconWrap}>
 								{config.icon}
 							</div>
 							<span className={styles.statBtnLabel}>{config.label}</span>
@@ -639,116 +587,61 @@ function SubtrackerView({
 		.filter(Boolean) as (StatConfig & { value: number })[];
 
 	// Reorder stats for rotated cards so HP appears at the player's "top"
-	// For single-column layout: 90° keeps default order, 270° reverses it
-	const norm = ((rotation % 360) + 360) % 360;
+	const norm = normRot(rotation);
 	let stats = statsBase;
 	if (norm === 270) {
 		stats = [...statsBase].reverse();
 	}
 
 	const is90or270 = rotation === 90 || rotation === 270;
+	const rotDeg = `${rotation}deg`;
+	const statFontSize = is90or270
+		? `clamp(32px, ${30 / stats.length}cqmax, 90px)`
+		: `clamp(28px, ${35 / stats.length}cqi, 72px)`;
+	const statIconSize = is90or270
+		? `clamp(20px, ${10 / stats.length}cqmax, 46px)`
+		: `clamp(18px, ${14 / stats.length}cqi, 38px)`;
+
+	const rootClass = `${styles.subtrackerRoot} ${is90or270 ? styles.subtrackerRootRotated : styles.subtrackerRootDefault}`;
+	const flexClass = `${styles.subtrackerFlex} ${is90or270 ? styles.subtrackerFlexRotated : styles.subtrackerFlexDefault}`;
+	const cellVariant = is90or270 ? styles.statCellHoriz : styles.statCellVert;
 
 	return (
 		<div
-			style={{
-				position: "absolute",
-				zIndex: 1,
-				...(is90or270
-					? {
-							top: 0,
-							left: 0,
-							width: "100%",
-							height: "100%",
-						}
-					: {
-							inset: 0,
-							transform: rotation ? `rotate(${rotation}deg)` : undefined,
-						}),
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
-			}}
+			className={rootClass}
+			style={!is90or270 && rotation ? { "--rotation": rotDeg } as React.CSSProperties : undefined}
 		>
-			<div
-				style={{
-					display: "flex",
-					alignItems: is90or270 ? "stretch" : "center",
-					justifyContent: "center",
-					width: "100%",
-					height: "100%",
-					...(is90or270 ? { flexDirection: "column" as const } : {}),
-				}}
-			>
-				{stats.map((stat, i) => {
+			<div className={flexClass}>
+				{stats.map((stat) => {
 					return (
 						<div
 							key={stat.key}
-							className={styles.statCell}
+							className={`${styles.statCell} ${cellVariant}`}
 							onClick={(e) => handleStatClick(e, stat.key, stat.value)}
-							style={{
-								...(is90or270
-									? { width: "100%", flex: 1 }
-									: { flex: 1, height: "100%" }),
-								...(is90or270
-									? {
-											borderBottom:
-												i < stats.length - 1
-													? "1px solid rgba(255,255,255,0.15)"
-													: "none",
-										}
-									: {
-											borderRight:
-												i < stats.length - 1
-													? "1px solid rgba(255,255,255,0.2)"
-													: "none",
-										}),
-							}}
 						>
 							<div
+								className={styles.statCellInner}
 								style={{
-									display: "flex",
-									flexDirection: "column",
-									alignItems: "center",
-									gap: "clamp(2px, 0.5vw, 4px)",
-									transform: is90or270 ? `rotate(${rotation}deg)` : undefined,
-								}}
+									"--rotation": is90or270 ? rotDeg : "0deg",
+									"--stat-font-size": statFontSize,
+									"--stat-icon-size": statIconSize,
+								} as React.CSSProperties}
 							>
-								<span
-									className={styles.statValue}
-									style={{
-										fontSize: is90or270
-											? `clamp(32px, ${30 / stats.length}cqmax, 90px)`
-											: `clamp(28px, ${35 / stats.length}cqi, 72px)`,
-									}}
-								>
+								<span className={styles.statValue}>
 									{stat.value}
 								</span>
-								<div
-									style={{
-										width: is90or270
-											? `clamp(20px, ${10 / stats.length}cqmax, 46px)`
-											: `clamp(18px, ${14 / stats.length}cqi, 38px)`,
-										height: is90or270
-											? `clamp(20px, ${10 / stats.length}cqmax, 46px)`
-											: `clamp(18px, ${14 / stats.length}cqi, 38px)`,
-										opacity: 0.85,
-										filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))",
-									}}
-								>
+								<div className={styles.subtrackerIconWrap}>
 									{stat.icon}
 								</div>
 							</div>
 							{/* Tap flash for this stat */}
 							{flashMap[stat.key] &&
 								(() => {
-									const { color, gradDir, clip } = flashStyle(rotation, flashMap[stat.key] === "top");
+									const { className, bg } = flashProps(rotation, flashMap[stat.key] === "top");
 									return (
 										<div
-											className={styles.tapFlash}
-											style={{
-												...clip,
-												background: `linear-gradient(${gradDir}, ${color}, transparent)`,
-											}}
+											className={className}
+											style={{ "--flash-bg": bg } as React.CSSProperties}
 										/>
 									);
 								})()}
@@ -811,19 +704,17 @@ function FloatingParticle({
 	const rotatedArcX = arcX * cos - arcY * sin;
 	const rotatedArcY = arcX * sin + arcY * cos;
 
+	const colorClass = isPositive ? styles.particlePositive : styles.particleNegative;
+	const baseClass = `${styles.floatingParticle} ${colorClass}${started ? ` ${styles.particleStarted}` : ""}`;
+
 	return (
 		<span
-			className={styles.floatingParticle}
+			className={baseClass}
 			style={{
-				color: isPositive ? "#4ade80" : "#f87171",
-				transition: started
-					? "transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.75s ease-out"
-					: "none",
-				transform: started
-					? `translate(calc(-50% + ${rotatedArcX}px), calc(-50% + ${rotatedArcY}px)) rotate(${rotation}deg)`
-					: `translate(-50%, -50%) rotate(${rotation}deg)`,
-				opacity: started ? 0 : 1,
-			}}
+				"--rotation": `${rotation}deg`,
+				"--arc-x": `${rotatedArcX}px`,
+				"--arc-y": `${rotatedArcY}px`,
+			} as React.CSSProperties}
 		>
 			{isPositive ? "+1" : "-1"}
 		</span>

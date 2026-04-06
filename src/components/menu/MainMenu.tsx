@@ -40,9 +40,7 @@ export function MainMenu() {
 	return (
 		<div
 			className={styles.container}
-			style={{
-				backgroundImage: `url(${import.meta.env.BASE_URL}menu-bg.jpg)`,
-			}}
+			style={{ "--bg-image": `url(${import.meta.env.BASE_URL}menu-bg.jpg)` } as React.CSSProperties}
 		>
 			<div className={styles.logoSection}>
 				<img
