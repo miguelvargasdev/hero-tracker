@@ -53,9 +53,6 @@ export function SubtrackerView({
 	const handleMouseDown = useCallback((e: React.MouseEvent) => {
 		const el = scrollRef.current;
 		if (!el) return;
-		// Prevent parent long-press handler from firing
-		e.stopPropagation();
-		e.preventDefault();
 		dragState.current = {
 			active: true,
 			startX: e.clientX,

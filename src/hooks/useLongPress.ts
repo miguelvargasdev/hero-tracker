@@ -49,6 +49,8 @@ export function useLongPress(
 		}
 	}, []);
 
+	const mouseStart = useRef<{ x: number; y: number } | null>(null);
+
 	const handlers = {
 		onTouchStart: useCallback(
 			(e: React.TouchEvent) => {
@@ -72,9 +74,30 @@ export function useLongPress(
 			cancel();
 			touchStart.current = null;
 		}, [cancel]),
-		onMouseDown: start,
-		onMouseUp: cancel,
-		onMouseLeave: cancel,
+		onMouseDown: useCallback(
+			(e: React.MouseEvent) => {
+				mouseStart.current = { x: e.clientX, y: e.clientY };
+				start();
+			},
+			[start],
+		),
+		onMouseMove: useCallback(
+			(e: React.MouseEvent) => {
+				if (!mouseStart.current || !timer.current) return;
+				const dx = e.clientX - mouseStart.current.x;
+				const dy = e.clientY - mouseStart.current.y;
+				if (Math.sqrt(dx * dx + dy * dy) > MOVE_THRESHOLD) cancel();
+			},
+			[cancel],
+		),
+		onMouseUp: useCallback(() => {
+			cancel();
+			mouseStart.current = null;
+		}, [cancel]),
+		onMouseLeave: useCallback(() => {
+			cancel();
+			mouseStart.current = null;
+		}, [cancel]),
 	};
 
 	return { handlers, didFire };
