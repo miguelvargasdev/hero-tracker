@@ -13,6 +13,7 @@ export function GameView() {
 	const gameMode = useHeroStore((s) => s.gameMode);
 	const navigateTo = useHeroStore((s) => s.navigateTo);
 	const resetGame = useHeroStore((s) => s.resetGame);
+	const resetCounter = useHeroStore((s) => s.resetCounter);
 	const { visible: menuVisible, exiting: menuExiting, open: openMenu, close: closeMenu } = useModalAnimation();
 	const [selectingPlayerId, setSelectingPlayerId] = useState<string | null>(
 		null,
@@ -104,6 +105,7 @@ export function GameView() {
 			{/* Counter grid */}
 			{isSolo ? (
 				<HealthCounter
+					key={resetCounter}
 					hero={heroes[0]}
 					onSelect={() => setSelectingPlayerId(heroes[0].id)}
 				/>
@@ -111,6 +113,7 @@ export function GameView() {
 				<TyrantLayout
 					heroes={heroes}
 					onSelect={(id) => setSelectingPlayerId(id)}
+					resetCounter={resetCounter}
 				/>
 			) : (
 				<div
@@ -122,6 +125,7 @@ export function GameView() {
 							className={`${styles.gridItem}${shouldSpan(index, heroes.length) ? ` ${styles.gridItemSpan}` : ""}`}
 						>
 							<HealthCounter
+								key={`${hero.id}-${resetCounter}`}
 								hero={hero}
 								rotation={getRotation(index, heroes.length)}
 								onSelect={() => setSelectingPlayerId(hero.id)}

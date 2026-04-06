@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import { HERO_TEMPLATES } from "../../data/heroes";
 import { useLongPress } from "../../hooks/useLongPress";
@@ -24,7 +24,6 @@ export function HealthCounter({
 	onSelect,
 }: HealthCounterProps) {
 	const updateStat = useHeroStore((s) => s.updateStat);
-	const resetCounter = useHeroStore((s) => s.resetCounter);
 
 	const isUnselected = hero.templateId === null;
 	const template = isUnselected
@@ -33,20 +32,9 @@ export function HealthCounter({
 
 	const { floaters, spawn: spawnFloater } = useFloatingNumbers();
 	const [tapFlash, setTapFlash] = useState<"none" | "top" | "bottom">("none");
-	const { drawerState, openDrawer, closeDrawer, resetDrawer } = useDrawerState();
+	const { drawerState, openDrawer, closeDrawer } = useDrawerState();
 	const [activeSubtrackers, setActiveSubtrackers] = useState<StatKey[]>([]);
 	const [showSubtrackerModal, setShowSubtrackerModal] = useState(false);
-
-	// Clear subtrackers on game reset
-	const prevResetCounter = useRef(resetCounter);
-	useEffect(() => {
-		if (resetCounter !== prevResetCounter.current) {
-			prevResetCounter.current = resetCounter;
-			setActiveSubtrackers([]);
-			setShowSubtrackerModal(false);
-			resetDrawer();
-		}
-	}, [resetCounter, resetDrawer]);
 
 	const { handlers: longPressHandlers, didFire: didLongPress } = useLongPress(
 		openDrawer,
@@ -54,10 +42,7 @@ export function HealthCounter({
 	);
 
 	const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (didLongPress.current) {
-			didLongPress.current = false;
-			return;
-		}
+		if (didLongPress.current) return;
 
 		if (drawerState !== "closed") return;
 

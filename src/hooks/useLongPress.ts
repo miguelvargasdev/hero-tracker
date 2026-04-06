@@ -42,6 +42,11 @@ export function useLongPress(
 			clearTimeout(timer.current);
 			timer.current = null;
 		}
+		// Reset didFire after a microtask so the click handler still sees it
+		// for the current interaction, but it won't stick around to eat the next tap.
+		if (didFire.current) {
+			setTimeout(() => { didFire.current = false; }, 0);
+		}
 	}, []);
 
 	const handlers = {

@@ -5,9 +5,11 @@ import styles from "./GameView.module.css";
 export function TyrantLayout({
 	heroes,
 	onSelect,
+	resetCounter,
 }: {
 	heroes: Hero[];
 	onSelect: (id: string) => void;
+	resetCounter: number;
 }) {
 	const boss = heroes.find((h) => h.role === "boss");
 	const team = heroes.filter((h) => h.role === "team");
@@ -25,6 +27,7 @@ export function TyrantLayout({
 			{/* Boss: right column, spans all rows */}
 			<div className={styles.tyrantBoss}>
 				<HealthCounter
+					key={resetCounter}
 					hero={boss}
 					rotation={270}
 					onSelect={() => onSelect(boss.id)}
@@ -37,6 +40,7 @@ export function TyrantLayout({
 					className={styles.tyrantTeam}
 				>
 					<HealthCounter
+						key={`${hero.id}-${resetCounter}`}
 						hero={hero}
 						rotation={90}
 						onSelect={() => onSelect(hero.id)}
