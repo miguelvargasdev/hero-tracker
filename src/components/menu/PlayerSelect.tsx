@@ -1,26 +1,7 @@
 import { useHeroStore } from "../../store/useHeroStore";
+import styles from "./PlayerSelect.module.css";
 
 const PLAYER_COUNTS = [2, 3, 4, 5];
-
-const KEYFRAMES = `
-	@keyframes psHeaderIn {
-		from { opacity: 0; transform: translateY(-16px); }
-		to { opacity: 1; transform: translateY(0); }
-	}
-	@keyframes psDiceIn {
-		from { opacity: 0; transform: scale(0.8) rotate(-8deg); }
-		to { opacity: 1; transform: scale(1) rotate(0deg); }
-	}
-	@keyframes psBackIn {
-		from { opacity: 0; transform: translateX(-10px); }
-		to { opacity: 1; transform: translateX(0); }
-	}
-	@keyframes psPipPop {
-		0% { r: 0; opacity: 0; }
-		60% { r: 12; opacity: 1; }
-		100% { r: 10; opacity: 1; }
-	}
-`;
 
 /** Renders a dice face SVG with the given number of pips */
 function DiceFace({ count, index }: { count: number; index: number }) {
@@ -88,9 +69,8 @@ function DiceFace({ count, index }: { count: number; index: number }) {
 					cy={cy}
 					r="10"
 					fill="#eee"
-					style={{
-						animation: `psPipPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) ${baseDelay + i * 0.03}s both`,
-					}}
+					className={styles.pip}
+					style={{ '--pip-delay': `${baseDelay + i * 0.03}s` } as React.CSSProperties}
 				/>
 			))}
 		</svg>
@@ -102,105 +82,28 @@ export function PlayerSelect() {
 	const navigateTo = useHeroStore((s) => s.navigateTo);
 
 	return (
-		<div
-			style={{
-				display: "flex",
-				flexDirection: "column",
-				alignItems: "center",
-				justifyContent: "center",
-				height: "100%",
-				padding: 32,
-				position: "relative",
-				backgroundColor: "#111",
-			}}
-		>
-			<style>{KEYFRAMES}</style>
-
+		<div className={styles.container}>
 			<button
 				onClick={() => navigateTo("main-menu")}
-				style={{
-					position: "absolute",
-					top: 32,
-					left: 32,
-					background: "none",
-					border: "none",
-					color: "#eee",
-					cursor: "pointer",
-					fontSize: 14,
-					fontWeight: "bold",
-					padding: 0,
-					animation: "psBackIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both",
-					transition: "transform 0.15s",
-				}}
-				onMouseDown={(e) => {
-					(e.currentTarget as HTMLButtonElement).style.transform = "translateX(-3px)";
-				}}
-				onMouseUp={(e) => {
-					(e.currentTarget as HTMLButtonElement).style.transform = "translateX(0)";
-				}}
-				onMouseLeave={(e) => {
-					(e.currentTarget as HTMLButtonElement).style.transform = "translateX(0)";
-				}}
+				className={styles.backButton}
 			>
 				&larr; Back
 			</button>
 
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-					alignItems: "center",
-					width: "100%",
-				}}
-			>
-				<h2
-					style={{
-						fontFamily: "'Cinzel', serif",
-						marginBottom: 32,
-						fontSize: 28,
-						color: "#eee",
-						fontWeight: 700,
-						textTransform: "uppercase",
-						textAlign: "center",
-						lineHeight: 1.2,
-						animation: "psHeaderIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) 0.03s both",
-					}}
-				>
+			<div className={styles.content}>
+				<h2 className={styles.heading}>
 					Number of
 					<br />
 					Players
 				</h2>
 
-				<div
-					style={{
-						display: "grid",
-						gridTemplateColumns: "repeat(2, 1fr)",
-						gap: 16,
-						width: "clamp(240px, 65vw, 300px)",
-					}}
-				>
+				<div className={styles.grid}>
 					{PLAYER_COUNTS.map((count, i) => (
 						<button
 							key={count}
 							onClick={() => startGame("standard", count)}
-							style={{
-								padding: 8,
-								backgroundColor: "transparent",
-								border: "none",
-								borderRadius: 12,
-								cursor: "pointer",
-								animation: `psDiceIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) ${0.08 + i * 0.05}s both`,
-								transition: "transform 0.15s",
-							}}
-							onMouseDown={(e) => {
-								(e.currentTarget as HTMLButtonElement).style.transform = "scale(0.93)";
-							}}
-							onMouseUp={(e) => {
-								(e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
-							}}
-							onMouseLeave={(e) => {
-								(e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
-							}}
+							className={styles.diceButton}
+							style={{ '--delay': `${0.08 + i * 0.05}s` } as React.CSSProperties}
 						>
 							<DiceFace count={count} index={i} />
 						</button>

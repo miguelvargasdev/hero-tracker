@@ -1,0 +1,168 @@
+@keyframes mainLogoIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes mainTitleIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mainBtnIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: clamp(24px, 5vh, 60px);
+  height: 100%;
+  position: relative;
+  padding: clamp(16px, 3vh, 32px);
+  gap: clamp(8px, 1.5vh, 16px);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.logoSection {
+  text-align: center;
+  margin-bottom: clamp(8px, 2vh, 24px);
+  animation: mainLogoIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.logoImage {
+  width: clamp(320px, 90vw, 600px);
+  max-width: 90%;
+  height: auto;
+  margin-bottom: clamp(4px, 1vh, 12px);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(26px, 6.5vw, 40px);
+  color: #eee;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5);
+  animation: mainTitleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 250px;
+}
+
+.menuButton {
+  padding: 14px 21px;
+  font-size: 28px;
+  background: linear-gradient(
+    130deg,
+    #8b6914 0%,
+    #b8860b 20%,
+    #e8cc6e 40%,
+    #e8cc6e 60%,
+    #b8860b 80%,
+    #8b6914 100%
+  );
+  color: #111;
+  border: 1px solid #d4af37;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  animation: mainBtnIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) var(--delay) both;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.2s, filter 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menuButton:active {
+  transform: scale(0.94);
+  filter: brightness(0.85);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.buttonLabel {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.buttonDescription {
+  text-align: center;
+  font-size: 12px;
+  color: #111;
+  margin-top: 2px;
+}
+
+.bottomBar {
+  position: absolute;
+  bottom: clamp(12px, 2vh, 24px);
+  left: clamp(16px, 3vw, 32px);
+  right: clamp(16px, 3vw, 32px);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.youtubeLink {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  text-decoration: none;
+}
+
+.youtubeLinkText {
+  color: #fff;
+  font-size: 10px;
+  font-family: 'Cinzel', serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.youtubeIcon {
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8))
+    drop-shadow(0 0 20px rgba(0, 0, 0, 0.5));
+}
+
+.websiteLink {
+  color: #fff;
+  font-size: 14px;
+  font-family: 'Cinzel', serif;
+  text-decoration: none;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5);
+}

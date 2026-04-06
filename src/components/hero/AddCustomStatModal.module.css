@@ -1,0 +1,48 @@
+.fieldGroup {
+  margin-bottom: 12px;
+}
+
+.fieldGroupLast {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 16px;
+  background-color: #1a1a2e;
+  color: #eee;
+  border: 1px solid #444;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.cancelBtn {
+  padding: 8px 16px;
+  background-color: transparent;
+  color: #aaa;
+  border: 1px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submitBtn {
+  padding: 8px 16px;
+  background-color: #4a6fa5;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Modal } from "../shared/Modal";
 import { useHeroStore } from "../../store/useHeroStore";
+import styles from "./AddCustomStatModal.module.css";
 
 interface AddCustomStatModalProps {
   heroId: string;
@@ -31,10 +32,8 @@ export function AddCustomStatModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add Custom Stat">
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 12 }}>
-          <label
-            style={{ display: "block", marginBottom: 4, fontSize: 14 }}
-          >
+        <div className={styles.fieldGroup}>
+          <label className={styles.label}>
             Stat Name
           </label>
           <input
@@ -43,22 +42,11 @@ export function AddCustomStatModal({
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             autoFocus
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              fontSize: 16,
-              backgroundColor: "#1a1a2e",
-              color: "#eee",
-              border: "1px solid #444",
-              borderRadius: 4,
-              boxSizing: "border-box",
-            }}
+            className={styles.input}
           />
         </div>
-        <div style={{ marginBottom: 16 }}>
-          <label
-            style={{ display: "block", marginBottom: 4, fontSize: 14 }}
-          >
+        <div className={styles.fieldGroupLast}>
+          <label className={styles.label}>
             Max Value
           </label>
           <input
@@ -66,43 +54,20 @@ export function AddCustomStatModal({
             value={max}
             min="1"
             onChange={(e) => setMax(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              fontSize: 16,
-              backgroundColor: "#1a1a2e",
-              color: "#eee",
-              border: "1px solid #444",
-              borderRadius: 4,
-              boxSizing: "border-box",
-            }}
+            className={styles.input}
           />
         </div>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+        <div className={styles.actions}>
           <button
             type="button"
             onClick={onClose}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "transparent",
-              color: "#aaa",
-              border: "1px solid #444",
-              borderRadius: 4,
-              cursor: "pointer",
-            }}
+            className={styles.cancelBtn}
           >
             Cancel
           </button>
           <button
             type="submit"
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#4a6fa5",
-              color: "#fff",
-              border: "none",
-              borderRadius: 4,
-              cursor: "pointer",
-            }}
+            className={styles.submitBtn}
           >
             Add
           </button>
