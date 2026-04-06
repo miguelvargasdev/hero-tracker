@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useModalAnimation } from "../../hooks/useModalAnimation";
 import styles from "./TutorialModal.module.css";
 
 const STORAGE_KEY = "hero-tracker-tutorial-seen";
@@ -212,23 +213,20 @@ const STEPS: TutorialStep[] = [
 export function TutorialModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(0);
   const [stepKey, setStepKey] = useState(0); // triggers re-animation on step change
-  const [exiting, setExiting] = useState(false);
+  const { exiting, close: animateOut } = useModalAnimation(200);
   const dotRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const isLast = step === STEPS.length - 1;
   const current = STEPS[step];
 
-  const animateOut = (cb: () => void) => {
-    setExiting(true);
-    setTimeout(cb, 200);
+  const dismiss = () => {
+    localStorage.setItem(STORAGE_KEY, "true");
+    onClose();
   };
 
   const handleNext = () => {
     if (isLast) {
-      animateOut(() => {
-        localStorage.setItem(STORAGE_KEY, "true");
-        onClose();
-      });
+      animateOut(dismiss);
     } else {
       setStep((s) => s + 1);
       setStepKey((k) => k + 1);
@@ -236,10 +234,7 @@ export function TutorialModal({ onClose }: { onClose: () => void }) {
   };
 
   const handleSkip = () => {
-    animateOut(() => {
-      localStorage.setItem(STORAGE_KEY, "true");
-      onClose();
-    });
+    animateOut(dismiss);
   };
 
   // Pop animation on the active dot when step changes

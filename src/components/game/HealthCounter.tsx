@@ -1,15 +1,11 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import { HERO_TEMPLATES } from "../../data/heroes";
+import { useLongPress } from "../../hooks/useLongPress";
+import { useFloatingNumbers, type FloatingNumber } from "../../hooks/useFloatingNumbers";
+import { useDrawerState } from "../../hooks/useDrawerState";
 import type { Hero } from "../../types/hero";
 import styles from "./HealthCounter.module.css";
-
-interface FloatingNumber {
-	id: number;
-	value: number;
-	arcX: number;
-	arcY: number;
-}
 
 let nextId = 0;
 
@@ -18,8 +14,6 @@ interface HealthCounterProps {
 	rotation?: number;
 	onSelect: () => void;
 }
-
-const LONG_PRESS_MS = 500;
 
 // Normalize rotation to 0–359
 const normRot = (r: number) => ((r % 360) + 360) % 360;
@@ -62,14 +56,13 @@ export function HealthCounter({
 		? null
 		: HERO_TEMPLATES.find((t) => t.id === hero.templateId);
 
-	const [floaters, setFloaters] = useState<FloatingNumber[]>([]);
+	const { floaters, spawn: spawnFloater } = useFloatingNumbers();
 	const [tapFlash, setTapFlash] = useState<"none" | "top" | "bottom">("none");
-	const [drawerState, setDrawerState] = useState<
-		"closed" | "opening" | "open" | "closing"
-	>("closed");
+	const { drawerState, openDrawer, closeDrawer, resetDrawer } = useDrawerState();
 	const [activeSubtrackers, setActiveSubtrackers] = useState<
 		("hp" | "mana" | "armor" | "attack")[]
 	>([]);
+	const [showSubtrackerModal, setShowSubtrackerModal] = useState(false);
 
 	// Clear subtrackers on game reset
 	const prevResetCounter = useRef(resetCounter);
@@ -78,89 +71,14 @@ export function HealthCounter({
 			prevResetCounter.current = resetCounter;
 			setActiveSubtrackers([]);
 			setShowSubtrackerModal(false);
-			setDrawerState("closed");
+			resetDrawer();
 		}
-	}, [resetCounter]);
-	const [showSubtrackerModal, setShowSubtrackerModal] = useState(false);
-	const cleanupTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
-	const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const didLongPress = useRef(false);
+	}, [resetCounter, resetDrawer]);
 
-	useEffect(() => {
-		return () => {
-			cleanupTimers.current.forEach((t) => clearTimeout(t));
-			if (longPressTimer.current) clearTimeout(longPressTimer.current);
-		};
-	}, []);
-
-	const spawnFloater = (isIncrement: boolean) => {
-		const value = isIncrement ? 1 : -1;
-		const direction = isIncrement ? 1 : -1;
-		const arcX = (Math.random() - 0.5) * 30;
-		const arcY = direction * -(50 + Math.random() * 40);
-		const id = nextId++;
-
-		const floater: FloatingNumber = { id, value, arcX, arcY };
-		setFloaters((prev) => [...prev, floater]);
-
-		const timer = setTimeout(() => {
-			setFloaters((prev) => prev.filter((f) => f.id !== id));
-			cleanupTimers.current.delete(timer);
-		}, 800);
-		cleanupTimers.current.add(timer);
-	};
-
-	const startLongPress = useCallback(() => {
-		if (isUnselected) return;
-		didLongPress.current = false;
-		if (longPressTimer.current) clearTimeout(longPressTimer.current);
-		longPressTimer.current = setTimeout(() => {
-			didLongPress.current = true;
-			setDrawerState("opening");
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => setDrawerState("open"));
-			});
-			longPressTimer.current = null;
-		}, LONG_PRESS_MS);
-	}, [isUnselected]);
-
-	const cancelLongPress = useCallback(() => {
-		if (longPressTimer.current) {
-			clearTimeout(longPressTimer.current);
-			longPressTimer.current = null;
-		}
-	}, []);
-
-	// Use a ref to track touch start position for move threshold
-	const touchStartPos = useRef<{ x: number; y: number } | null>(null);
-
-	const handleTouchStart = useCallback(
-		(e: React.TouchEvent) => {
-			const touch = e.touches[0];
-			touchStartPos.current = { x: touch.clientX, y: touch.clientY };
-			startLongPress();
-		},
-		[startLongPress],
+	const { handlers: longPressHandlers, didFire: didLongPress } = useLongPress(
+		openDrawer,
+		{ disabled: isUnselected },
 	);
-
-	const handleTouchMove = useCallback(
-		(e: React.TouchEvent) => {
-			if (!touchStartPos.current || !longPressTimer.current) return;
-			const touch = e.touches[0];
-			const dx = touch.clientX - touchStartPos.current.x;
-			const dy = touch.clientY - touchStartPos.current.y;
-			// Only cancel if finger moves more than 10px
-			if (Math.sqrt(dx * dx + dy * dy) > 10) {
-				cancelLongPress();
-			}
-		},
-		[cancelLongPress],
-	);
-
-	const handleTouchEnd = useCallback(() => {
-		cancelLongPress();
-		touchStartPos.current = null;
-	}, [cancelLongPress]);
 
 	const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (didLongPress.current) {
@@ -186,14 +104,6 @@ export function HealthCounter({
 		setTimeout(() => setTapFlash("none"), 150);
 	};
 
-	const closeDrawer = useCallback((onDone?: () => void) => {
-		setDrawerState("closing");
-		setTimeout(() => {
-			setDrawerState("closed");
-			onDone?.();
-		}, 300);
-	}, []);
-
 	const handleChangeHero = () => {
 		closeDrawer(() => onSelect());
 	};
@@ -216,12 +126,7 @@ export function HealthCounter({
 		<div
 			className={`${styles.card}${isUnselected ? ` ${styles.unselected}` : ""}`}
 			onClick={handleClick}
-			onTouchStart={handleTouchStart}
-			onTouchMove={handleTouchMove}
-			onTouchEnd={handleTouchEnd}
-			onMouseDown={startLongPress}
-			onMouseUp={cancelLongPress}
-			onMouseLeave={cancelLongPress}
+			{...longPressHandlers}
 			onContextMenu={(e) => e.preventDefault()}
 		>
 			{/* Hero artwork background */}

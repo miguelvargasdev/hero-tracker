@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
+import { useModalAnimation } from "../../hooks/useModalAnimation";
 import { HealthCounter } from "./HealthCounter";
 import { HeroSelectModal } from "./HeroSelectModal";
 import { TutorialModal, useTutorialSeen } from "./TutorialModal";
@@ -11,28 +12,13 @@ export function GameView() {
 	const gameMode = useHeroStore((s) => s.gameMode);
 	const navigateTo = useHeroStore((s) => s.navigateTo);
 	const resetGame = useHeroStore((s) => s.resetGame);
-	const [menuVisible, setMenuVisible] = useState(false);
-	const [menuExiting, setMenuExiting] = useState(false);
+	const { visible: menuVisible, exiting: menuExiting, open: openMenu, close: closeMenu } = useModalAnimation();
 	const [selectingPlayerId, setSelectingPlayerId] = useState<string | null>(
 		null,
 	);
 	const tutorialSeen = useTutorialSeen();
 	const [tutorialDismissed, setTutorialDismissed] = useState(false);
 	const [showTutorial, setShowTutorial] = useState(false);
-
-	const openMenu = useCallback(() => {
-		setMenuVisible(true);
-		setMenuExiting(false);
-	}, []);
-
-	const closeMenu = useCallback((onDone?: () => void) => {
-		setMenuExiting(true);
-		setTimeout(() => {
-			setMenuVisible(false);
-			setMenuExiting(false);
-			onDone?.();
-		}, 180);
-	}, []);
 
 	if (heroes.length === 0) {
 		navigateTo("main-menu");
