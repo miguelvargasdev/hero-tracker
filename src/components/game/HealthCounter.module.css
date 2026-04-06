@@ -378,6 +378,11 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   touch-action: pan-x;
+  cursor: grab;
+}
+
+.subtrackerFlexDefault:active {
+  cursor: grabbing;
 }
 
 .subtrackerFlexDefault::-webkit-scrollbar {

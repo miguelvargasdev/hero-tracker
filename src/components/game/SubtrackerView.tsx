@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import type { FloatingNumber } from "../../hooks/useFloatingNumbers";
 import type { Hero } from "../../types/hero";
@@ -6,6 +6,8 @@ import { normRot, isClickIncr, flashProps, getNextId, type StatKey, type StatCon
 import { STAT_CONFIGS } from "./statConfigs";
 import { FloatingParticle } from "./FloatingParticle";
 import styles from "./HealthCounter.module.css";
+
+const DRAG_THRESHOLD = 5;
 
 export function SubtrackerView({
 	hero,
@@ -32,9 +34,59 @@ export function SubtrackerView({
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const [activePage, setActivePage] = useState(0);
 
+	// Mouse drag-to-scroll state
+	const dragState = useRef<{
+		active: boolean;
+		startX: number;
+		startY: number;
+		scrollLeft: number;
+		scrollTop: number;
+		didDrag: boolean;
+	} | null>(null);
+
 	useEffect(() => {
 		return () => {
 			cleanupTimers.current.forEach((t) => clearTimeout(t));
+		};
+	}, []);
+
+	const handleMouseDown = useCallback((e: React.MouseEvent) => {
+		const el = scrollRef.current;
+		if (!el) return;
+		dragState.current = {
+			active: true,
+			startX: e.clientX,
+			startY: e.clientY,
+			scrollLeft: el.scrollLeft,
+			scrollTop: el.scrollTop,
+			didDrag: false,
+		};
+	}, []);
+
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			const ds = dragState.current;
+			const el = scrollRef.current;
+			if (!ds?.active || !el) return;
+			const dx = e.clientX - ds.startX;
+			const dy = e.clientY - ds.startY;
+			if (!ds.didDrag && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
+			ds.didDrag = true;
+			el.scrollLeft = ds.scrollLeft - dx;
+			el.scrollTop = ds.scrollTop - dy;
+		};
+
+		const handleMouseUp = () => {
+			if (dragState.current) {
+				dragState.current.active = false;
+			}
+		};
+
+		window.addEventListener("mousemove", handleMouseMove);
+		window.addEventListener("mouseup", handleMouseUp);
+		return () => {
+			window.removeEventListener("mousemove", handleMouseMove);
+			window.removeEventListener("mouseup", handleMouseUp);
 		};
 	}, []);
 
@@ -60,6 +112,7 @@ export function SubtrackerView({
 		currentValue: number,
 	) => {
 		e.stopPropagation();
+		if (dragState.current?.didDrag) return;
 		const rect = e.currentTarget.getBoundingClientRect();
 		const isIncrement = isClickIncr(rotation, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height);
 		const change = isIncrement ? 1 : -1;
@@ -131,6 +184,7 @@ export function SubtrackerView({
 				ref={scrollRef}
 				className={flexClass}
 				onScroll={handleScroll}
+				onMouseDown={handleMouseDown}
 			>
 				{stats.map((stat) => {
 					return (
