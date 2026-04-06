@@ -71,15 +71,23 @@ export function SubtrackerView({
 			const dx = e.clientX - ds.startX;
 			const dy = e.clientY - ds.startY;
 			if (!ds.didDrag && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
-			ds.didDrag = true;
+			if (!ds.didDrag) {
+				// Disable snap while dragging so scrollLeft changes aren't overridden
+				el.style.scrollSnapType = "none";
+				ds.didDrag = true;
+			}
 			el.scrollLeft = ds.scrollLeft - dx;
 			el.scrollTop = ds.scrollTop - dy;
 		};
 
 		const handleMouseUp = () => {
-			if (dragState.current) {
-				dragState.current.active = false;
+			const ds = dragState.current;
+			const el = scrollRef.current;
+			if (ds && el && ds.didDrag) {
+				// Re-enable snap so it settles to nearest stat
+				el.style.scrollSnapType = "";
 			}
+			if (ds) ds.active = false;
 		};
 
 		window.addEventListener("mousemove", handleMouseMove);
