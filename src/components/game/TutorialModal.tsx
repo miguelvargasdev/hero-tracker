@@ -183,11 +183,3 @@ export function TutorialModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** Returns true if the tutorial has already been dismissed */
-export function useTutorialSeen(): boolean {
-  const [seen, setSeen] = useState(true); // default true to avoid flash
-  useEffect(() => {
-    setSeen(localStorage.getItem(STORAGE_KEY) === "true");
-  }, []);
-  return seen;
-}
