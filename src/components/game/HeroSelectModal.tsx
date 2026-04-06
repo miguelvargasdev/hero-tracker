@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { HERO_TEMPLATES } from "../../data/heroes";
 import { useHeroStore } from "../../store/useHeroStore";
+import { useModalAnimation } from "../../hooks/useModalAnimation";
 import styles from "./HeroSelectModal.module.css";
 
 interface HeroSelectModalProps {
@@ -16,27 +17,18 @@ export function HeroSelectModal({
 }: HeroSelectModalProps) {
 	const heroes = useHeroStore((s) => s.heroes);
 	const selectHero = useHeroStore((s) => s.selectHero);
-	const [visible, setVisible] = useState(false);
-	const [exiting, setExiting] = useState(false);
+	const { visible, exiting, open, close } = useModalAnimation();
 
 	useEffect(() => {
 		if (isOpen) {
-			setVisible(true);
-			setExiting(false);
+			open();
 		} else if (visible && !exiting) {
-			// Parent closed without animation (edge case)
-			setVisible(false);
+			close();
 		}
 	}, [isOpen]);
 
 	const handleClose = () => {
-		if (exiting) return;
-		setExiting(true);
-		setTimeout(() => {
-			setVisible(false);
-			setExiting(false);
-			onClose();
-		}, 180);
+		close(() => onClose());
 	};
 
 	if (!visible || !playerId) return null;
