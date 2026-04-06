@@ -43,10 +43,9 @@ export function StatBlock({
         <div
           className={styles.barFill}
           style={{
-            width: `${Math.max(0, Math.min(100, percent))}%`,
-            backgroundColor:
-              percent > 50 ? "#4caf50" : percent > 25 ? "#ff9800" : "#f44336",
-          }}
+            "--bar-width": `${Math.max(0, Math.min(100, percent))}%`,
+            "--bar-color": percent > 50 ? "#4caf50" : percent > 25 ? "#ff9800" : "#f44336",
+          } as React.CSSProperties}
         />
       </div>
 
