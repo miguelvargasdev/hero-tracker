@@ -3,8 +3,9 @@ import { useHeroStore } from "../../store/useHeroStore";
 import { useModalAnimation } from "../../hooks/useModalAnimation";
 import { HealthCounter } from "./HealthCounter";
 import { HeroSelectModal } from "./HeroSelectModal";
-import { TutorialModal, useTutorialSeen } from "./TutorialModal";
-import type { Hero } from "../../types/hero";
+import { TutorialModal } from "./TutorialModal";
+import { TyrantLayout } from "./TyrantLayout";
+import { useTutorialSeen } from "../../hooks/useTutorialSeen";
 import styles from "./GameView.module.css";
 
 export function GameView() {
@@ -88,26 +89,15 @@ export function GameView() {
 			<button
 				onClick={openMenu}
 				onDragStart={(e) => e.preventDefault()}
-				className={styles.crownBtn}
-				style={
-					isSolo
-						? { top: 8, right: 8 }
-						: {
-								top: getMenuTopPercent(),
-								left: "50%",
-								transform: "translate(-50%, -50%)",
-							}
-				}
+				className={`${styles.crownBtn} ${isSolo ? styles.crownSolo : styles.crownCenter}`}
+				style={!isSolo ? { "--crown-top": getMenuTopPercent() } as React.CSSProperties : undefined}
 				aria-label="Menu"
 			>
 				<img
 					src={`${import.meta.env.BASE_URL}crown.png`}
 					alt="Menu"
 					draggable={false}
-					className={styles.crownImg}
-					style={{
-						transform: isTyrant ? "rotate(-90deg)" : undefined,
-					}}
+					className={`${styles.crownImg}${isTyrant ? ` ${styles.crownImgTyrant}` : ""}`}
 				/>
 			</button>
 
@@ -124,14 +114,12 @@ export function GameView() {
 				/>
 			) : (
 				<div
-					className={styles.counterGrid}
-					style={getGridLayout(heroes.length)}
+					className={`${styles.counterGrid} ${getGridClass(heroes.length)}`}
 				>
 					{heroes.map((hero, index) => (
 						<div
 							key={hero.id}
-							className={styles.gridItem}
-							style={getItemStyle(index, heroes.length)}
+							className={`${styles.gridItem}${shouldSpan(index, heroes.length) ? ` ${styles.gridItemSpan}` : ""}`}
 						>
 							<HealthCounter
 								hero={hero}
@@ -163,41 +151,20 @@ export function GameView() {
 	);
 }
 
-function getItemStyle(index: number, total: number): React.CSSProperties {
-	return (total === 5 && index === 4) || (total === 3 && index === 2)
-		? { gridColumn: "span 2" }
-		: {};
+function shouldSpan(index: number, total: number): boolean {
+	return (total === 5 && index === 4) || (total === 3 && index === 2);
 }
 
-function getGridLayout(count: number): React.CSSProperties {
-	switch (count) {
-		case 2:
-			return {
-				gridTemplateColumns: "1fr",
-				gridTemplateRows: "1fr 1fr",
-			};
-		case 3:
-		case 4:
-			return {
-				gridTemplateColumns: "1fr 1fr",
-				gridTemplateRows: "1fr 1fr",
-			};
-		case 5:
-			return {
-				gridTemplateColumns: "1fr 1fr",
-				gridTemplateRows: "1fr 1fr 1fr",
-			};
-		case 6:
-			return {
-				gridTemplateColumns: "1fr 1fr 1fr",
-				gridTemplateRows: "1fr 1fr",
-			};
-		default:
-			return {
-				gridTemplateColumns: "1fr 1fr",
-				gridTemplateRows: "1fr",
-			};
-	}
+const GRID_CLASSES: Record<number, string> = {
+	2: styles.grid2,
+	3: styles.grid3,
+	4: styles.grid4,
+	5: styles.grid5,
+	6: styles.grid6,
+};
+
+function getGridClass(count: number): string {
+	return GRID_CLASSES[count] ?? styles.grid2;
 }
 
 /** Returns the rotation in degrees for each player's counter */
@@ -220,54 +187,3 @@ function getRotation(index: number, total: number): number {
 	}
 }
 
-/* ─── Tyrant Layout ─── */
-
-function TyrantLayout({
-	heroes,
-	onSelect,
-}: {
-	heroes: Hero[];
-	onSelect: (id: string) => void;
-}) {
-	const boss = heroes.find((h) => h.role === "boss");
-	const team = heroes.filter((h) => h.role === "team");
-
-	if (!boss) return null;
-
-	return (
-		<div
-			className={styles.tyrantGrid}
-			style={{
-				gridTemplateRows: `repeat(${team.length}, 1fr)`,
-			}}
-		>
-			{/* Boss: right column, spans all rows */}
-			<div
-				style={{
-					gridColumn: 2,
-					gridRow: `1 / ${team.length + 1}`,
-					height: "100%",
-				}}
-			>
-				<HealthCounter
-					hero={boss}
-					rotation={270}
-					onSelect={() => onSelect(boss.id)}
-				/>
-			</div>
-			{/* Team: stacked vertically in left column, rotated 90° */}
-			{team.map((hero, i) => (
-				<div
-					key={hero.id}
-					style={{ gridColumn: 1, gridRow: i + 1, height: "100%" }}
-				>
-					<HealthCounter
-						hero={hero}
-						rotation={90}
-						onSelect={() => onSelect(hero.id)}
-					/>
-				</div>
-			))}
-		</div>
-	);
-}

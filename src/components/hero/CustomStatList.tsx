@@ -58,9 +58,7 @@ export function CustomStatList({ heroId, stats }: CustomStatListProps) {
             <div className={styles.barTrack}>
               <div
                 className={styles.barFill}
-                style={{
-                  width: `${Math.max(0, Math.min(100, percent))}%`,
-                }}
+                style={{ "--bar-width": `${Math.max(0, Math.min(100, percent))}%` } as React.CSSProperties}
               />
             </div>
 

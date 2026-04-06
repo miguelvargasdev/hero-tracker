@@ -94,6 +94,7 @@
   overflow: hidden;
   position: relative;
   transition: transform 0.1s;
+  background-color: var(--hero-bg);
 }
 
 .heroCardAnimated {
@@ -112,4 +113,6 @@
   height: 100%;
   background-size: 400%;
   background-repeat: no-repeat;
+  background-image: var(--hero-image);
+  background-position: var(--hero-focus);
 }

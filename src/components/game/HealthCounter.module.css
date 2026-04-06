@@ -31,6 +31,29 @@
   border: 2px solid #555;
 }
 
+/* ─── Hero Artwork Background ─── */
+
+.artwork {
+  position: absolute;
+  background-size: cover;
+  background-position: var(--bg-position);
+  background-repeat: no-repeat;
+  background-image: var(--bg-image);
+}
+
+.artworkDefault {
+  inset: 0;
+  transform: rotate(var(--rotation));
+}
+
+.artworkRotated {
+  top: 50%;
+  left: 50%;
+  width: 100cqh;
+  height: 100cqw;
+  transform: translate(-50%, -50%) rotate(var(--rotation));
+}
+
 /* ─── Dim Overlay ─── */
 
 .dimOverlay {
@@ -54,6 +77,7 @@
   flex-direction: column;
   align-items: center;
   gap: clamp(2px, 0.5vw, 6px);
+  transform: rotate(var(--rotation, 0deg));
 }
 
 /* ─── HP Text ─── */
@@ -88,6 +112,14 @@
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8));
 }
 
+/* ─── Stat Icon Wrapper (SubtrackerModal) ─── */
+
+.statIconWrap {
+  width: clamp(20px, 5vw, 28px);
+  height: clamp(20px, 5vw, 28px);
+  flex-shrink: 0;
+}
+
 /* ─── Tap Flash ─── */
 
 .tapFlash {
@@ -95,7 +127,18 @@
   z-index: 2;
   pointer-events: none;
   animation: tapFlashFade 0.15s ease-out forwards;
+  background: var(--flash-bg);
 }
+
+/* Tap flash clip regions by rotation × side */
+.tapFlashTop0 { top: 0; left: 0; height: 50%; width: 100%; }
+.tapFlashBottom0 { bottom: 0; left: 0; height: 50%; width: 100%; }
+.tapFlashTop90 { right: 0; top: 0; width: 50%; height: 100%; }
+.tapFlashBottom90 { left: 0; top: 0; width: 50%; height: 100%; }
+.tapFlashTop180 { bottom: 0; left: 0; height: 50%; width: 100%; }
+.tapFlashBottom180 { top: 0; left: 0; height: 50%; width: 100%; }
+.tapFlashTop270 { left: 0; top: 0; width: 50%; height: 100%; }
+.tapFlashBottom270 { right: 0; top: 0; width: 50%; height: 100%; }
 
 /* ─── Drawer Overlay Root ─── */
 
@@ -105,6 +148,19 @@
   z-index: 5;
   display: flex;
   overflow: hidden;
+  flex-direction: column;
+}
+
+.drawerRot90 {
+  flex-direction: row-reverse;
+}
+
+.drawerRot180 {
+  transform: rotate(180deg);
+}
+
+.drawerRot270 {
+  flex-direction: row;
 }
 
 /* ─── Drawer Dim Area ─── */
@@ -112,6 +168,11 @@
 .drawerDim {
   flex: 1;
   transition: background-color 0.3s ease;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.drawerDimVisible {
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 /* ─── Drawer Button ─── */
@@ -125,6 +186,12 @@
   align-items: center;
   gap: 4px;
   color: #fff;
+  padding: 8px;
+}
+
+.drawerBtnCompact {
+  padding: 4px;
+  transform: rotate(var(--rotation));
 }
 
 /* ─── Drawer Button Label ─── */
@@ -136,6 +203,18 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Drawer Button SVG Icon ─── */
+
+.drawerBtnIcon {
+  width: clamp(28px, 6vw, 44px);
+  height: clamp(28px, 6vw, 44px);
+}
+
+.drawerBtnIconCompact {
+  width: clamp(18px, 4vw, 28px);
+  height: clamp(18px, 4vw, 28px);
 }
 
 /* ─── Drawer Divider ─── */
@@ -164,6 +243,8 @@
   display: flex;
   align-items: center;
   transition: transform 0.3s ease;
+  background-color: var(--hero-color);
+  transform: var(--slide-transform);
 }
 
 .drawerContentDefault {
@@ -189,6 +270,10 @@
   background-color: rgba(0, 0, 0, 0.7);
 }
 
+.modalRot180 {
+  transform: rotate(180deg);
+}
+
 /* ─── Subtracker Modal Card ─── */
 
 .modalCard {
@@ -198,6 +283,17 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  border: 1px solid var(--hero-color);
+}
+
+.modalCardDefault {
+  min-width: 70%;
+  max-width: 85%;
+}
+
+.modalCardRotated {
+  max-width: 80%;
+  transform: rotate(var(--rotation));
 }
 
 /* ─── Subtracker Modal Heading ─── */
@@ -228,6 +324,11 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.statBtnActive {
+  background-color: var(--hero-color);
 }
 
 .statBtnLabel {
@@ -240,6 +341,44 @@
   opacity: 0.7;
 }
 
+/* ─── SubtrackerView ─── */
+
+.subtrackerRoot {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subtrackerRootDefault {
+  inset: 0;
+  transform: rotate(var(--rotation, 0deg));
+}
+
+.subtrackerRootRotated {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.subtrackerFlex {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.subtrackerFlexDefault {
+  align-items: center;
+}
+
+.subtrackerFlexRotated {
+  align-items: stretch;
+  flex-direction: column;
+}
+
 /* ─── SubtrackerView Stat Cell ─── */
 
 .statCell {
@@ -250,6 +389,35 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  flex: 1;
+}
+
+.statCellHoriz {
+  width: 100%;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.statCellHoriz:last-child {
+  border-bottom: none;
+}
+
+.statCellVert {
+  height: 100%;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.statCellVert:last-child {
+  border-right: none;
+}
+
+/* ─── SubtrackerView Stat Inner ─── */
+
+.statCellInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2px, 0.5vw, 4px);
+  transform: rotate(var(--rotation, 0deg));
 }
 
 /* ─── SubtrackerView Stat Value ─── */
@@ -263,6 +431,16 @@
     0 2px 8px rgba(0, 0, 0, 0.8),
     0 0 4px rgba(0, 0, 0, 0.6);
   letter-spacing: -0.02em;
+  font-size: var(--stat-font-size);
+}
+
+/* ─── SubtrackerView Stat Icon Wrap ─── */
+
+.subtrackerIconWrap {
+  width: var(--stat-icon-size);
+  height: var(--stat-icon-size);
+  opacity: 0.85;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.7));
 }
 
 /* ─── Floating Particle ─── */
@@ -280,4 +458,21 @@
     0 1px 6px rgba(0, 0, 0, 0.9),
     0 0 3px rgba(0, 0, 0, 0.7);
   pointer-events: none;
+  transform: translate(-50%, -50%) rotate(var(--rotation, 0deg));
+  opacity: 1;
+  transition: none;
+}
+
+.particlePositive {
+  color: #4ade80;
+}
+
+.particleNegative {
+  color: #f87171;
+}
+
+.particleStarted {
+  transition: transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.75s ease-out;
+  transform: translate(calc(-50% + var(--arc-x)), calc(-50% + var(--arc-y))) rotate(var(--rotation, 0deg));
+  opacity: 0;
 }

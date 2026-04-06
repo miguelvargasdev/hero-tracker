@@ -41,6 +41,7 @@
   position: relative;
   padding: clamp(16px, 3vh, 32px);
   gap: clamp(8px, 1.5vh, 16px);
+  background-image: var(--bg-image);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -52,6 +52,7 @@
   background-color: #6a8fc4;
   border-radius: 3px;
   transition: width 0.3s;
+  width: var(--bar-width);
 }
 
 .quickButtons {
