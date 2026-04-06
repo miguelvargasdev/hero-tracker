@@ -40,9 +40,9 @@ const STEPS: TutorialStep[] = [
     ),
   },
   {
-    title: "Long Press for Options",
+    title: "Swipe for Options",
     description:
-      "Hold down on a card to open the drawer. From there you can change your hero or add subtrackers like Attack, Armor, and Mana.",
+      "Swipe up on a card to open the drawer. From there you can change your hero or add subtrackers like Attack, Armor, and Mana.",
     visual: (
       <div className={styles.tutLongPressWrap}>
         <div className={styles.tutLongPressCard}>
