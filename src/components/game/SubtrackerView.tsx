@@ -178,7 +178,7 @@ export function SubtrackerView({
 	// 90° stacks top-down which already matches the right-side player.)
 	const norm = normRot(rotation);
 	let stats = statsBase;
-	if (norm === 270) {
+	if (norm === 270 || norm === 180) {
 		stats = [...statsBase].reverse();
 	}
 
@@ -198,11 +198,7 @@ export function SubtrackerView({
 	const is180 = norm === 180;
 	const rootClass = `${styles.subtrackerRoot} ${is90or270 || is180 ? styles.subtrackerRootRotated : styles.subtrackerRootDefault}`;
 	const flexClass = `${styles.subtrackerFlex} ${
-		is90or270
-			? styles.subtrackerFlexRotated
-			: is180
-				? `${styles.subtrackerFlexDefault} ${styles.subtrackerFlex180}`
-				: styles.subtrackerFlexDefault
+		is90or270 ? styles.subtrackerFlexRotated : styles.subtrackerFlexDefault
 	}`;
 	const cellVariant = is90or270 ? styles.statCellHoriz : styles.statCellVert;
 
