@@ -192,8 +192,18 @@ export function SubtrackerView({
 		? `clamp(20px, ${10 / visibleCount}cqmax, 46px)`
 		: `clamp(18px, ${14 / visibleCount}cqi, 38px)`;
 
-	const rootClass = `${styles.subtrackerRoot} ${is90or270 ? styles.subtrackerRootRotated : styles.subtrackerRootDefault}`;
-	const flexClass = `${styles.subtrackerFlex} ${is90or270 ? styles.subtrackerFlexRotated : styles.subtrackerFlexDefault}`;
+	// 180° gets its own root (no parent rotate transform) so native scroll
+	// direction matches the player's expectation. Cell content is rotated
+	// individually instead.
+	const is180 = norm === 180;
+	const rootClass = `${styles.subtrackerRoot} ${is90or270 || is180 ? styles.subtrackerRootRotated : styles.subtrackerRootDefault}`;
+	const flexClass = `${styles.subtrackerFlex} ${
+		is90or270
+			? styles.subtrackerFlexRotated
+			: is180
+				? `${styles.subtrackerFlexDefault} ${styles.subtrackerFlex180}`
+				: styles.subtrackerFlexDefault
+	}`;
 	const cellVariant = is90or270 ? styles.statCellHoriz : styles.statCellVert;
 
 	const showDots = stats.length > 2;
@@ -201,13 +211,10 @@ export function SubtrackerView({
 	const totalPages = Math.max(1, stats.length - 1);
 	const dotContainerClass = is90or270
 		? `${styles.scrollDots} ${styles.scrollDotsRotated} ${norm === 90 ? styles.scrollDotsRot90 : styles.scrollDotsRot270}`
-		: `${styles.scrollDots} ${styles.scrollDotsDefault}`;
+		: `${styles.scrollDots} ${styles.scrollDotsDefault}${is180 ? ` ${styles.scrollDotsRot180}` : ""}`;
 
 	return (
-		<div
-			className={rootClass}
-			style={!is90or270 && rotation ? { "--rotation": rotDeg } as React.CSSProperties : undefined}
-		>
+		<div className={rootClass}>
 			<div
 				ref={scrollRef}
 				className={flexClass}
@@ -224,7 +231,7 @@ export function SubtrackerView({
 							<div
 								className={styles.statCellInner}
 								style={{
-									"--rotation": is90or270 ? rotDeg : "0deg",
+									"--rotation": is90or270 || is180 ? rotDeg : "0deg",
 									"--stat-font-size": statFontSize,
 									"--stat-icon-size": statIconSize,
 								} as React.CSSProperties}
@@ -256,7 +263,7 @@ export function SubtrackerView({
 										value={f.value}
 										arcX={f.arcX}
 										arcY={f.arcY}
-										rotation={is90or270 ? rotation : 0}
+										rotation={is90or270 || is180 ? rotation : 0}
 									/>
 								))}
 						</div>
