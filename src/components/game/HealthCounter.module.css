@@ -336,6 +336,40 @@
   text-align: left;
 }
 
+/* Compact modal: hide labels when the card is small so the modal still fits */
+@container (max-width: 220px) {
+  .statBtnLabel {
+    display: none;
+  }
+  .statBtn {
+    justify-content: center;
+    gap: 6px;
+  }
+  .modalCard {
+    padding: 8px;
+    gap: 4px;
+  }
+  .modalHeading {
+    font-size: 10px;
+  }
+}
+@container (max-height: 220px) {
+  .statBtnLabel {
+    display: none;
+  }
+  .statBtn {
+    justify-content: center;
+    gap: 6px;
+  }
+  .modalCard {
+    padding: 8px;
+    gap: 4px;
+  }
+  .modalHeading {
+    font-size: 10px;
+  }
+}
+
 .statBtnCheck {
   font-size: clamp(10px, 2.5vw, 14px);
   opacity: 0.7;
@@ -375,6 +409,7 @@
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   touch-action: pan-x;
@@ -396,6 +431,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   touch-action: pan-y;
