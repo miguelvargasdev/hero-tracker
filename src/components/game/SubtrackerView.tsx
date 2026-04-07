@@ -52,21 +52,19 @@ export function SubtrackerView({
 
 	// Reset scroll whenever the set of active subtrackers changes
 	// (e.g. after the user closes the Add Subtracker modal).
-	// For 180°, stats are reversed so HP sits at the DOM end — scroll
-	// to the max so HP + adjacent subtracker are visible and the dot
-	// indicator starts at the highest index.
 	const is180Reset = normRot(rotation) === 180;
 	useEffect(() => {
 		const el = scrollRef.current;
 		if (!el) return;
 		requestAnimationFrame(() => {
+			el.scrollTo({ left: 0, top: 0, behavior: "auto" });
 			if (is180Reset) {
-				const halfPage = el.clientWidth / 2;
-				const maxScroll = el.scrollWidth - el.clientWidth;
-				el.scrollTo({ left: maxScroll, top: 0, behavior: "auto" });
-				setActivePage(halfPage > 0 ? Math.round(maxScroll / halfPage) : 0);
+				// row-reverse: scrollLeft=0 shows HP (DOM-first). Dot index
+				// starts at the top so it counts down as they swipe.
+				const totalStats = 1 + activeKeys.filter((k) => k !== "hp").length;
+				const totalPagesLocal = Math.max(1, totalStats - 1);
+				setActivePage(totalPagesLocal - 1);
 			} else {
-				el.scrollTo({ left: 0, top: 0, behavior: "auto" });
 				setActivePage(0);
 			}
 		});
@@ -168,11 +166,23 @@ export function SubtrackerView({
 	const handleScroll = () => {
 		const el = scrollRef.current;
 		if (!el) return;
-		const pageSize = is90or270 ? el.clientHeight : el.clientWidth;
-		const scrollPos = is90or270 ? el.scrollTop : el.scrollLeft;
+		const is90or270Local = rotation === 90 || rotation === 270;
+		const is180Local = normRot(rotation) === 180;
+		const pageSize = is90or270Local ? el.clientHeight : el.clientWidth;
+		const scrollPos = is90or270Local ? el.scrollTop : el.scrollLeft;
 		// Each stat takes 50% of the viewport, so a "page" is half the visible size
 		const halfPage = pageSize / 2;
-		setActivePage(Math.round(scrollPos / halfPage));
+		// row-reverse in Chrome can use negative scrollLeft; take the absolute distance.
+		const absPage = halfPage > 0 ? Math.round(Math.abs(scrollPos) / halfPage) : 0;
+		if (is180Local) {
+			// For 180° we want the active dot to start at the highest index
+			// (player's right side, "3") and count down as they swipe.
+			const totalStats = 1 + activeKeys.filter((k) => k !== "hp").length;
+			const totalPagesLocal = Math.max(1, totalStats - 1);
+			setActivePage(Math.max(0, totalPagesLocal - 1 - absPage));
+		} else {
+			setActivePage(absPage);
+		}
 	};
 
 	// HP is always first, then user-added subtrackers
@@ -185,13 +195,12 @@ export function SubtrackerView({
 		})
 		.filter(Boolean) as (StatConfig & { value: number })[];
 
-	// Reverse stat order for 180° and 270° so HP ends up on the player's
-	// left (reading-first position). Using a real array reverse (rather
-	// than flex row-reverse) keeps scrollLeft semantics normal and lets
-	// :last-child strip the correct cell border.
+	// Reverse stat order for 270° so HP ends up on the player's left.
+	// 180° uses row-reverse at the flex level instead, to keep HP at the
+	// DOM start (so scrollLeft=0 on row-reverse starts HP visible).
 	const norm = normRot(rotation);
 	let stats = statsBase;
-	if (norm === 270 || norm === 180) {
+	if (norm === 270) {
 		stats = [...statsBase].reverse();
 	}
 
@@ -211,7 +220,11 @@ export function SubtrackerView({
 	const is180 = norm === 180;
 	const rootClass = `${styles.subtrackerRoot} ${is90or270 || is180 ? styles.subtrackerRootRotated : styles.subtrackerRootDefault}`;
 	const flexClass = `${styles.subtrackerFlex} ${
-		is90or270 ? styles.subtrackerFlexRotated : styles.subtrackerFlexDefault
+		is90or270
+			? styles.subtrackerFlexRotated
+			: is180
+				? `${styles.subtrackerFlexDefault} ${styles.subtrackerFlex180}`
+				: styles.subtrackerFlexDefault
 	}`;
 	const cellVariant = is90or270 ? styles.statCellHoriz : styles.statCellVert;
 
