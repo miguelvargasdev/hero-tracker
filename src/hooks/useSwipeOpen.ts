@@ -43,8 +43,8 @@ export function useSwipeOpen(
 		const dy = t.clientY - start.current.y;
 		if (isUpSwipe(dx, dy)) {
 			didFire.current = true;
+			start.current = null;
 			onSwipeOpen();
-			setTimeout(() => { didFire.current = false; }, 0);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [disabled, onSwipeOpen, rotation]);
@@ -67,8 +67,8 @@ export function useSwipeOpen(
 		const dy = e.clientY - start.current.y;
 		if (isUpSwipe(dx, dy)) {
 			didFire.current = true;
+			start.current = null;
 			onSwipeOpen();
-			setTimeout(() => { didFire.current = false; }, 0);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [disabled, onSwipeOpen, rotation]);

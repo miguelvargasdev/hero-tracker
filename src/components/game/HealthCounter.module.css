@@ -496,6 +496,11 @@
   flex-direction: row;
 }
 
+.scrollDotsRot180 {
+  bottom: auto;
+  top: 6px;
+}
+
 .scrollDotsRotated {
   top: 50%;
   flex-direction: column;
