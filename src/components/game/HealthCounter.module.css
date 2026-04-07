@@ -425,12 +425,6 @@
   cursor: grabbing;
 }
 
-/* 180°: horizontal row-reverse so HP (DOM-first) ends up on the
-   visual right, which is the 180° player's left. */
-.subtrackerFlex180 {
-  flex-direction: row-reverse;
-}
-
 .subtrackerFlexRotated {
   align-items: stretch;
   flex-direction: column;
