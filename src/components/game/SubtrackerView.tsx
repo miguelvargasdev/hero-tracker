@@ -50,6 +50,15 @@ export function SubtrackerView({
 		};
 	}, []);
 
+	// Reset scroll to start whenever the set of active subtrackers changes
+	// (e.g. after the user closes the Add Subtracker modal).
+	useEffect(() => {
+		const el = scrollRef.current;
+		if (!el) return;
+		el.scrollTo({ left: 0, top: 0, behavior: "auto" });
+		setActivePage(0);
+	}, [activeKeys]);
+
 	const is90or270 = rotation === 90 || rotation === 270;
 
 	const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -74,8 +83,10 @@ export function SubtrackerView({
 			const dy = e.clientY - ds.startY;
 			if (!ds.didDrag && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
 			if (!ds.didDrag) {
-				// Disable snap while dragging so scrollLeft changes aren't overridden
+				// Disable snap and smooth-scroll while dragging so scrollLeft
+				// changes aren't overridden or animated per-pixel.
 				el.style.scrollSnapType = "none";
+				el.style.scrollBehavior = "auto";
 				ds.didDrag = true;
 			}
 			el.scrollLeft = ds.scrollLeft - dx;
@@ -86,8 +97,9 @@ export function SubtrackerView({
 			const ds = dragState.current;
 			const el = scrollRef.current;
 			if (ds && el && ds.didDrag) {
-				// Re-enable snap so it settles to nearest stat
+				// Re-enable snap + smooth-scroll so it settles to nearest stat
 				el.style.scrollSnapType = "";
+				el.style.scrollBehavior = "";
 			}
 			if (ds) ds.active = false;
 		};
