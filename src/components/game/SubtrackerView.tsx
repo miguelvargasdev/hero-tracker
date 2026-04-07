@@ -172,12 +172,13 @@ export function SubtrackerView({
 		})
 		.filter(Boolean) as (StatConfig & { value: number })[];
 
-	// Reorder stats so HP appears first in the player's reading order.
-	// For 180° (upside down) and 270° (left side) the on-screen DOM order
-	// runs opposite to the player's reading direction, so reverse.
+	// Reorder stats for 270° so HP appears first in the player's reading
+	// order. (0° and 180° share a flex container that gets transformed by
+	// the parent root, so DOM order already maps to the right visual order;
+	// 90° stacks top-down which already matches the right-side player.)
 	const norm = normRot(rotation);
 	let stats = statsBase;
-	if (norm === 180 || norm === 270) {
+	if (norm === 270) {
 		stats = [...statsBase].reverse();
 	}
 
@@ -200,7 +201,7 @@ export function SubtrackerView({
 	const totalPages = Math.max(1, stats.length - 1);
 	const dotContainerClass = is90or270
 		? `${styles.scrollDots} ${styles.scrollDotsRotated} ${norm === 90 ? styles.scrollDotsRot90 : styles.scrollDotsRot270}`
-		: `${styles.scrollDots} ${styles.scrollDotsDefault}${norm === 180 ? ` ${styles.scrollDotsRot180}` : ""}`;
+		: `${styles.scrollDots} ${styles.scrollDotsDefault}`;
 
 	return (
 		<div
