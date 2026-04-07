@@ -50,14 +50,27 @@ export function SubtrackerView({
 		};
 	}, []);
 
-	// Reset scroll to start whenever the set of active subtrackers changes
+	// Reset scroll whenever the set of active subtrackers changes
 	// (e.g. after the user closes the Add Subtracker modal).
+	// For 180°, stats are reversed so HP sits at the DOM end — scroll
+	// to the max so HP + adjacent subtracker are visible and the dot
+	// indicator starts at the highest index.
+	const is180Reset = normRot(rotation) === 180;
 	useEffect(() => {
 		const el = scrollRef.current;
 		if (!el) return;
-		el.scrollTo({ left: 0, top: 0, behavior: "auto" });
-		setActivePage(0);
-	}, [activeKeys]);
+		requestAnimationFrame(() => {
+			if (is180Reset) {
+				const halfPage = el.clientWidth / 2;
+				const maxScroll = el.scrollWidth - el.clientWidth;
+				el.scrollTo({ left: maxScroll, top: 0, behavior: "auto" });
+				setActivePage(halfPage > 0 ? Math.round(maxScroll / halfPage) : 0);
+			} else {
+				el.scrollTo({ left: 0, top: 0, behavior: "auto" });
+				setActivePage(0);
+			}
+		});
+	}, [activeKeys, is180Reset]);
 
 	const is90or270 = rotation === 90 || rotation === 270;
 
