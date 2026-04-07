@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import { HERO_TEMPLATES } from "../../data/heroes";
-import { useLongPress } from "../../hooks/useLongPress";
 import { useSwipeOpen } from "../../hooks/useSwipeOpen";
 import { useFloatingNumbers } from "../../hooks/useFloatingNumbers";
 import { useDrawerState } from "../../hooks/useDrawerState";
@@ -37,33 +36,13 @@ export function HealthCounter({
 	const [activeSubtrackers, setActiveSubtrackers] = useState<StatKey[]>([]);
 	const [showSubtrackerModal, setShowSubtrackerModal] = useState(false);
 
-	const { handlers: longPressHandlers, didFire: didLongPress } = useLongPress(
-		openDrawer,
-		{ disabled: isUnselected },
-	);
 	const { handlers: swipeHandlers, didFire: didSwipe } = useSwipeOpen(
 		openDrawer,
 		{ rotation, disabled: isUnselected },
 	);
 
-	const combinedHandlers = {
-		...longPressHandlers,
-		onTouchStart: (e: React.TouchEvent) => {
-			longPressHandlers.onTouchStart(e);
-			swipeHandlers.onTouchStart(e);
-		},
-		onTouchMove: (e: React.TouchEvent) => {
-			longPressHandlers.onTouchMove(e);
-			swipeHandlers.onTouchMove(e);
-		},
-		onTouchEnd: () => {
-			longPressHandlers.onTouchEnd();
-			swipeHandlers.onTouchEnd();
-		},
-	};
-
 	const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (didLongPress.current || didSwipe.current) return;
+		if (didSwipe.current) return;
 
 		if (drawerState !== "closed") return;
 
@@ -107,7 +86,7 @@ export function HealthCounter({
 		<div
 			className={`${styles.card}${isUnselected ? ` ${styles.unselected}` : ""}`}
 			onClick={handleClick}
-			{...combinedHandlers}
+			{...swipeHandlers}
 			onContextMenu={(e) => e.preventDefault()}
 		>
 			{/* Hero artwork background */}

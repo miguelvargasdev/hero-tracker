@@ -53,8 +53,32 @@ export function useSwipeOpen(
 		start.current = null;
 	}, []);
 
+	const onMouseDown = useCallback((e: React.MouseEvent) => {
+		if (disabled) return;
+		didFire.current = false;
+		start.current = { x: e.clientX, y: e.clientY };
+	}, [disabled]);
+
+	const onMouseMove = useCallback((e: React.MouseEvent) => {
+		if (disabled || !start.current || didFire.current) return;
+		// Only track while a button is held
+		if (e.buttons === 0) { start.current = null; return; }
+		const dx = e.clientX - start.current.x;
+		const dy = e.clientY - start.current.y;
+		if (isUpSwipe(dx, dy)) {
+			didFire.current = true;
+			onSwipeOpen();
+			setTimeout(() => { didFire.current = false; }, 0);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [disabled, onSwipeOpen, rotation]);
+
+	const onMouseUp = useCallback(() => {
+		start.current = null;
+	}, []);
+
 	return {
-		handlers: { onTouchStart, onTouchMove, onTouchEnd },
+		handlers: { onTouchStart, onTouchMove, onTouchEnd, onMouseDown, onMouseMove, onMouseUp, onMouseLeave: onMouseUp },
 		didFire,
 	};
 }
