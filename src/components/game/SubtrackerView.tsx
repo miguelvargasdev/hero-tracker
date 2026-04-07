@@ -185,13 +185,13 @@ export function SubtrackerView({
 		})
 		.filter(Boolean) as (StatConfig & { value: number })[];
 
-	// Reorder stats for 270° so HP appears first in the player's reading
-	// order. (0° and 180° share a flex container that gets transformed by
-	// the parent root, so DOM order already maps to the right visual order;
-	// 90° stacks top-down which already matches the right-side player.)
+	// Reverse stat order for 180° and 270° so HP ends up on the player's
+	// left (reading-first position). Using a real array reverse (rather
+	// than flex row-reverse) keeps scrollLeft semantics normal and lets
+	// :last-child strip the correct cell border.
 	const norm = normRot(rotation);
 	let stats = statsBase;
-	if (norm === 270) {
+	if (norm === 270 || norm === 180) {
 		stats = [...statsBase].reverse();
 	}
 
@@ -211,11 +211,7 @@ export function SubtrackerView({
 	const is180 = norm === 180;
 	const rootClass = `${styles.subtrackerRoot} ${is90or270 || is180 ? styles.subtrackerRootRotated : styles.subtrackerRootDefault}`;
 	const flexClass = `${styles.subtrackerFlex} ${
-		is90or270
-			? styles.subtrackerFlexRotated
-			: is180
-				? `${styles.subtrackerFlexDefault} ${styles.subtrackerFlex180}`
-				: styles.subtrackerFlexDefault
+		is90or270 ? styles.subtrackerFlexRotated : styles.subtrackerFlexDefault
 	}`;
 	const cellVariant = is90or270 ? styles.statCellHoriz : styles.statCellVert;
 
