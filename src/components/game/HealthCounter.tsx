@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import { HERO_TEMPLATES } from "../../data/heroes";
-import { useLongPress } from "../../hooks/useLongPress";
+import { useSwipeOpen } from "../../hooks/useSwipeOpen";
 import { useFloatingNumbers } from "../../hooks/useFloatingNumbers";
 import { useDrawerState } from "../../hooks/useDrawerState";
 import { isClickIncr, flashProps, type StatKey } from "./healthCounterUtils";
@@ -36,13 +36,13 @@ export function HealthCounter({
 	const [activeSubtrackers, setActiveSubtrackers] = useState<StatKey[]>([]);
 	const [showSubtrackerModal, setShowSubtrackerModal] = useState(false);
 
-	const { handlers: longPressHandlers, didFire: didLongPress } = useLongPress(
+	const { handlers: swipeHandlers, didFire: didSwipe } = useSwipeOpen(
 		openDrawer,
-		{ disabled: isUnselected },
+		{ rotation, disabled: isUnselected },
 	);
 
 	const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (didLongPress.current) return;
+		if (didSwipe.current) return;
 
 		if (drawerState !== "closed") return;
 
@@ -86,7 +86,7 @@ export function HealthCounter({
 		<div
 			className={`${styles.card}${isUnselected ? ` ${styles.unselected}` : ""}`}
 			onClick={handleClick}
-			{...longPressHandlers}
+			{...swipeHandlers}
 			onContextMenu={(e) => e.preventDefault()}
 		>
 			{/* Hero artwork background */}

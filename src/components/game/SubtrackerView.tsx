@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import type { FloatingNumber } from "../../hooks/useFloatingNumbers";
 import type { Hero } from "../../types/hero";
@@ -6,6 +6,8 @@ import { normRot, isClickIncr, flashProps, getNextId, type StatKey, type StatCon
 import { STAT_CONFIGS } from "./statConfigs";
 import { FloatingParticle } from "./FloatingParticle";
 import styles from "./HealthCounter.module.css";
+
+const DRAG_THRESHOLD = 5;
 
 export function SubtrackerView({
 	hero,
@@ -28,9 +30,73 @@ export function SubtrackerView({
 	>([]);
 	const cleanupTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
+	// Scroll tracking for dot indicators
+	const scrollRef = useRef<HTMLDivElement>(null);
+	const [activePage, setActivePage] = useState(0);
+
+	// Mouse drag-to-scroll state
+	const dragState = useRef<{
+		active: boolean;
+		startX: number;
+		startY: number;
+		scrollLeft: number;
+		scrollTop: number;
+		didDrag: boolean;
+	} | null>(null);
+
 	useEffect(() => {
 		return () => {
 			cleanupTimers.current.forEach((t) => clearTimeout(t));
+		};
+	}, []);
+
+	const is90or270 = rotation === 90 || rotation === 270;
+
+	const handleMouseDown = useCallback((e: React.MouseEvent) => {
+		const el = scrollRef.current;
+		if (!el) return;
+		dragState.current = {
+			active: true,
+			startX: e.clientX,
+			startY: e.clientY,
+			scrollLeft: el.scrollLeft,
+			scrollTop: el.scrollTop,
+			didDrag: false,
+		};
+	}, []);
+
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			const ds = dragState.current;
+			const el = scrollRef.current;
+			if (!ds?.active || !el) return;
+			const dx = e.clientX - ds.startX;
+			const dy = e.clientY - ds.startY;
+			if (!ds.didDrag && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
+			if (!ds.didDrag) {
+				// Disable snap while dragging so scrollLeft changes aren't overridden
+				el.style.scrollSnapType = "none";
+				ds.didDrag = true;
+			}
+			el.scrollLeft = ds.scrollLeft - dx;
+			el.scrollTop = ds.scrollTop - dy;
+		};
+
+		const handleMouseUp = () => {
+			const ds = dragState.current;
+			const el = scrollRef.current;
+			if (ds && el && ds.didDrag) {
+				// Re-enable snap so it settles to nearest stat
+				el.style.scrollSnapType = "";
+			}
+			if (ds) ds.active = false;
+		};
+
+		window.addEventListener("mousemove", handleMouseMove);
+		window.addEventListener("mouseup", handleMouseUp);
+		return () => {
+			window.removeEventListener("mousemove", handleMouseMove);
+			window.removeEventListener("mouseup", handleMouseUp);
 		};
 	}, []);
 
@@ -56,6 +122,7 @@ export function SubtrackerView({
 		currentValue: number,
 	) => {
 		e.stopPropagation();
+		if (dragState.current?.didDrag) return;
 		const rect = e.currentTarget.getBoundingClientRect();
 		const isIncrement = isClickIncr(rotation, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height);
 		const change = isIncrement ? 1 : -1;
@@ -71,6 +138,16 @@ export function SubtrackerView({
 			() => setFlashMap((prev) => ({ ...prev, [statKey]: null })),
 			150,
 		);
+	};
+
+	const handleScroll = () => {
+		const el = scrollRef.current;
+		if (!el) return;
+		const pageSize = is90or270 ? el.clientHeight : el.clientWidth;
+		const scrollPos = is90or270 ? el.scrollTop : el.scrollLeft;
+		// Each stat takes 50% of the viewport, so a "page" is half the visible size
+		const halfPage = pageSize / 2;
+		setActivePage(Math.round(scrollPos / halfPage));
 	};
 
 	// HP is always first, then user-added subtrackers
@@ -90,25 +167,38 @@ export function SubtrackerView({
 		stats = [...statsBase].reverse();
 	}
 
-	const is90or270 = rotation === 90 || rotation === 270;
 	const rotDeg = `${rotation}deg`;
+	// Font/icon size based on visible count (max 2), not total
+	const visibleCount = Math.min(stats.length, 2);
 	const statFontSize = is90or270
-		? `clamp(32px, ${30 / stats.length}cqmax, 90px)`
-		: `clamp(28px, ${35 / stats.length}cqi, 72px)`;
+		? `clamp(32px, ${30 / visibleCount}cqmax, 90px)`
+		: `clamp(28px, ${35 / visibleCount}cqi, 72px)`;
 	const statIconSize = is90or270
-		? `clamp(20px, ${10 / stats.length}cqmax, 46px)`
-		: `clamp(18px, ${14 / stats.length}cqi, 38px)`;
+		? `clamp(20px, ${10 / visibleCount}cqmax, 46px)`
+		: `clamp(18px, ${14 / visibleCount}cqi, 38px)`;
 
 	const rootClass = `${styles.subtrackerRoot} ${is90or270 ? styles.subtrackerRootRotated : styles.subtrackerRootDefault}`;
 	const flexClass = `${styles.subtrackerFlex} ${is90or270 ? styles.subtrackerFlexRotated : styles.subtrackerFlexDefault}`;
 	const cellVariant = is90or270 ? styles.statCellHoriz : styles.statCellVert;
+
+	const showDots = stats.length > 2;
+	// Number of pages = stats.length - 1 (since 2 stats are visible at a time)
+	const totalPages = Math.max(1, stats.length - 1);
+	const dotContainerClass = is90or270
+		? `${styles.scrollDots} ${styles.scrollDotsRotated} ${norm === 90 ? styles.scrollDotsRot90 : styles.scrollDotsRot270}`
+		: `${styles.scrollDots} ${styles.scrollDotsDefault}`;
 
 	return (
 		<div
 			className={rootClass}
 			style={!is90or270 && rotation ? { "--rotation": rotDeg } as React.CSSProperties : undefined}
 		>
-			<div className={flexClass}>
+			<div
+				ref={scrollRef}
+				className={flexClass}
+				onScroll={handleScroll}
+				onMouseDown={handleMouseDown}
+			>
 				{stats.map((stat) => {
 					return (
 						<div
@@ -158,6 +248,16 @@ export function SubtrackerView({
 					);
 				})}
 			</div>
+			{showDots && (
+				<div className={dotContainerClass}>
+					{Array.from({ length: totalPages }).map((_, i) => (
+						<div
+							key={i}
+							className={`${styles.scrollDot} ${i === Math.min(activePage, totalPages - 1) ? styles.scrollDotActive : ""}`}
+						/>
+					))}
+				</div>
+			)}
 		</div>
 	);
 }

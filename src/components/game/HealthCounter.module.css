@@ -365,18 +365,50 @@
 
 .subtrackerFlex {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   height: 100%;
 }
 
 .subtrackerFlexDefault {
   align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
+  cursor: grab;
+  user-select: none;
+}
+
+.subtrackerFlexDefault::-webkit-scrollbar {
+  display: none;
+}
+
+.subtrackerFlexDefault:active {
+  cursor: grabbing;
 }
 
 .subtrackerFlexRotated {
   align-items: stretch;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+
+.subtrackerFlexRotated::-webkit-scrollbar {
+  display: none;
+}
+
+.subtrackerFlexRotated:active {
+  cursor: grabbing;
 }
 
 /* ─── SubtrackerView Stat Cell ─── */
@@ -389,11 +421,13 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  flex: 1;
+  scroll-snap-align: start;
 }
 
 .statCellHoriz {
   width: 100%;
+  flex: 1 0 50%;
+  min-height: 50%;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
@@ -403,6 +437,8 @@
 
 .statCellVert {
   height: 100%;
+  flex: 1 0 50%;
+  min-width: 50%;
   border-right: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -441,6 +477,50 @@
   height: var(--stat-icon-size);
   opacity: 0.85;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.7));
+}
+
+/* ─── Scroll Dots ─── */
+
+.scrollDots {
+  position: absolute;
+  display: flex;
+  gap: 4px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.scrollDotsDefault {
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: row;
+}
+
+.scrollDotsRotated {
+  top: 50%;
+  flex-direction: column;
+}
+
+.scrollDotsRot90 {
+  left: 6px;
+  transform: translateY(-50%);
+}
+
+.scrollDotsRot270 {
+  right: 6px;
+  transform: translateY(-50%);
+}
+
+.scrollDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: background 0.2s ease;
+}
+
+.scrollDotActive {
+  background: rgba(255, 255, 255, 0.85);
 }
 
 /* ─── Floating Particle ─── */
