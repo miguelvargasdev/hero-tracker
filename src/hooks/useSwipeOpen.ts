@@ -21,9 +21,9 @@ export function useSwipeOpen(
 			case 180:
 				return dy > SWIPE_THRESHOLD && Math.abs(dy) > Math.abs(dx);
 			case 90:
-				return dx < -SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy);
-			case 270:
 				return dx > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy);
+			case 270:
+				return dx < -SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy);
 			default:
 				return false;
 		}
