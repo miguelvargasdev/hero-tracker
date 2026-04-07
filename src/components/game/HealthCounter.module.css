@@ -23,7 +23,7 @@
   border-radius: 12px;
   position: relative;
   overflow: hidden;
-  touch-action: none;
+  touch-action: pan-x pan-y;
   container-type: size;
 }
 
