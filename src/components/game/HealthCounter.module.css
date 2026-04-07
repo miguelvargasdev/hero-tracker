@@ -425,6 +425,12 @@
   cursor: grabbing;
 }
 
+/* 180°: same horizontal scroll as default but visually reversed so HP
+   ends up on the player's left (= screen right). */
+.subtrackerFlex180 {
+  flex-direction: row-reverse;
+}
+
 .subtrackerFlexRotated {
   align-items: stretch;
   flex-direction: column;
@@ -530,6 +536,12 @@
   left: 50%;
   transform: translateX(-50%);
   flex-direction: row;
+}
+
+.scrollDotsRot180 {
+  bottom: auto;
+  top: 6px;
+  flex-direction: row-reverse;
 }
 
 .scrollDotsRotated {
