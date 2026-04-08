@@ -7,7 +7,7 @@ import {
 } from "react";
 
 /** Duration of each leg (fade-in + fade-out) in ms. */
-const FADE_MS = 280;
+const FADE_MS = 200;
 
 interface ViewTransitionContextValue {
 	isTransitioning: boolean;
@@ -18,7 +18,9 @@ interface ViewTransitionContextValue {
 	transitionTo: (action: () => void) => void;
 }
 
-const ViewTransitionContext = createContext<ViewTransitionContextValue | null>(null);
+const ViewTransitionContext = createContext<ViewTransitionContextValue | null>(
+	null,
+);
 
 export function ViewTransitionProvider({ children }: { children: ReactNode }) {
 	const [isTransitioning, setIsTransitioning] = useState(false);
@@ -55,7 +57,9 @@ export function ViewTransitionProvider({ children }: { children: ReactNode }) {
 export function useViewTransition() {
 	const ctx = useContext(ViewTransitionContext);
 	if (!ctx) {
-		throw new Error("useViewTransition must be used within ViewTransitionProvider");
+		throw new Error(
+			"useViewTransition must be used within ViewTransitionProvider",
+		);
 	}
 	return ctx;
 }
