@@ -4,14 +4,39 @@ import './index.css'
 import App from './App.tsx'
 import { HERO_TEMPLATES } from './data/heroes.ts'
 
-// Preload hero images so they're cached before the select modal opens
-HERO_TEMPLATES.forEach((template) => {
-  const img = new Image();
-  img.src = template.image;
-});
+const BASE = import.meta.env.BASE_URL;
+
+// Every image the app needs before its first interaction is meaningful.
+// The splash in index.html stays visible until all of these have loaded
+// (or failed) so the user never sees a blank/half-loaded screen.
+const CRITICAL_IMAGES: string[] = [
+  `${BASE}crown.png`,
+  `${BASE}menu-bg.jpg`,
+  `${BASE}icons/health.png`,
+  `${BASE}icons/attack.png`,
+  `${BASE}icons/armor.png`,
+  `${BASE}icons/mana.png`,
+  ...HERO_TEMPLATES.flatMap((t) => [t.image, t.wideImage]),
+];
+
+function loadImage(src: string): Promise<void> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve(); // never block on a broken asset
+    img.src = src;
+  });
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
   </StrictMode>,
 )
+
+Promise.all(CRITICAL_IMAGES.map(loadImage)).then(() => {
+  const splash = document.getElementById('splash');
+  if (!splash) return;
+  splash.classList.add('splash-hidden');
+  splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+});
