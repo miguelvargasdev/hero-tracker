@@ -49,6 +49,7 @@ export function MainMenu() {
 					draggable={false}
 					onDragStart={(e) => e.preventDefault()}
 					className={styles.logoImage}
+					data-splash-target="logo"
 				/>
 				<h1 className={styles.title}>
 					Health Tracker<br />Companion App
