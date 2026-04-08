@@ -85,7 +85,7 @@ function dismissSplash() {
       ],
       {
         duration: 700,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        easing: 'ease-in-out',
         fill: 'forwards',
       },
     );

@@ -1,4 +1,5 @@
 import { useHeroStore } from "../../store/useHeroStore";
+import { useViewTransition } from "../../hooks/useViewTransition";
 import { DiceFace } from "./DiceFace";
 import styles from "./PlayerSelect.module.css";
 
@@ -7,6 +8,7 @@ const PLAYER_COUNTS = [2, 3, 4, 5];
 export function PlayerSelect() {
 	const startGame = useHeroStore((s) => s.startGame);
 	const navigateTo = useHeroStore((s) => s.navigateTo);
+	const { transitionTo } = useViewTransition();
 
 	return (
 		<div className={styles.container}>
@@ -28,7 +30,7 @@ export function PlayerSelect() {
 					{PLAYER_COUNTS.map((count, i) => (
 						<button
 							key={count}
-							onClick={() => startGame("standard", count)}
+							onClick={() => transitionTo(() => startGame("standard", count))}
 							className={styles.diceButton}
 							style={{ '--delay': `${0.08 + i * 0.05}s` } as React.CSSProperties}
 						>
