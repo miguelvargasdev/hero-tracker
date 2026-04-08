@@ -1,4 +1,5 @@
 import { useHeroStore } from "../../store/useHeroStore";
+import { useViewTransition } from "../../hooks/useViewTransition";
 import styles from "./TyrantPlayerSelect.module.css";
 
 const PARTY_SIZES = [
@@ -10,6 +11,7 @@ const PARTY_SIZES = [
 export function TyrantPlayerSelect() {
 	const startGame = useHeroStore((s) => s.startGame);
 	const navigateTo = useHeroStore((s) => s.navigateTo);
+	const { transitionTo } = useViewTransition();
 
 	return (
 		<div className={styles.container}>
@@ -32,7 +34,7 @@ export function TyrantPlayerSelect() {
 					{PARTY_SIZES.map((size, i) => (
 						<button
 							key={size.total}
-							onClick={() => startGame("tyrant", size.total)}
+							onClick={() => transitionTo(() => startGame("tyrant", size.total))}
 							className={styles.card}
 							style={{ '--delay': `${0.08 + i * 0.05}s` } as React.CSSProperties}
 						>

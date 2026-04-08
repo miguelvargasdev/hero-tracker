@@ -39,13 +39,64 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
+function dismissSplash() {
+  const splash = document.getElementById('splash');
+  const splashLogo = document.getElementById('splash-logo') as HTMLImageElement | null;
+  if (!splash || !splashLogo) {
+    document.body.classList.remove('splash-active');
+    return;
+  }
+
+  const cleanup = () => {
+    document.body.classList.remove('splash-active');
+    splash.remove();
+  };
+
+  // Phase 3 → fade the black backdrop to transparent, revealing the menu.
+  const fadeBackdrop = () => {
+    const fade = splash.animate(
+      [{ backgroundColor: '#000' }, { backgroundColor: 'transparent' }],
+      { duration: 500, easing: 'ease-out', fill: 'forwards' },
+    );
+    fade.onfinish = cleanup;
+  };
+
+  // If the main-menu logo is in the DOM, fly the splash logo into its slot
+  // first, THEN fade the backdrop. Otherwise just fade out immediately.
+  const target = document.querySelector<HTMLElement>('[data-splash-target="logo"]');
+
+  if (target) {
+    const targetRect = target.getBoundingClientRect();
+    const logoRect = splashLogo.getBoundingClientRect();
+
+    const dx =
+      (targetRect.left + targetRect.width / 2) -
+      (logoRect.left + logoRect.width / 2);
+    const dy =
+      (targetRect.top + targetRect.height / 2) -
+      (logoRect.top + logoRect.height / 2);
+    const scale = targetRect.width / logoRect.width;
+
+    // Phase 2 → slide & scale into the menu's logo slot via WAAPI.
+    const slide = splashLogo.animate(
+      [
+        { transform: 'translate(0px, 0px) scale(1)' },
+        { transform: `translate(${dx}px, ${dy}px) scale(${scale})` },
+      ],
+      {
+        duration: 700,
+        easing: 'ease-in-out',
+        fill: 'forwards',
+      },
+    );
+    slide.onfinish = fadeBackdrop;
+  } else {
+    fadeBackdrop();
+  }
+}
+
 Promise.all(CRITICAL_IMAGES.map(loadImage)).then(() => {
   const elapsed = performance.now() - splashStart;
   const wait = Math.max(0, MIN_SPLASH_MS - elapsed);
-  setTimeout(() => {
-    const splash = document.getElementById('splash');
-    if (!splash) return;
-    splash.classList.add('splash-hidden');
-    splash.addEventListener('transitionend', () => splash.remove(), { once: true });
-  }, wait);
+  setTimeout(dismissSplash, wait);
 });

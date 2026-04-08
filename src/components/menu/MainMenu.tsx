@@ -1,4 +1,5 @@
 import { useHeroStore } from "../../store/useHeroStore";
+import { useViewTransition } from "../../hooks/useViewTransition";
 import styles from "./MainMenu.module.css";
 
 const MENU_ITEMS = [
@@ -22,19 +23,22 @@ const MENU_ITEMS = [
 export function MainMenu() {
 	const startGame = useHeroStore((s) => s.startGame);
 	const navigateTo = useHeroStore((s) => s.navigateTo);
+	const { transitionTo } = useViewTransition();
 
 	const handleSelect = (action: (typeof MENU_ITEMS)[number]["action"]) => {
-		switch (action) {
-			case "solo":
-				startGame("solo", 1);
-				break;
-			case "standard":
-				navigateTo("player-select");
-				break;
-			case "tyrant":
-				navigateTo("tyrant-select");
-				break;
-		}
+		transitionTo(() => {
+			switch (action) {
+				case "solo":
+					startGame("solo", 1);
+					break;
+				case "standard":
+					navigateTo("player-select");
+					break;
+				case "tyrant":
+					navigateTo("tyrant-select");
+					break;
+			}
+		});
 	};
 
 	return (
@@ -49,6 +53,7 @@ export function MainMenu() {
 					draggable={false}
 					onDragStart={(e) => e.preventDefault()}
 					className={styles.logoImage}
+					data-splash-target="logo"
 				/>
 				<h1 className={styles.title}>
 					Health Tracker<br />Companion App
