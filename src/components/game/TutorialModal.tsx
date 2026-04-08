@@ -40,28 +40,11 @@ const STEPS: TutorialStep[] = [
     ),
   },
   {
-    title: "Long Press for Options",
+    title: "Swipe Up for Options",
     description:
-      "Hold down on a card to open the drawer. From there you can change your hero or add subtrackers like Attack, Armor, and Mana.",
+      "Swipe up on a card to open the drawer. From there you can change your hero or add subtrackers like Attack, Armor, and Mana.",
     visual: (
-      <div className={styles.tutLongPressWrap}>
-        <div className={styles.tutLongPressCard}>
-          <div className={styles.tutPulse} />
-        </div>
-        <svg
-          className={styles.tutBounceDown}
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="rgba(255,255,255,0.5)"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M12 5v14" />
-          <path d="M19 12l-7 7-7-7" />
-        </svg>
+      <div className={styles.tutSwipeUpWrap}>
         <div className={`${styles.tutSlideUp} ${styles.tutDrawerPreview}`}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 2v6h-6" />
@@ -72,6 +55,23 @@ const STEPS: TutorialStep[] = [
             <path d="M4 6v4c0 1.66 3.58 3 8 3s8-1.34 8-3V6" />
             <path d="M4 10v4c0 1.66 3.58 3 8 3s8-1.34 8-3v-4" />
           </svg>
+        </div>
+        <svg
+          className={styles.tutBounceUp}
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="rgba(255,255,255,0.5)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 19V5" />
+          <path d="M5 12l7-7 7 7" />
+        </svg>
+        <div className={styles.tutSwipeUpCard}>
+          <div className={styles.tutSwipeFinger} />
         </div>
       </div>
     ),
