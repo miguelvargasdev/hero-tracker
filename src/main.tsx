@@ -19,6 +19,9 @@ const CRITICAL_IMAGES: string[] = [
   ...HERO_TEMPLATES.flatMap((t) => [t.image, t.wideImage]),
 ];
 
+// Minimum time the splash stays visible, even if images load faster.
+const MIN_SPLASH_MS = 1000;
+
 function loadImage(src: string): Promise<void> {
   return new Promise((resolve) => {
     const img = new Image();
@@ -28,6 +31,8 @@ function loadImage(src: string): Promise<void> {
   });
 }
 
+const splashStart = performance.now();
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
@@ -35,8 +40,12 @@ createRoot(document.getElementById('root')!).render(
 )
 
 Promise.all(CRITICAL_IMAGES.map(loadImage)).then(() => {
-  const splash = document.getElementById('splash');
-  if (!splash) return;
-  splash.classList.add('splash-hidden');
-  splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+  const elapsed = performance.now() - splashStart;
+  const wait = Math.max(0, MIN_SPLASH_MS - elapsed);
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    if (!splash) return;
+    splash.classList.add('splash-hidden');
+    splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+  }, wait);
 });
