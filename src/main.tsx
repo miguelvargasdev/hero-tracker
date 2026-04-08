@@ -41,7 +41,7 @@ createRoot(document.getElementById('root')!).render(
 
 function dismissSplash() {
   const splash = document.getElementById('splash');
-  const splashLogo = document.getElementById('splash-logo');
+  const splashLogo = document.getElementById('splash-logo') as HTMLImageElement | null;
   if (!splash || !splashLogo) {
     document.body.classList.remove('splash-active');
     return;
@@ -52,21 +52,16 @@ function dismissSplash() {
     splash.remove();
   };
 
-  // Phase 3 → fade the black backdrop to reveal the main menu, then drop
-  // the splash element and unhide the real menu logo.
+  // Phase 3 → fade the black backdrop to transparent, revealing the menu.
   const fadeBackdrop = () => {
-    splash.classList.add('splash-bg-out');
-    splash.addEventListener(
-      'transitionend',
-      (e) => {
-        if (e.propertyName !== 'background-color') return;
-        cleanup();
-      },
-      { once: true },
+    const fade = splash.animate(
+      [{ backgroundColor: '#000' }, { backgroundColor: 'transparent' }],
+      { duration: 500, easing: 'ease-out', fill: 'forwards' },
     );
+    fade.onfinish = cleanup;
   };
 
-  // If the main-menu logo is in the DOM, fly the splash logo into its place
+  // If the main-menu logo is in the DOM, fly the splash logo into its slot
   // first, THEN fade the backdrop. Otherwise just fade out immediately.
   const target = document.querySelector<HTMLElement>('[data-splash-target="logo"]');
 
@@ -82,18 +77,20 @@ function dismissSplash() {
       (logoRect.top + logoRect.height / 2);
     const scale = targetRect.width / logoRect.width;
 
-    // Phase 2 → slide & scale into the menu's logo slot.
-    splashLogo.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
-    splashLogo.addEventListener(
-      'transitionend',
-      (e) => {
-        if (e.propertyName !== 'transform') return;
-        fadeBackdrop();
+    // Phase 2 → slide & scale into the menu's logo slot via WAAPI.
+    const slide = splashLogo.animate(
+      [
+        { transform: 'translate(0px, 0px) scale(1)' },
+        { transform: `translate(${dx}px, ${dy}px) scale(${scale})` },
+      ],
+      {
+        duration: 700,
+        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        fill: 'forwards',
       },
-      { once: true },
     );
+    slide.onfinish = fadeBackdrop;
   } else {
-    splashLogo.classList.add('splash-logo-fade');
     fadeBackdrop();
   }
 }
