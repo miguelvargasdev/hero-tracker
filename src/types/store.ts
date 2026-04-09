@@ -1,5 +1,6 @@
 import type { Hero, CustomStat } from "./hero";
 import type { ViewName, GameMode } from "./views";
+import type { StatKey } from "../components/game/healthCounterUtils";
 
 export interface HeroStore {
   heroes: Hero[];
@@ -16,7 +17,7 @@ export interface HeroStore {
 
   updateStat: (
     heroId: string,
-    statKey: "hp" | "mana" | "armor" | "attack",
+    statKey: StatKey,
     field: "current" | "max",
     value: number
   ) => void;

@@ -16,6 +16,7 @@ const CRITICAL_IMAGES: string[] = [
 	`${BASE}icons/attack.png`,
 	`${BASE}icons/armor.png`,
 	`${BASE}icons/mana.png`,
+	`${BASE}icons/star.png`,
 	...HERO_TEMPLATES.flatMap((t) => [t.image, t.wideImage]),
 ];
 

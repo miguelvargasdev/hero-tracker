@@ -1,6 +1,6 @@
 import styles from "./HealthCounter.module.css";
 
-export type StatKey = "hp" | "mana" | "armor" | "attack";
+export type StatKey = "hp" | "mana" | "armor" | "attack" | "misc";
 
 export interface StatConfig {
 	key: StatKey;
