@@ -36,6 +36,7 @@ export function HealthCounter({
 	const { drawerState, openDrawer, closeDrawer } = useDrawerState();
 	const [activeSubtrackers, setActiveSubtrackers] = useState<StatKey[]>([]);
 	const [showSubtrackerModal, setShowSubtrackerModal] = useState(false);
+	const hasSubtrackers = activeSubtrackers.length > 0;
 
 	const { handlers: swipeHandlers, didFire: didSwipe } = useSwipeOpen(
 		openDrawer,
@@ -72,6 +73,10 @@ export function HealthCounter({
 	}, [drawerState, cancelHold]);
 
 	const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+		// When subtrackers are visible, SubtrackerView owns press input.
+		// Pointer events from a stat cell bubble up to the card, so we have
+		// to bail here or the parent would also schedule an HP hold-repeat.
+		if (hasSubtrackers) return;
 		if (isUnselected || drawerState !== "closed") return;
 		const rect = e.currentTarget.getBoundingClientRect();
 		const isIncrement = isClickIncr(
@@ -93,6 +98,11 @@ export function HealthCounter({
 			onSelect();
 			return;
 		}
+
+		// Same reasoning as handlePointerDown — clicks on subtracker stat
+		// cells already stopPropagation, but dead-space taps inside the
+		// subtracker layout (gaps, dot indicators) shouldn't drain HP.
+		if (hasSubtrackers) return;
 
 		const rect = e.currentTarget.getBoundingClientRect();
 		const isIncrement = isClickIncr(rotation, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height);
@@ -117,7 +127,6 @@ export function HealthCounter({
 
 	const is90or270 = rotation === 90 || rotation === 270;
 	const rotDeg = `${rotation}deg`;
-	const hasSubtrackers = activeSubtrackers.length > 0;
 
 	return (
 		<div
