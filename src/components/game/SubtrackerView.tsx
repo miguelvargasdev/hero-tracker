@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import type { FloatingNumber } from "../../hooks/useFloatingNumbers";
 import type { Hero } from "../../types/hero";
+import { useHoldRepeat } from "../../hooks/useHoldRepeat";
 import { normRot, isClickIncr, flashProps, getNextId, type StatKey, type StatConfig } from "./healthCounterUtils";
 import { STAT_CONFIGS } from "./statConfigs";
 import { FloatingParticle } from "./FloatingParticle";
@@ -85,6 +86,53 @@ export function SubtrackerView({
 		};
 	}, []);
 
+	const spawnFloater = useCallback((statKey: string, isIncrement: boolean) => {
+		const value = isIncrement ? 1 : -1;
+		const direction = isIncrement ? 1 : -1;
+		const arcX = (Math.random() - 0.5) * 20;
+		const arcY = direction * -(30 + Math.random() * 25);
+		const id = getNextId();
+
+		setFloaters((prev) => [...prev, { id, value, arcX, arcY, statKey }]);
+
+		const timer = setTimeout(() => {
+			setFloaters((prev) => prev.filter((f) => f.id !== id));
+			cleanupTimers.current.delete(timer);
+		}, 800);
+		cleanupTimers.current.add(timer);
+	}, []);
+
+	// Apply a single +1/-1 to a stat (used by both tap and hold-to-repeat).
+	// Reads fresh state from the store so repeat fires accumulate correctly
+	// instead of reusing a stale closure value.
+	const applyStatChange = useCallback(
+		({ statKey, isIncrement }: { statKey: StatKey; isIncrement: boolean }) => {
+			const fresh = useHeroStore
+				.getState()
+				.heroes.find((h) => h.id === hero.id);
+			if (!fresh) return;
+			const current = fresh[statKey].current;
+			const change = isIncrement ? 1 : -1;
+			updateStat(hero.id, statKey, "current", current + change);
+			spawnFloater(statKey, isIncrement);
+			setFlashMap((prev) => ({
+				...prev,
+				[statKey]: isIncrement ? "top" : "bottom",
+			}));
+			const flashTimer = setTimeout(
+				() => setFlashMap((prev) => ({ ...prev, [statKey]: null })),
+				150,
+			);
+			cleanupTimers.current.add(flashTimer);
+		},
+		[hero.id, spawnFloater, updateStat],
+	);
+
+	const { start: startHold, cancel: cancelHold } = useHoldRepeat<{
+		statKey: StatKey;
+		isIncrement: boolean;
+	}>(applyStatChange);
+
 	useEffect(() => {
 		const handleMouseMove = (e: MouseEvent) => {
 			const ds = dragState.current;
@@ -99,6 +147,9 @@ export function SubtrackerView({
 				el.style.scrollSnapType = "none";
 				el.style.scrollBehavior = "auto";
 				ds.didDrag = true;
+				// A real drag means the press is no longer a hold — cancel any
+				// pending repeat so it doesn't fire mid-scroll.
+				cancelHold();
 			}
 			el.scrollLeft = ds.scrollLeft - dx;
 			el.scrollTop = ds.scrollTop - dy;
@@ -121,46 +172,29 @@ export function SubtrackerView({
 			window.removeEventListener("mousemove", handleMouseMove);
 			window.removeEventListener("mouseup", handleMouseUp);
 		};
-	}, []);
+	}, [cancelHold]);
 
-	const spawnFloater = (statKey: string, isIncrement: boolean) => {
-		const value = isIncrement ? 1 : -1;
-		const direction = isIncrement ? 1 : -1;
-		const arcX = (Math.random() - 0.5) * 20;
-		const arcY = direction * -(30 + Math.random() * 25);
-		const id = getNextId();
-
-		setFloaters((prev) => [...prev, { id, value, arcX, arcY, statKey }]);
-
-		const timer = setTimeout(() => {
-			setFloaters((prev) => prev.filter((f) => f.id !== id));
-			cleanupTimers.current.delete(timer);
-		}, 800);
-		cleanupTimers.current.add(timer);
+	const handleStatPointerDown = (e: React.PointerEvent, statKey: StatKey) => {
+		const rect = e.currentTarget.getBoundingClientRect();
+		const isIncrement = isClickIncr(
+			rotation,
+			e.clientX - rect.left,
+			e.clientY - rect.top,
+			rect.width,
+			rect.height,
+		);
+		startHold({ statKey, isIncrement });
 	};
 
 	const handleStatClick = (
 		e: React.MouseEvent,
 		statKey: StatKey,
-		currentValue: number,
 	) => {
 		e.stopPropagation();
 		if (dragState.current?.didDrag) return;
 		const rect = e.currentTarget.getBoundingClientRect();
 		const isIncrement = isClickIncr(rotation, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height);
-		const change = isIncrement ? 1 : -1;
-		updateStat(hero.id, statKey, "current", currentValue + change);
-		spawnFloater(statKey, isIncrement);
-
-		// Tap flash
-		setFlashMap((prev) => ({
-			...prev,
-			[statKey]: isIncrement ? "top" : "bottom",
-		}));
-		setTimeout(
-			() => setFlashMap((prev) => ({ ...prev, [statKey]: null })),
-			150,
-		);
+		applyStatChange({ statKey, isIncrement });
 	};
 
 	const handleScroll = () => {
@@ -245,7 +279,11 @@ export function SubtrackerView({
 						<div
 							key={stat.key}
 							className={`${styles.statCell} ${cellVariant}`}
-							onClick={(e) => handleStatClick(e, stat.key, stat.value)}
+							onClick={(e) => handleStatClick(e, stat.key)}
+							onPointerDown={(e) => handleStatPointerDown(e, stat.key)}
+							onPointerUp={cancelHold}
+							onPointerCancel={cancelHold}
+							onPointerLeave={cancelHold}
 						>
 							<div
 								className={styles.statCellInner}

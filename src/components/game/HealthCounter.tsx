@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import { HERO_TEMPLATES } from "../../data/heroes";
 import { useSwipeOpen } from "../../hooks/useSwipeOpen";
 import { useFloatingNumbers } from "../../hooks/useFloatingNumbers";
 import { useDrawerState } from "../../hooks/useDrawerState";
+import { useHoldRepeat } from "../../hooks/useHoldRepeat";
 import { isClickIncr, flashProps, type StatKey } from "./healthCounterUtils";
 import { DrawerOverlay } from "./DrawerOverlay";
 import { SubtrackerModal } from "./SubtrackerModal";
@@ -35,11 +36,58 @@ export function HealthCounter({
 	const { drawerState, openDrawer, closeDrawer } = useDrawerState();
 	const [activeSubtrackers, setActiveSubtrackers] = useState<StatKey[]>([]);
 	const [showSubtrackerModal, setShowSubtrackerModal] = useState(false);
+	const hasSubtrackers = activeSubtrackers.length > 0;
 
 	const { handlers: swipeHandlers, didFire: didSwipe } = useSwipeOpen(
 		openDrawer,
 		{ rotation, disabled: isUnselected },
 	);
+
+	// Apply a single +1/-1 to HP and trigger the floater + flash. Shared
+	// between the tap (onClick) and hold-to-repeat (useHoldRepeat) paths.
+	const applyHpChange = useCallback(
+		(isIncrement: boolean) => {
+			const change = isIncrement ? 1 : -1;
+			updateStat(
+				hero.id,
+				"hp",
+				"current",
+				useHeroStore.getState().heroes.find((h) => h.id === hero.id)!.hp
+					.current + change,
+			);
+			spawnFloater(isIncrement);
+			setTapFlash(isIncrement ? "top" : "bottom");
+			setTimeout(() => setTapFlash("none"), 150);
+		},
+		[hero.id, spawnFloater, updateStat],
+	);
+
+	const { start: startHold, cancel: cancelHold } = useHoldRepeat<boolean>(
+		applyHpChange,
+	);
+
+	// If the press becomes a swipe (drawer opening) cancel any pending repeat
+	// so it doesn't keep firing while the drawer is animating in.
+	useEffect(() => {
+		if (drawerState !== "closed") cancelHold();
+	}, [drawerState, cancelHold]);
+
+	const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+		// When subtrackers are visible, SubtrackerView owns press input.
+		// Pointer events from a stat cell bubble up to the card, so we have
+		// to bail here or the parent would also schedule an HP hold-repeat.
+		if (hasSubtrackers) return;
+		if (isUnselected || drawerState !== "closed") return;
+		const rect = e.currentTarget.getBoundingClientRect();
+		const isIncrement = isClickIncr(
+			rotation,
+			e.clientX - rect.left,
+			e.clientY - rect.top,
+			rect.width,
+			rect.height,
+		);
+		startHold(isIncrement);
+	};
 
 	const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
 		if (didSwipe.current) return;
@@ -51,15 +99,14 @@ export function HealthCounter({
 			return;
 		}
 
+		// Same reasoning as handlePointerDown — clicks on subtracker stat
+		// cells already stopPropagation, but dead-space taps inside the
+		// subtracker layout (gaps, dot indicators) shouldn't drain HP.
+		if (hasSubtrackers) return;
+
 		const rect = e.currentTarget.getBoundingClientRect();
 		const isIncrement = isClickIncr(rotation, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height);
-		const change = isIncrement ? 1 : -1;
-		updateStat(hero.id, "hp", "current", hero.hp.current + change);
-		spawnFloater(isIncrement);
-
-		// Tap flash
-		setTapFlash(isIncrement ? "top" : "bottom");
-		setTimeout(() => setTapFlash("none"), 150);
+		applyHpChange(isIncrement);
 	};
 
 	const handleChangeHero = () => {
@@ -80,13 +127,16 @@ export function HealthCounter({
 
 	const is90or270 = rotation === 90 || rotation === 270;
 	const rotDeg = `${rotation}deg`;
-	const hasSubtrackers = activeSubtrackers.length > 0;
 
 	return (
 		<div
 			className={`${styles.card}${isUnselected ? ` ${styles.unselected}` : ""}`}
 			onClick={handleClick}
 			{...swipeHandlers}
+			onPointerDown={handlePointerDown}
+			onPointerUp={cancelHold}
+			onPointerCancel={cancelHold}
+			onPointerLeave={cancelHold}
 			onContextMenu={(e) => e.preventDefault()}
 		>
 			{/* Hero artwork background */}
