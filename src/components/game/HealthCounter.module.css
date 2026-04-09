@@ -485,6 +485,35 @@
   border-right: none;
 }
 
+/* ─── Responsive cell width — fit more cells on wider/taller cards ───
+ * Default is 50% (2-up). At wider container sizes the basis steps down so
+ * 3 or 4 cells can fit before scrolling. Onyx King's tyrant boss slot is
+ * the widest card; on a typical phone it lands in the >=420 bucket. */
+@container (min-width: 320px) {
+  .statCellVert {
+    flex: 1 0 33.3333%;
+    min-width: 33.3333%;
+  }
+}
+@container (min-width: 420px) {
+  .statCellVert {
+    flex: 1 0 25%;
+    min-width: 25%;
+  }
+}
+@container (min-height: 320px) {
+  .statCellHoriz {
+    flex: 1 0 33.3333%;
+    min-height: 33.3333%;
+  }
+}
+@container (min-height: 420px) {
+  .statCellHoriz {
+    flex: 1 0 25%;
+    min-height: 25%;
+  }
+}
+
 /* ─── SubtrackerView Stat Inner ─── */
 
 .statCellInner {
