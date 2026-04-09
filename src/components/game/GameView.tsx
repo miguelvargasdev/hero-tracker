@@ -6,6 +6,7 @@ import { HeroSelectModal } from "./HeroSelectModal";
 import { TutorialModal } from "./TutorialModal";
 import { TyrantLayout } from "./TyrantLayout";
 import { useTutorialSeen } from "../../hooks/useTutorialSeen";
+import { APP_VERSION_DISPLAY } from "../../version";
 import styles from "./GameView.module.css";
 
 export function GameView() {
@@ -82,6 +83,7 @@ export function GameView() {
 						>
 							Cancel
 						</button>
+						<div className={styles.menuVersion}>{APP_VERSION_DISPLAY}</div>
 					</div>
 				</div>
 			)}

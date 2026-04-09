@@ -167,3 +167,18 @@
   text-decoration: none;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5);
 }
+
+.versionTag {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #c8c8c8;
+  font-size: 11px;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.12em;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95), 0 0 12px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  user-select: none;
+}

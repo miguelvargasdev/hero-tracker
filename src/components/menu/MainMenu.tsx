@@ -1,5 +1,6 @@
 import { useHeroStore } from "../../store/useHeroStore";
 import { useViewTransition } from "../../hooks/useViewTransition";
+import { APP_VERSION_DISPLAY } from "../../version";
 import styles from "./MainMenu.module.css";
 
 const MENU_ITEMS = [
@@ -105,6 +106,9 @@ export function MainMenu() {
 					www.talesofthetomes.com
 				</a>
 			</div>
+
+			{/* Version tag — sits below the footer, centered, intentionally dim */}
+			<div className={styles.versionTag}>{APP_VERSION_DISPLAY}</div>
 		</div>
 	);
 }
