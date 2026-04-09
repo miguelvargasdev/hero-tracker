@@ -46,4 +46,15 @@ export const STAT_CONFIGS: StatConfig[] = [
 			/>
 		),
 	},
+	{
+		key: "misc",
+		label: "Misc",
+		icon: (
+			<img
+				src={`${import.meta.env.BASE_URL}icons/star.png`}
+				alt="Misc"
+				className={styles.statIcon}
+			/>
+		),
+	},
 ];

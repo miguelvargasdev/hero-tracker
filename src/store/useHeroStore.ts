@@ -8,7 +8,13 @@ const stat = (v: number) => ({ current: v, max: v });
 const ZERO = stat(0);
 
 function templateStats(t: { hp: number; attack: number; mana: number; armor: number }) {
-	return { hp: stat(t.hp), attack: stat(t.attack), mana: stat(t.mana), armor: stat(t.armor) };
+	return {
+		hp: stat(t.hp),
+		attack: stat(t.attack),
+		mana: stat(t.mana),
+		armor: stat(t.armor),
+		misc: { ...ZERO },
+	};
 }
 
 function createEmptySlot(): Hero {
@@ -21,6 +27,7 @@ function createEmptySlot(): Hero {
 		mana: { ...ZERO },
 		armor: { ...ZERO },
 		attack: { ...ZERO },
+		misc: { ...ZERO },
 		customStats: [],
 		createdAt: Date.now(),
 	};
@@ -136,6 +143,19 @@ export const useHeroStore = create<HeroStore>()(
 		}),
 		{
 			name: "hero-tracker-store",
+			version: 1,
+			migrate: (persistedState, version) => {
+				const s = persistedState as { heroes?: Hero[] } | undefined;
+				if (s && version < 1 && Array.isArray(s.heroes)) {
+					// v1 added the `misc` stat — backfill legacy heroes so the
+					// new field is never undefined when the store rehydrates.
+					s.heroes = s.heroes.map((h) => ({
+						...h,
+						misc: h.misc ?? { current: 0, max: 0 },
+					}));
+				}
+				return s as HeroStore;
+			},
 			partialize: (state) => ({
 				heroes: state.heroes,
 				gameMode: state.gameMode,
