@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import { useHeroStore } from "../../store/useHeroStore";
 import type { FloatingNumber } from "../../hooks/useFloatingNumbers";
 import type { Hero } from "../../types/hero";
@@ -34,6 +34,10 @@ export function SubtrackerView({
 	// Scroll tracking for dot indicators
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const [activePage, setActivePage] = useState(0);
+	// Number of cells the CSS container queries are letting fit at once.
+	// Measured from the DOM so font sizing and dot math stay in sync with
+	// whatever flex-basis the container query picked.
+	const [visibleCount, setVisibleCount] = useState(2);
 
 	// Mouse drag-to-scroll state
 	const dragState = useRef<{
@@ -72,6 +76,33 @@ export function SubtrackerView({
 	}, [activeKeys, is180Reset]);
 
 	const is90or270 = rotation === 90 || rotation === 270;
+
+	// HP is always first, then user-added subtrackers
+	const allKeys: StatKey[] = ["hp", ...activeKeys.filter((k) => k !== "hp")];
+	const totalCells = allKeys.length;
+
+	// Re-measure visible cell count whenever the container resizes or the
+	// number of stats changes. We compute cellSize from scrollWidth/N rather
+	// than reading CSS directly, which keeps the math agnostic to whatever
+	// breakpoint the container query landed on.
+	useLayoutEffect(() => {
+		const el = scrollRef.current;
+		if (!el || totalCells === 0) return;
+		const measure = () => {
+			const isVert = rotation === 90 || rotation === 270;
+			const total = isVert ? el.scrollHeight : el.scrollWidth;
+			const visible = isVert ? el.clientHeight : el.clientWidth;
+			if (total <= 0) return;
+			const cellSize = total / totalCells;
+			if (cellSize <= 0) return;
+			const v = Math.max(1, Math.min(totalCells, Math.round(visible / cellSize)));
+			setVisibleCount(v);
+		};
+		measure();
+		const ro = new ResizeObserver(measure);
+		ro.observe(el);
+		return () => ro.disconnect();
+	}, [rotation, totalCells]);
 
 	const handleMouseDown = useCallback((e: React.MouseEvent) => {
 		const el = scrollRef.current;
@@ -199,28 +230,25 @@ export function SubtrackerView({
 
 	const handleScroll = () => {
 		const el = scrollRef.current;
-		if (!el) return;
+		if (!el || totalCells === 0) return;
 		const is90or270Local = rotation === 90 || rotation === 270;
 		const is180Local = normRot(rotation) === 180;
-		const pageSize = is90or270Local ? el.clientHeight : el.clientWidth;
+		const total = is90or270Local ? el.scrollHeight : el.scrollWidth;
 		const scrollPos = is90or270Local ? el.scrollTop : el.scrollLeft;
-		const halfPage = pageSize / 2;
-		const rawPage = halfPage > 0 ? Math.round(scrollPos / halfPage) : 0;
+		const cellSize = total / totalCells;
+		const rawPage = cellSize > 0 ? Math.round(scrollPos / cellSize) : 0;
 		if (is180Local) {
 			// 180° stats are reversed in DOM so HP sits at DOM-end. We scroll
 			// to max on mount. Map raw page inversely so dot[0] is lit when
 			// HP is visible (player's "3"), and dot[N-1] when #lastAdded is
 			// visible (player's "1").
-			const totalStats = 1 + activeKeys.filter((k) => k !== "hp").length;
-			const totalPagesLocal = Math.max(1, totalStats - 1);
+			const totalPagesLocal = Math.max(1, totalCells - visibleCount + 1);
 			setActivePage(Math.max(0, totalPagesLocal - 1 - rawPage));
 		} else {
 			setActivePage(rawPage);
 		}
 	};
 
-	// HP is always first, then user-added subtrackers
-	const allKeys: StatKey[] = ["hp", ...activeKeys.filter((k) => k !== "hp")];
 	const statsBase = allKeys
 		.map((key) => {
 			const config = STAT_CONFIGS.find((c) => c.key === key);
@@ -240,14 +268,16 @@ export function SubtrackerView({
 	}
 
 	const rotDeg = `${rotation}deg`;
-	// Font/icon size based on visible count (max 2), not total
-	const visibleCount = Math.min(stats.length, 2);
+	// Font/icon size scales inversely with how many cells are visible at once.
+	// 1 stat = oversize (solo-mode HP); 2+ stats use the measured visibleCount
+	// so 4-up cards shrink the digits enough to fit comfortably.
+	const sizeDivisor = stats.length <= 1 ? 1 : visibleCount;
 	const statFontSize = is90or270
-		? `clamp(32px, ${30 / visibleCount}cqmax, 90px)`
-		: `clamp(28px, ${35 / visibleCount}cqi, 72px)`;
+		? `clamp(28px, ${30 / sizeDivisor}cqmax, 90px)`
+		: `clamp(24px, ${35 / sizeDivisor}cqi, 72px)`;
 	const statIconSize = is90or270
-		? `clamp(20px, ${10 / visibleCount}cqmax, 46px)`
-		: `clamp(18px, ${14 / visibleCount}cqi, 38px)`;
+		? `clamp(18px, ${10 / sizeDivisor}cqmax, 46px)`
+		: `clamp(16px, ${14 / sizeDivisor}cqi, 38px)`;
 
 	// 180° gets its own root (no parent rotate transform) so native scroll
 	// direction matches the player's expectation. Cell content is rotated
@@ -259,9 +289,10 @@ export function SubtrackerView({
 	}`;
 	const cellVariant = is90or270 ? styles.statCellHoriz : styles.statCellVert;
 
-	const showDots = stats.length > 2;
-	// Number of pages = stats.length - 1 (since 2 stats are visible at a time)
-	const totalPages = Math.max(1, stats.length - 1);
+	// Show dots only when the active stats can't all fit at once.
+	const showDots = stats.length > visibleCount;
+	// One page per leftmost-cell position: N - V + 1 distinct snap stops.
+	const totalPages = Math.max(1, stats.length - visibleCount + 1);
 	const dotContainerClass = is90or270
 		? `${styles.scrollDots} ${styles.scrollDotsRotated} ${norm === 90 ? styles.scrollDotsRot90 : styles.scrollDotsRot270}`
 		: `${styles.scrollDots} ${styles.scrollDotsDefault}${is180 ? ` ${styles.scrollDotsRot180}` : ""}`;
