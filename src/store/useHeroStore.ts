@@ -17,6 +17,15 @@ function templateStats(t: { hp: number; attack: number; mana: number; armor: num
 	};
 }
 
+// Tyrant boss HP scales +10 per enemy (1v2 → +20, 1v3 → +30, 1v4 → +40).
+// e.g. Onyx King base 35 → 55 / 65 / 75. Used at game start AND reset so the
+// scaled max sticks across resets.
+const TYRANT_BOSS_HP_PER_ENEMY = 10;
+function tyrantBossHp(baseHp: number, enemyCount: number) {
+	const total = baseHp + TYRANT_BOSS_HP_PER_ENEMY * enemyCount;
+	return stat(total);
+}
+
 function createEmptySlot(): Hero {
 	return {
 		id: crypto.randomUUID(),
@@ -55,6 +64,7 @@ export const useHeroStore = create<HeroStore>()(
 						heroes.push(createEmptySlot());
 					} else if (mode === "tyrant") {
 						const t = HERO_TEMPLATES.find((t) => t.id === "onyxking")!;
+						const enemyCount = playerCount - 1;
 						heroes.push({
 							...createEmptySlot(),
 							role: "boss",
@@ -62,6 +72,7 @@ export const useHeroStore = create<HeroStore>()(
 							templateId: t.id,
 							color: t.color,
 							...templateStats(t),
+							hp: tyrantBossHp(t.hp, enemyCount),
 						});
 						for (let i = 1; i < playerCount; i++)
 							heroes.push({ ...createEmptySlot(), role: "team" });
@@ -73,13 +84,27 @@ export const useHeroStore = create<HeroStore>()(
 				}),
 
 			resetGame: () =>
-				set((state) => ({
-					resetCounter: state.resetCounter + 1,
-					heroes: state.heroes.map((h) => {
-						const t = HERO_TEMPLATES.find((t) => t.id === h.templateId);
-						return t ? { ...h, ...templateStats(t), customStats: [] } : h;
-					}),
-				})),
+				set((state) => {
+					// Tyrant boss reset has to recompute scaled HP based on the
+					// current enemy count, otherwise it would snap back to the
+					// raw template value (35 instead of 55/65/75).
+					const enemyCount =
+						state.gameMode === "tyrant"
+							? state.heroes.filter((h) => h.role === "team").length
+							: 0;
+					return {
+						resetCounter: state.resetCounter + 1,
+						heroes: state.heroes.map((h) => {
+							const t = HERO_TEMPLATES.find((t) => t.id === h.templateId);
+							if (!t) return h;
+							const fresh = { ...h, ...templateStats(t), customStats: [] };
+							if (state.gameMode === "tyrant" && h.role === "boss") {
+								fresh.hp = tyrantBossHp(t.hp, enemyCount);
+							}
+							return fresh;
+						}),
+					};
+				}),
 
 			selectHero: (playerId, templateId) =>
 				set((state) => {
