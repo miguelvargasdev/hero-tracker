@@ -6,10 +6,12 @@ import { HeroSelectModal } from "./HeroSelectModal";
 import { TutorialModal } from "./TutorialModal";
 import { TyrantLayout } from "./TyrantLayout";
 import { useTutorialSeen } from "../../hooks/useTutorialSeen";
+import { useWakeLock } from "../../hooks/useWakeLock";
 import { APP_VERSION_DISPLAY } from "../../version";
 import styles from "./GameView.module.css";
 
 export function GameView() {
+	useWakeLock(true);
 	const heroes = useHeroStore((s) => s.heroes);
 	const gameMode = useHeroStore((s) => s.gameMode);
 	const navigateTo = useHeroStore((s) => s.navigateTo);
