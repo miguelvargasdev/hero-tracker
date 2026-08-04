@@ -20,6 +20,9 @@ export function useWakeLock(enabled: boolean) {
 					await lock.release();
 					return;
 				}
+				lock.addEventListener("release", () => {
+					if (sentinel === lock) sentinel = null;
+				});
 				sentinel = lock;
 			} catch {
 				// Wake lock can be denied (e.g. low battery, backgrounded tab);
