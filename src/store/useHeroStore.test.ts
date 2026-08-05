@@ -70,7 +70,7 @@ describe("useHeroStore", () => {
 			const hero = useHeroStore.getState().heroes[0];
 			expect(hero.templateId).toBe("arcanas");
 			expect(hero.name).toBe("Arcanas Invos");
-			expect(hero.color).toBe("#3b82f6");
+			expect(hero.color).toBe("#2a4dff");
 		});
 
 		it("sets hp from template", () => {

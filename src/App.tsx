@@ -5,7 +5,7 @@ import { TyrantPlayerSelect } from "./components/menu/TyrantPlayerSelect";
 import { GameView } from "./components/game/GameView";
 import { HeroDetail } from "./components/hero/HeroDetail";
 import { InstallPrompt } from "./components/InstallPrompt";
-import { ViewTransitionProvider } from "./hooks/useViewTransition";
+import { ViewTransitionProvider } from "./hooks/ViewTransitionProvider";
 
 function App() {
   const activeView = useHeroStore((s) => s.activeView);

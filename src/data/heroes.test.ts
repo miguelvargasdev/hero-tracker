@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { HERO_TEMPLATES } from "./heroes";
 
 describe("HERO_TEMPLATES", () => {
-	it("contains 8 heroes", () => {
-		expect(HERO_TEMPLATES).toHaveLength(8);
+	it("contains 12 heroes", () => {
+		expect(HERO_TEMPLATES).toHaveLength(12);
 	});
 
 	it("every hero has a unique id", () => {
