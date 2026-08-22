@@ -7,6 +7,13 @@ import { HERO_TEMPLATES } from "../data/heroes";
 const stat = (v: number) => ({ current: v, max: v });
 const ZERO = stat(0);
 
+// localStorage is scoped per-origin, not per-path, so the /dev preview build
+// (see vite.config.ts) would otherwise read and write the exact same saved
+// heroes as production at "/". Key it separately so dev testing never
+// clobbers real save data on shared devices.
+const STORAGE_KEY =
+	import.meta.env.BASE_URL === "/dev/" ? "hero-tracker-store-dev" : "hero-tracker-store";
+
 function templateStats(t: { hp: number; attack: number; mana: number; armor: number }) {
 	return {
 		hp: stat(t.hp),
@@ -167,7 +174,7 @@ export const useHeroStore = create<HeroStore>()(
 				})),
 		}),
 		{
-			name: "hero-tracker-store",
+			name: STORAGE_KEY,
 			version: 1,
 			migrate: (persistedState, version) => {
 				const s = persistedState as { heroes?: Hero[] } | undefined;
