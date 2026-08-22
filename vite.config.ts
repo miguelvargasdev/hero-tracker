@@ -58,6 +58,11 @@ export default defineConfig(({ mode }) => {
 			workbox: {
 				globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,woff2}"],
 				maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+				// The production SW's scope ("/") prefix-matches "/dev/" too, so
+				// its default catch-all NavigationRoute would otherwise hijack
+				// navigations to /dev/ (serving the stale prod shell) whenever a
+				// browser hasn't yet registered the more specific /dev/-scoped SW.
+				...(!isDev && { navigateFallbackDenylist: [/^\/dev\//] }),
 			},
 			devOptions: {
 				enabled: true,
