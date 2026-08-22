@@ -1,8 +1,13 @@
 name: Deploy to GitHub Pages
 
+# GitHub Pages (workflow build type) publishes a single artifact that
+# replaces the *entire* site on every deploy, so this job always rebuilds
+# both master (served at "/") and dev (served at "/dev/") and assembles them
+# into one artifact — otherwise whichever branch triggered the run would
+# wipe out the other environment.
 on:
   push:
-    branches: [master]
+    branches: [master, dev]
   workflow_dispatch:
 
 permissions:
@@ -21,8 +26,17 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout
+      - name: Checkout master (production)
         uses: actions/checkout@v4
+        with:
+          ref: master
+          path: prod
+
+      - name: Checkout dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          path: dev
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -34,17 +48,44 @@ jobs:
         with:
           version: latest
 
-      - name: Install dependencies
+      - name: Install production dependencies
+        working-directory: prod
         run: pnpm install --frozen-lockfile
 
-      - name: Lint
+      - name: Lint production
+        working-directory: prod
         run: pnpm lint
 
-      - name: Test
+      - name: Test production
+        working-directory: prod
         run: pnpm test:run
 
-      - name: Build
+      - name: Build production
+        working-directory: prod
         run: pnpm build
+
+      - name: Install dev dependencies
+        working-directory: dev
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint dev
+        working-directory: dev
+        run: pnpm lint
+
+      - name: Test dev
+        working-directory: dev
+        run: pnpm test:run
+
+      - name: Build dev
+        working-directory: dev
+        run: pnpm build:dev
+
+      - name: Assemble site (production at "/", dev at "/dev/")
+        run: |
+          mkdir -p site
+          cp -r prod/dist/. site/
+          mkdir -p site/dev
+          cp -r dev/dist/. site/dev/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -52,7 +93,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site
 
       - name: Deploy to GitHub Pages
         id: deployment
