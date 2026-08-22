@@ -1,26 +1,5 @@
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useState,
-	type ReactNode,
-} from "react";
-
-/** Duration of each leg (fade-in + fade-out) in ms. */
-const FADE_MS = 200;
-
-interface ViewTransitionContextValue {
-	isTransitioning: boolean;
-	/**
-	 * Fade the screen to black, run `action`, then fade back in.
-	 * `action` should perform the navigation (e.g. navigateTo / startGame).
-	 */
-	transitionTo: (action: () => void) => void;
-}
-
-const ViewTransitionContext = createContext<ViewTransitionContextValue | null>(
-	null,
-);
+import { useCallback, useState, type ReactNode } from "react";
+import { FADE_MS, ViewTransitionContext } from "./viewTransitionContext";
 
 export function ViewTransitionProvider({ children }: { children: ReactNode }) {
 	const [isTransitioning, setIsTransitioning] = useState(false);
@@ -52,14 +31,4 @@ export function ViewTransitionProvider({ children }: { children: ReactNode }) {
 			/>
 		</ViewTransitionContext.Provider>
 	);
-}
-
-export function useViewTransition() {
-	const ctx = useContext(ViewTransitionContext);
-	if (!ctx) {
-		throw new Error(
-			"useViewTransition must be used within ViewTransitionProvider",
-		);
-	}
-	return ctx;
 }

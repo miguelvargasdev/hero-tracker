@@ -14,7 +14,6 @@ export function SubtrackerView({
 	hero,
 	rotation,
 	activeKeys,
-	onRemove: _onRemove,
 }: {
 	hero: Hero;
 	rotation: number;

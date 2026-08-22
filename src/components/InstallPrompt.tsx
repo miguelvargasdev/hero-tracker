@@ -101,48 +101,42 @@ const IOS_STEPS = [
 export function InstallPrompt() {
 	const [deferredPrompt, setDeferredPrompt] =
 		useState<BeforeInstallPromptEvent | null>(null);
-	const [dismissed, setDismissed] = useState(false);
-	const [isInstalled, setIsInstalled] = useState(false);
-	const [showIOSPrompt, setShowIOSPrompt] = useState(false);
+	const [isInstalled, setIsInstalled] = useState(() => isInStandaloneMode());
+	// dismissed/showIOSPrompt only matter on mobile, and are static for the
+	// lifetime of the component, so they're derived once at mount instead of
+	// being set from inside an effect.
+	const [dismissed, setDismissed] = useState(
+		() =>
+			isMobileDevice() &&
+			sessionStorage.getItem("pwa-install-dismissed") === "true",
+	);
+	const [showIOSPrompt] = useState(
+		() => !isInStandaloneMode() && isMobileDevice() && isIOS(),
+	);
 	const [showIOSSteps, setShowIOSSteps] = useState(false);
 
 	useEffect(() => {
-		if (isInStandaloneMode()) {
-			setIsInstalled(true);
-			return;
-		}
-
-		// Only show on mobile/tablet devices
-		if (!isMobileDevice()) {
-			return;
-		}
-
-		// Check if user previously dismissed
-		const wasDismissed = sessionStorage.getItem("pwa-install-dismissed");
-		if (wasDismissed) {
-			setDismissed(true);
-		}
-
-		// iOS Safari — no beforeinstallprompt, show manual instructions
-		if (isIOS()) {
-			setShowIOSPrompt(true);
-			return;
-		}
+		// Chrome's native install prompt only applies once installed/iOS/desktop
+		// are ruled out — subscribe to it and to the install completion event.
+		if (isInstalled || showIOSPrompt || !isMobileDevice()) return;
 
 		const handler = (e: Event) => {
 			e.preventDefault();
 			setDeferredPrompt(e as BeforeInstallPromptEvent);
 		};
-
-		window.addEventListener("beforeinstallprompt", handler);
-
-		window.addEventListener("appinstalled", () => {
+		const onInstalled = () => {
 			setIsInstalled(true);
 			setDeferredPrompt(null);
-		});
+		};
 
-		return () => window.removeEventListener("beforeinstallprompt", handler);
-	}, []);
+		window.addEventListener("beforeinstallprompt", handler);
+		window.addEventListener("appinstalled", onInstalled);
+
+		return () => {
+			window.removeEventListener("beforeinstallprompt", handler);
+			window.removeEventListener("appinstalled", onInstalled);
+		};
+	}, [isInstalled, showIOSPrompt]);
 
 	const handleInstall = async () => {
 		if (!deferredPrompt) return;

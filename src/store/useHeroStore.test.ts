@@ -70,7 +70,7 @@ describe("useHeroStore", () => {
 			const hero = useHeroStore.getState().heroes[0];
 			expect(hero.templateId).toBe("arcanas");
 			expect(hero.name).toBe("Arcanas Invos");
-			expect(hero.color).toBe("#3b82f6");
+			expect(hero.color).toBe("#2a4dff");
 		});
 
 		it("sets hp from template", () => {
@@ -269,6 +269,206 @@ describe("useHeroStore", () => {
 		it("navigateTo without heroId sets activeHeroId to null", () => {
 			useHeroStore.getState().navigateTo("main-menu");
 			expect(useHeroStore.getState().activeHeroId).toBeNull();
+		});
+	});
+
+	describe("tyrant mode", () => {
+		it("scales boss HP by +10 per enemy on startGame", () => {
+			// 1v2 -> 2 enemies -> +20
+			useHeroStore.getState().startGame("tyrant", 3);
+			const boss = useHeroStore.getState().heroes[0];
+			expect(boss.role).toBe("boss");
+			expect(boss.templateId).toBe("onyxking");
+			expect(boss.hp.current).toBe(55);
+			expect(boss.hp.max).toBe(55);
+		});
+
+		it("scales boss HP differently for different player counts", () => {
+			useHeroStore.getState().startGame("tyrant", 2); // 1 enemy -> +10
+			expect(useHeroStore.getState().heroes[0].hp.current).toBe(45);
+
+			useHeroStore.getState().startGame("tyrant", 5); // 4 enemies -> +40
+			expect(useHeroStore.getState().heroes[0].hp.current).toBe(75);
+		});
+
+		it("creates one boss slot and playerCount - 1 team slots", () => {
+			useHeroStore.getState().startGame("tyrant", 4);
+			const heroes = useHeroStore.getState().heroes;
+			expect(heroes).toHaveLength(4);
+			expect(heroes[0].role).toBe("boss");
+			expect(heroes.slice(1).every((h) => h.role === "team")).toBe(true);
+		});
+
+		it("team slots start unselected like standard mode", () => {
+			useHeroStore.getState().startGame("tyrant", 3);
+			const [, ...team] = useHeroStore.getState().heroes;
+			for (const hero of team) {
+				expect(hero.templateId).toBeNull();
+				expect(hero.hp.current).toBe(0);
+			}
+		});
+
+		it("resetGame recomputes boss HP from the current team size", () => {
+			useHeroStore.getState().startGame("tyrant", 3); // 2 enemies -> 55
+			const bossId = useHeroStore.getState().heroes[0].id;
+			useHeroStore.getState().updateStat(bossId, "hp", "current", 5);
+
+			useHeroStore.getState().resetGame();
+
+			const boss = useHeroStore.getState().heroes[0];
+			expect(boss.hp.current).toBe(55);
+			expect(boss.hp.max).toBe(55);
+		});
+
+		it("resetGame does not apply boss scaling to team heroes", () => {
+			useHeroStore.getState().startGame("tyrant", 2);
+			const teamId = useHeroStore.getState().heroes[1].id;
+			useHeroStore.getState().selectHero(teamId, "arcanas");
+			useHeroStore.getState().updateStat(teamId, "hp", "current", 1);
+
+			useHeroStore.getState().resetGame();
+
+			const teamHero = useHeroStore.getState().heroes[1];
+			expect(teamHero.role).toBe("team");
+			expect(teamHero.hp.current).toBe(32); // plain Arcanas hp, no +10/enemy
+		});
+	});
+
+	describe("addHero / removeHero / setActiveHero", () => {
+		it("addHero appends a new empty slot with the given name", () => {
+			useHeroStore.getState().addHero("Guest");
+			const heroes = useHeroStore.getState().heroes;
+			expect(heroes).toHaveLength(1);
+			expect(heroes[0].name).toBe("Guest");
+			expect(heroes[0].templateId).toBeNull();
+		});
+
+		it("addHero appends without disturbing existing heroes", () => {
+			useHeroStore.getState().startGame("standard", 2);
+			const existingIds = useHeroStore.getState().heroes.map((h) => h.id);
+			useHeroStore.getState().addHero("Guest");
+
+			const heroes = useHeroStore.getState().heroes;
+			expect(heroes).toHaveLength(3);
+			expect(heroes.slice(0, 2).map((h) => h.id)).toEqual(existingIds);
+		});
+
+		it("removeHero removes only the specified hero", () => {
+			useHeroStore.getState().startGame("standard", 3);
+			const [id1, id2, id3] = useHeroStore
+				.getState()
+				.heroes.map((h) => h.id);
+
+			useHeroStore.getState().removeHero(id2);
+
+			const remainingIds = useHeroStore.getState().heroes.map((h) => h.id);
+			expect(remainingIds).toEqual([id1, id3]);
+		});
+
+		it("removeHero clears activeHeroId when the active hero is removed", () => {
+			useHeroStore.getState().startGame("standard", 2);
+			const heroId = useHeroStore.getState().heroes[0].id;
+			useHeroStore.getState().setActiveHero(heroId);
+
+			useHeroStore.getState().removeHero(heroId);
+
+			expect(useHeroStore.getState().activeHeroId).toBeNull();
+		});
+
+		it("removeHero leaves activeHeroId untouched when a different hero is removed", () => {
+			useHeroStore.getState().startGame("standard", 2);
+			const [id1, id2] = useHeroStore
+				.getState()
+				.heroes.map((h) => h.id);
+			useHeroStore.getState().setActiveHero(id1);
+
+			useHeroStore.getState().removeHero(id2);
+
+			expect(useHeroStore.getState().activeHeroId).toBe(id1);
+		});
+
+		it("setActiveHero sets activeHeroId directly", () => {
+			useHeroStore.getState().setActiveHero("hero-42");
+			expect(useHeroStore.getState().activeHeroId).toBe("hero-42");
+		});
+	});
+
+	describe("updateStat clamping", () => {
+		it("clamps non-hp stats at a minimum of 0", () => {
+			useHeroStore.getState().startGame("standard", 1);
+			const heroId = useHeroStore.getState().heroes[0].id;
+			useHeroStore.getState().selectHero(heroId, "arcanas");
+
+			useHeroStore.getState().updateStat(heroId, "mana", "current", -5);
+
+			expect(useHeroStore.getState().heroes[0].mana.current).toBe(0);
+		});
+
+		it("allows hp to go negative (unlike other stats)", () => {
+			useHeroStore.getState().startGame("standard", 1);
+			const heroId = useHeroStore.getState().heroes[0].id;
+			useHeroStore.getState().selectHero(heroId, "arcanas");
+
+			useHeroStore.getState().updateStat(heroId, "hp", "current", -5);
+
+			expect(useHeroStore.getState().heroes[0].hp.current).toBe(-5);
+		});
+	});
+
+	describe("persist migrate", () => {
+		function migrate(state: unknown, version: number): unknown {
+			const options = useHeroStore.persist.getOptions();
+			return options.migrate!(state, version);
+		}
+
+		it("backfills a missing misc stat on heroes from a pre-v1 store", () => {
+			const legacyState = {
+				heroes: [
+					{
+						id: "h1",
+						name: "Test",
+						templateId: "arcanas",
+						color: "#2a4dff",
+						hp: { current: 10, max: 32 },
+						mana: { current: 6, max: 6 },
+						armor: { current: 0, max: 0 },
+						attack: { current: 1, max: 1 },
+						customStats: [],
+						createdAt: 0,
+						// misc intentionally absent, as in pre-v1 persisted state
+					},
+				],
+			};
+
+			const migrated = migrate(legacyState, 0) as typeof legacyState & {
+				heroes: { misc: { current: number; max: number } }[];
+			};
+
+			expect(migrated.heroes[0].misc).toEqual({ current: 0, max: 0 });
+		});
+
+		it("does not touch heroes that already have a misc stat", () => {
+			const state = {
+				heroes: [
+					{ id: "h1", misc: { current: 3, max: 5 } },
+				],
+			};
+
+			const migrated = migrate(state, 0) as {
+				heroes: { misc: { current: number; max: number } }[];
+			};
+
+			expect(migrated.heroes[0].misc).toEqual({ current: 3, max: 5 });
+		});
+
+		it("is a no-op at the current version", () => {
+			const state = { heroes: [{ id: "h1" }] };
+			const migrated = migrate(state, 1);
+			expect(migrated).toBe(state);
+		});
+
+		it("passes through undefined state without throwing", () => {
+			expect(() => migrate(undefined, 0)).not.toThrow();
 		});
 	});
 
