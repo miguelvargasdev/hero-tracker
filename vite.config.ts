@@ -62,7 +62,10 @@ export default defineConfig(({ mode }) => {
 				// its default catch-all NavigationRoute would otherwise hijack
 				// navigations to /dev/ (serving the stale prod shell) whenever a
 				// browser hasn't yet registered the more specific /dev/-scoped SW.
-				...(!isDev && { navigateFallbackDenylist: [/^\/dev\//] }),
+				// Match bare "/dev" too — GitHub Pages 301s "/dev" -> "/dev/", but
+				// the SW intercepts the original (slash-less) navigation request
+				// before that redirect ever happens.
+				...(!isDev && { navigateFallbackDenylist: [/^\/dev(\/|$)/] }),
 			},
 			devOptions: {
 				enabled: true,
