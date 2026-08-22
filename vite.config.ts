@@ -24,6 +24,18 @@ export default defineConfig(({ mode }) => {
 	},
 	plugins: [
 		react(),
+		// Keep the /dev/ preview out of search results. A noindex meta tag
+		// (rather than a robots.txt disallow) is deliberate: blocking crawl
+		// via robots.txt would stop Google from ever seeing this tag, which
+		// is the opposite of what we want — see https://developers.google.com/search/docs/crawling-indexing/block-indexing
+		isDev && {
+			name: "dev-noindex",
+			transformIndexHtml: (html) =>
+				html.replace(
+					"<head>",
+					`<head>\n    <meta name="robots" content="noindex, nofollow" />`,
+				),
+		},
 		VitePWA({
 			registerType: "autoUpdate",
 			includeAssets: ["favicon.ico", "favicon.svg", "favicon-96x96.png", "apple-touch-icon.png"],
